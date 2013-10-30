@@ -90,7 +90,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     task.launchPath = [NSString stringWithFormat:@"%@/node", [plugInBundle resourcePath]];
     DDLogVerbose(@"LESS:: launchPath: %@", task.launchPath);
-    task.arguments = @[lessc, @"--no-color", lessFile];
+    task.arguments = @[lessc, @"--no-color", lessFile, cssFile];
     task.standardOutput = outputPipe;
     DDLogVerbose(@"LESS:: %@", task.environment);
     
@@ -109,7 +109,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) taskDidTerminate:(NSNotification *) notification
 {
-        DDLogVerbose(@"LESS:: Task terminated with status: %d", task.terminationStatus);
+    DDLogVerbose(@"LESS:: Task terminated with status: %d", task.terminationStatus);
+    if(task.terminationStatus == 0)
+    {
+        [self sendUserNotificationWithTitle:@"LESS:: Compiled Successfully!" sound: NSUserNotificationDefaultSoundName andMessage:@"File compiled successfully!"];
+    }
 }
 
 -(void) getOutput:(NSNotification *) notification
@@ -139,7 +143,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
     dispatch_async(dispatch_get_main_queue(), ^{
         NSString * error = [self getErrorMessage:outStr];
-        [self sendUserNotificationWithTitle:@"LESS:: Parse Error" sound: @"Basso" andMessage:error];
+        if(![error isEqualToString:@""])
+        {
+        	[self sendUserNotificationWithTitle:@"LESS:: Parse Error" sound: @"Basso" andMessage:error];
+        }
     });
     
     if([task isRunning])
