@@ -86,12 +86,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     errorPipe = [[NSPipe alloc]  init];
     outputText = [[NSString alloc] init];
     errorText = [[NSString alloc] init];
+    NSString * lessc = [NSString stringWithFormat:@"%@/less/bin/lessc", [plugInBundle resourcePath]];
     
-    task.launchPath = @"usr/bin/man"; //[NSString stringWithFormat:@"%@/less/bin/lessc", [plugInBundle resourcePath]];
+    task.launchPath = [NSString stringWithFormat:@"%@/node", [plugInBundle resourcePath]];
     DDLogVerbose(@"LESS:: launchPath: %@", task.launchPath);
-    task.arguments = @[@"-h"];
-    
+    task.arguments = @[lessc, @"--no-color", lessFile];
     task.standardOutput = outputPipe;
+    DDLogVerbose(@"LESS:: %@", task.environment);
+    
     [[outputPipe fileHandleForReading] readToEndOfFileInBackgroundAndNotify];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getOutput:) name:NSFileHandleReadToEndOfFileCompletionNotification object:[outputPipe fileHandleForReading]];
     
@@ -107,22 +109,20 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) taskDidTerminate:(NSNotification *) notification
 {
-        DDLogInfo(@"LESS:: Task terminated.");
-        DDLogInfo(@"LESS:: output: %@", outputText);
-        DDLogInfo(@"LESS:: errors: %@", errorText);
+        DDLogVerbose(@"LESS:: Task terminated with status: %d", task.terminationStatus);
 }
 
 -(void) getOutput:(NSNotification *) notification
 {
-	DDLogVerbose(@"LESS:: %@",[[notification userInfo ] objectForKey:@"NSFileHandleNotificationDataItem"]);
-    NSData *output = [[outputPipe fileHandleForReading] availableData];
+
+    NSData *output = [[notification userInfo ] objectForKey:@"NSFileHandleNotificationDataItem"];
     NSString *outStr = [[NSString alloc] initWithData:output encoding:NSUTF8StringEncoding];
- 
+	DDLogVerbose(@"LESS:: getOutput: %@",outStr);
+    
     dispatch_async(dispatch_get_main_queue(), ^{
-        DDLogVerbose(@"LESS:: getOutput");
         outputText = [outputText stringByAppendingString: outStr];
-        DDLogVerbose(@"LESS:: outputText: %@", outputText);
     });
+    
     if([task isRunning])
     {
         [[outputPipe fileHandleForReading] readToEndOfFileInBackgroundAndNotify];
@@ -135,16 +135,55 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     NSData *output = [[notification userInfo ] objectForKey:@"NSFileHandleNotificationDataItem"];
     NSString *outStr = [[NSString alloc] initWithData:output encoding:NSUTF8StringEncoding];
-	DDLogVerbose(@"LESS:: %@", outStr);
+    DDLogError(@"LESS:: Encountered some error: %@", outStr);
+
     dispatch_async(dispatch_get_main_queue(), ^{
-        DDLogVerbose(@"LESS:: getError");
-        errorText = [errorText stringByAppendingString: outStr];
+        NSString * error = [self getErrorMessage:outStr];
+        [self sendUserNotificationWithTitle:@"LESS:: Parse Error" sound: @"Basso" andMessage:error];
     });
     
     if([task isRunning])
     {
     	[[errorPipe fileHandleForReading] readToEndOfFileInBackgroundAndNotify];
     }
+}
+
+-(NSString *) getErrorMessage:(NSString *)fullError
+{
+    NSError * error = nil;
+    NSString * output = [NSString stringWithFormat:@""];
+    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"ParseError:(.*?) in (.*?less) (.*):" options:nil error:&error];
+    
+    NSArray * errorList = [regex matchesInString:fullError options:nil range:NSMakeRange(0, [fullError length])];
+    for(NSTextCheckingResult * ntcr in errorList)
+    {
+        NSString * errorName = [fullError substringWithRange:[ntcr rangeAtIndex:1]];
+        NSString * fileName = [[fullError substringWithRange:[ntcr rangeAtIndex:2]] lastPathComponent];
+        NSString * lineNumber = [fullError substringWithRange:[ntcr rangeAtIndex:3]];
+		output = [output stringByAppendingString:[NSString stringWithFormat:@"%@ in %@ %@", errorName, fileName, lineNumber]];
+    }
+    return output;
+}
+
+#pragma mark - NSUserNotification
+
+-(void) sendUserNotificationWithTitle:(NSString *)title sound:(NSString *)sound andMessage:(NSString * ) message
+{
+    NSUserNotification *notification = [[NSUserNotification alloc] init];
+    notification.title = title;
+    notification.informativeText = message;
+    notification.soundName = sound;
+
+	if([[NSUserNotificationCenter defaultUserNotificationCenter] delegate] == nil)
+    {
+        [[NSUserNotificationCenter defaultUserNotificationCenter] setDelegate:self];
+    }
+    
+    [[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
+}
+
+- (BOOL)userNotificationCenter:(NSUserNotificationCenter *)center shouldPresentNotification:(NSUserNotification *)notification{
+    return YES;
 }
 
 @end

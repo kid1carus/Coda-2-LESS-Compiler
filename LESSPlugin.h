@@ -3,7 +3,7 @@
 
 @class CodaPlugInsController;
 
-@interface LESSPlugin : NSObject <CodaPlugIn>
+@interface LESSPlugin : NSObject <CodaPlugIn, NSUserNotificationCenterDelegate>
 {
 	CodaPlugInsController* controller;
 	NSObject <CodaPlugInBundle> * plugInBundle;
