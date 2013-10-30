@@ -18,6 +18,16 @@
 		4C1DFC1B182063330078B179 /* growl in Resources */ = {isa = PBXBuildFile; fileRef = 4C1DFC1A182063330078B179 /* growl */; };
 		4C60E399182009D3003752C5 /* node in Resources */ = {isa = PBXBuildFile; fileRef = 4C60E398182009D3003752C5 /* node */; };
 		4C9DA7821820172600DFE9E5 /* less in Resources */ = {isa = PBXBuildFile; fileRef = 4C9DA7811820172600DFE9E5 /* less */; };
+		4CFCBB78182169690030FC08 /* preferencesWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4CFCBB77182169690030FC08 /* preferencesWindow.xib */; };
+		4CFCBB8518217EDC0030FC08 /* FMDatabase.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CFCBB7B18217EDC0030FC08 /* FMDatabase.m */; };
+		4CFCBB8618217EDC0030FC08 /* FMDatabaseAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CFCBB7D18217EDC0030FC08 /* FMDatabaseAdditions.m */; };
+		4CFCBB8718217EDC0030FC08 /* FMDatabasePool.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CFCBB7F18217EDC0030FC08 /* FMDatabasePool.m */; };
+		4CFCBB8818217EDC0030FC08 /* FMDatabaseQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CFCBB8118217EDC0030FC08 /* FMDatabaseQueue.m */; };
+		4CFCBB8918217EDC0030FC08 /* fmdb.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CFCBB8218217EDC0030FC08 /* fmdb.m */; };
+		4CFCBB8A18217EDC0030FC08 /* FMResultSet.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CFCBB8418217EDC0030FC08 /* FMResultSet.m */; };
+		4CFCBB8C182180620030FC08 /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CFCBB8B182180620030FC08 /* libsqlite3.dylib */; };
+		4CFCBB9018218F2B0030FC08 /* db.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 4CFCBB8F18218F2B0030FC08 /* db.sqlite */; };
+		4CFCBB921821B12D0030FC08 /* siteSettingsWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4CFCBB911821B12D0030FC08 /* siteSettingsWindow.xib */; };
 		8D5B49B0048680CD000E48DA /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C167DFE841241C02AAC07 /* InfoPlist.strings */; };
 		8D5B49B4048680CD000E48DA /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */; };
 		F163D8F50C67D694000A99F5 /* LESSPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = F163D8F40C67D694000A99F5 /* LESSPlugin.m */; };
@@ -48,6 +58,21 @@
 		4C605F3E1677C20600C8F7D9 /* CodaPlugInsController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CodaPlugInsController.h; sourceTree = "<group>"; };
 		4C60E398182009D3003752C5 /* node */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = node; sourceTree = "<group>"; };
 		4C9DA7811820172600DFE9E5 /* less */ = {isa = PBXFileReference; lastKnownFileType = folder; path = less; sourceTree = "<group>"; };
+		4CFCBB77182169690030FC08 /* preferencesWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = preferencesWindow.xib; sourceTree = "<group>"; };
+		4CFCBB7A18217EDC0030FC08 /* FMDatabase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMDatabase.h; sourceTree = "<group>"; };
+		4CFCBB7B18217EDC0030FC08 /* FMDatabase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FMDatabase.m; sourceTree = "<group>"; };
+		4CFCBB7C18217EDC0030FC08 /* FMDatabaseAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMDatabaseAdditions.h; sourceTree = "<group>"; };
+		4CFCBB7D18217EDC0030FC08 /* FMDatabaseAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FMDatabaseAdditions.m; sourceTree = "<group>"; };
+		4CFCBB7E18217EDC0030FC08 /* FMDatabasePool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMDatabasePool.h; sourceTree = "<group>"; };
+		4CFCBB7F18217EDC0030FC08 /* FMDatabasePool.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FMDatabasePool.m; sourceTree = "<group>"; };
+		4CFCBB8018217EDC0030FC08 /* FMDatabaseQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMDatabaseQueue.h; sourceTree = "<group>"; };
+		4CFCBB8118217EDC0030FC08 /* FMDatabaseQueue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FMDatabaseQueue.m; sourceTree = "<group>"; };
+		4CFCBB8218217EDC0030FC08 /* fmdb.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = fmdb.m; sourceTree = "<group>"; };
+		4CFCBB8318217EDC0030FC08 /* FMResultSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMResultSet.h; sourceTree = "<group>"; };
+		4CFCBB8418217EDC0030FC08 /* FMResultSet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FMResultSet.m; sourceTree = "<group>"; };
+		4CFCBB8B182180620030FC08 /* libsqlite3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.dylib; path = usr/lib/libsqlite3.dylib; sourceTree = SDKROOT; };
+		4CFCBB8F18218F2B0030FC08 /* db.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = db.sqlite; sourceTree = "<group>"; };
+		4CFCBB911821B12D0030FC08 /* siteSettingsWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = siteSettingsWindow.xib; sourceTree = "<group>"; };
 		8D5B49B6048680CD000E48DA /* LESSCompile.codaplugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LESSCompile.codaplugin; sourceTree = BUILT_PRODUCTS_DIR; };
 		8D5B49B7048680CD000E48DA /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D2F7E65807B2D6F200F64583 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
@@ -60,6 +85,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4CFCBB8C182180620030FC08 /* libsqlite3.dylib in Frameworks */,
 				8D5B49B4048680CD000E48DA /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -70,6 +96,7 @@
 		089C166AFE841209C02AAC07 /* Capitalize */ = {
 			isa = PBXGroup;
 			children = (
+				4CFCBB8B182180620030FC08 /* libsqlite3.dylib */,
 				08FB77AFFE84173DC02AAC07 /* Classes */,
 				32C88E010371C26100C91783 /* Other Sources */,
 				089C167CFE841241C02AAC07 /* Resources */,
@@ -91,11 +118,14 @@
 		089C167CFE841241C02AAC07 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				4CFCBB8F18218F2B0030FC08 /* db.sqlite */,
 				4C1DFC1A182063330078B179 /* growl */,
 				4C9DA7811820172600DFE9E5 /* less */,
 				4C60E398182009D3003752C5 /* node */,
 				8D5B49B7048680CD000E48DA /* Info.plist */,
 				089C167DFE841241C02AAC07 /* InfoPlist.strings */,
+				4CFCBB77182169690030FC08 /* preferencesWindow.xib */,
+				4CFCBB911821B12D0030FC08 /* siteSettingsWindow.xib */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -103,6 +133,7 @@
 		08FB77AFFE84173DC02AAC07 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				4CFCBB7918217EDC0030FC08 /* fmdb */,
 				4C0C4FBA181F118600E35333 /* Lumberjack */,
 				4C605F3E1677C20600C8F7D9 /* CodaPlugInsController.h */,
 				F163D8F30C67D694000A99F5 /* LESSPlugin.h */,
@@ -175,6 +206,24 @@
 			path = Extensions;
 			sourceTree = "<group>";
 		};
+		4CFCBB7918217EDC0030FC08 /* fmdb */ = {
+			isa = PBXGroup;
+			children = (
+				4CFCBB7A18217EDC0030FC08 /* FMDatabase.h */,
+				4CFCBB7B18217EDC0030FC08 /* FMDatabase.m */,
+				4CFCBB7C18217EDC0030FC08 /* FMDatabaseAdditions.h */,
+				4CFCBB7D18217EDC0030FC08 /* FMDatabaseAdditions.m */,
+				4CFCBB7E18217EDC0030FC08 /* FMDatabasePool.h */,
+				4CFCBB7F18217EDC0030FC08 /* FMDatabasePool.m */,
+				4CFCBB8018217EDC0030FC08 /* FMDatabaseQueue.h */,
+				4CFCBB8118217EDC0030FC08 /* FMDatabaseQueue.m */,
+				4CFCBB8218217EDC0030FC08 /* fmdb.m */,
+				4CFCBB8318217EDC0030FC08 /* FMResultSet.h */,
+				4CFCBB8418217EDC0030FC08 /* FMResultSet.m */,
+			);
+			path = fmdb;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -225,9 +274,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				4C1DFC1B182063330078B179 /* growl in Resources */,
+				4CFCBB9018218F2B0030FC08 /* db.sqlite in Resources */,
 				8D5B49B0048680CD000E48DA /* InfoPlist.strings in Resources */,
 				4C0C4FD2181F118600E35333 /* README.txt in Resources */,
 				4C60E399182009D3003752C5 /* node in Resources */,
+				4CFCBB921821B12D0030FC08 /* siteSettingsWindow.xib in Resources */,
+				4CFCBB78182169690030FC08 /* preferencesWindow.xib in Resources */,
 				4C9DA7821820172600DFE9E5 /* less in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -239,14 +291,20 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4CFCBB8918217EDC0030FC08 /* fmdb.m in Sources */,
 				F163D8F50C67D694000A99F5 /* LESSPlugin.m in Sources */,
+				4CFCBB8A18217EDC0030FC08 /* FMResultSet.m in Sources */,
 				4C0C4FCB181F118600E35333 /* DDAbstractDatabaseLogger.m in Sources */,
 				4C0C4FCC181F118600E35333 /* DDASLLogger.m in Sources */,
+				4CFCBB8518217EDC0030FC08 /* FMDatabase.m in Sources */,
 				4C0C4FCD181F118600E35333 /* DDFileLogger.m in Sources */,
+				4CFCBB8818217EDC0030FC08 /* FMDatabaseQueue.m in Sources */,
+				4CFCBB8718217EDC0030FC08 /* FMDatabasePool.m in Sources */,
 				4C0C4FCE181F118600E35333 /* DDLog.m in Sources */,
 				4C0C4FCF181F118600E35333 /* DDTTYLogger.m in Sources */,
 				4C0C4FD0181F118600E35333 /* ContextFilterLogFormatter.m in Sources */,
 				4C0C4FD1181F118600E35333 /* DispatchQueueLogFormatter.m in Sources */,
+				4CFCBB8618217EDC0030FC08 /* FMDatabaseAdditions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -311,7 +369,7 @@
 				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PREBINDING = NO;
 				SDKROOT = macosx;
 			};
@@ -323,7 +381,7 @@
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PREBINDING = NO;
 				SDKROOT = macosx;
 			};

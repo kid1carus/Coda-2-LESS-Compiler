@@ -33,9 +33,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	{
 		controller = inController;
 	}
-    
-    [controller registerActionWithTitle:@"LESS Compiler" target:self selector:nil];
     plugInBundle = p;
+    [self registerActions];
+    [self setupDb];
 	return self;
 }
 
@@ -46,11 +46,21 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		controller = inController;
 	}
     
-    [controller registerActionWithTitle:@"LESS Compiler" target:self selector:nil];
-    
+    [self registerActions];
 	return self;
 }
 
+-(void) registerActions
+{
+    [controller registerActionWithTitle:@"Site Settings" underSubmenuWithTitle:@"top menu" target:self selector:@selector(openSitesMenu) representedObject:nil keyEquivalent:nil pluginName:@"LESS Compiler"];
+    [controller registerActionWithTitle:@"Preferences" underSubmenuWithTitle:@"top menu" target:self selector:@selector(openPreferencesMenu) representedObject:nil keyEquivalent:nil pluginName:@"LESS Compiler"];
+    
+}
+
+-(BOOL)validateMenuItem:(NSMenuItem *)menuItem
+{
+    return true;
+}
 
 - (NSString*)name
 {
@@ -64,17 +74,120 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         NSURL *url = [NSURL fileURLWithPath:path isDirectory:NO];
         if ([[url pathExtension] isEqualToString:@"less"]) {
             
-			NSString *cssFile = [path stringByReplacingOccurrencesOfString:[url lastPathComponent] withString:[[url lastPathComponent] stringByReplacingOccurrencesOfString:@"less" withString:@"css"]];
+            [self handleLessFile:textView];
             
-            [self compileFile:textView toFile:cssFile];
         }
     }
 }
 
+#pragma mark - Menu methods
+
+-(void) openSitesMenu
+{
+    
+}
+
+-(void) openPreferencesMenu
+{
+    [NSBundle loadNibNamed:@"preferencesWindow" owner: self];
+    [self.LESSVersionField setStringValue:@"1.4.2"];
+    [self.versionField setStringValue:@"0.1"];
+}
+#pragma mark - database methods
+
+-(void) setupDb
+{
+    dbQueue = [FMDatabaseQueue databaseQueueWithPath:[[plugInBundle resourcePath] stringByAppendingString:@"/db.sqlite"]];
+    
+    [dbQueue inDatabase:^(FMDatabase *db) {
+		prefs = [db executeQuery:@"SELECT * FROM preferences"];
+    }];
+}
+
+
+-(FMResultSet *) getRegisteredFilesForSite:(NSString *) siteName
+{
+    DDLogVerbose(@"LESS:: getting registered files for site: %@", siteName);
+    __block FMResultSet * ret;
+    [dbQueue inDatabase:^(FMDatabase *db) {
+       ret = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM less_files WHERE site_id == '%@'", siteName]];
+    }];
+    
+    return ret;
+}
+
+
+
 
 #pragma mark - LESS methods
 
+-(void) handleLessFile:(CodaTextView *)textView
+{
+    NSString *path = [textView path];
+    [self performDependencyCheckOnFile:path];
+//    
+//    
+//    [dbQueue inDatabase:^(FMDatabase *db) {
+//        FMResultSet * s = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM less_files WHERE path = '%@'", path]];
+//        while([s next])
+//        {
+//            FMResultSet * parentFile = s;
+//            int parent_id = [parentFile intForColumn:@"parent_id"];
+//            DDLogVerbose(@"LESS:: initial parent_id: %d", parent_id);
+//            while(parent_id > -1)
+//            {
+//                parentFile = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM less_files WHERE id = %d", parent_id]];
+//                if([parentFile next])
+//                {
+//                    parent_id = [parentFile intForColumn:@"parent_id"];
+//                }
+//                DDLogVerbose(@"LESS:: next parent_id: %d", parent_id);
+//            }
+//            
+//			NSString * parentPath = [parentFile stringForColumn:@"path"];
+//            NSString *cssPath = [parentFile stringForColumn:@"css_path"];
+//            DDLogVerbose(@"LESS:: parent Path: %@", parentPath);
+//            DDLogVerbose(@"LESS:: css Path: %@", cssPath);
+//            [self performDependencyCheckOnFile:parentPath];
+//            [self compileFile:textView toFile:cssPath];
+//        }
+//    }];
+    
 
+}
+
+-(void) performDependencyCheckOnFile:(NSString *)path
+{
+    indexTask = [[NSTask alloc] init];
+    indexPipe = [[NSPipe alloc]  init];
+    
+    NSString * lessc = [NSString stringWithFormat:@"%@/less/bin/lessc", [plugInBundle resourcePath]];
+    
+    indexTask.launchPath = [NSString stringWithFormat:@"%@/node", [plugInBundle resourcePath]];
+    indexTask.arguments = @[lessc, @"--depends", path, @"DEPENDS"];
+    
+    indexTask.standardOutput = indexPipe;
+    
+    [[indexPipe fileHandleForReading] readToEndOfFileInBackgroundAndNotify];
+    [[NSNotificationCenter defaultCenter] addObserverForName:NSFileHandleReadToEndOfFileCompletionNotification object:[indexPipe fileHandleForReading] queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *notification) {
+        
+        NSData *output = [[notification userInfo ] objectForKey:@"NSFileHandleNotificationDataItem"];
+        NSString *outStr = [[NSString alloc] initWithData:output encoding:NSUTF8StringEncoding];
+        DDLogVerbose(@"LESS:: Output from --depends: %@", outStr);
+        NSError * error;
+        outStr = [outStr stringByReplacingOccurrencesOfString:@"DEPENDS: " withString:@""];
+        NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"(/.*?\.less)" options:nil error:&error];
+        NSArray * dependencies = [regex matchesInString:outStr options:nil range:NSMakeRange(0, [outStr length])];
+        for(NSTextCheckingResult * ntcr in dependencies)
+        {
+            NSString * fileName = [outStr substringWithRange:[ntcr rangeAtIndex:1]];
+            DDLogVerbose(@"LESS:: dependency: \"%@\"", fileName);
+        }
+
+    }];
+
+	[indexTask launch];
+}
 
 -(void) compileFile:(CodaTextView *)textView toFile:(NSString *)cssFile
 {
