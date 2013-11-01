@@ -84,7 +84,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) openSitesMenu
 {
-    
+    [NSBundle loadNibNamed:@"siteSettingsWindow" owner: self];
 }
 
 -(void) openPreferencesMenu
@@ -93,6 +93,39 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self.LESSVersionField setStringValue:@"1.4.2"];
     [self.versionField setStringValue:@"0.1"];
 }
+
+-(NSURL *) getFileNameFromUser
+{
+    NSURL * chosenFile = nil;
+    // Create the File Open Dialog class.
+    NSOpenPanel* openDlg = [NSOpenPanel openPanel];
+    
+    // Enable the selection of files in the dialog.
+    [openDlg setCanChooseFiles:YES];
+    
+    // Multiple files not allowed
+    [openDlg setAllowsMultipleSelection:NO];
+    
+    // Can't select a directory
+    [openDlg setCanChooseDirectories:NO];
+    
+    // Display the dialog. If the OK button was pressed,
+    // process the files.
+    if ( [openDlg runModal] == NSOKButton )
+    {
+        // Get an array containing the full filenames of all
+        // files and directories selected.
+        NSArray* files = [openDlg URLs];
+        
+        // Loop through all the files and process them.
+        for(NSURL * url in files)
+        {
+            chosenFile = url;
+        }
+    }
+    return chosenFile;
+}
+
 #pragma mark - database methods
 
 -(void) setupDb
@@ -101,6 +134,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     [dbQueue inDatabase:^(FMDatabase *db) {
 		prefs = [db executeQuery:@"SELECT * FROM preferences"];
+        [prefs next];
     }];
 }
 
@@ -116,82 +150,174 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     return ret;
 }
 
+-(NSString *) getResourceIdFromURL:(NSURL *)url
+{
+    NSString * r;
+	NSError * error;
+    [url getResourceValue:&r forKey:NSURLFileResourceIdentifierKey error:&error];
+    if(error)
+    {
+        DDLogError(@"LESS:: Error getting file resource id: %@", error);
+        return nil;
+    }
+    return r;
+}
 
+-(NSString *) getResolvedPathForPath:(NSString *)path
+{
+    NSURL * url = [NSURL fileURLWithPath:path];
+    url = [NSURL URLWithString:[url absoluteString]];	//absoluteString returns path in file:// format
+	NSString * newPath = [[url URLByResolvingSymlinksInPath] path];	//URLByResolvingSymlinksInPath expects file:// format for link, then resolves all symlinks
+    DDLogVerbose(@"LESS:: Converted from: %@ \n to: %@", path, newPath);
+    return newPath;
+}
+
+
+-(void) registerFile:(NSURL *)url
+{
+    if(url == nil)
+    {
+        DDLogVerbose(@"LESS:: User canceled file selection");
+        return;
+    }
+    
+	DDLogVerbose(@"LESS:: file system representation: %s", [url fileSystemRepresentation]);
+    
+    NSString * fileName = [self getResolvedPathForPath:[url path]];
+    NSString *cssFile = [fileName stringByReplacingOccurrencesOfString:[url lastPathComponent] withString:[[url lastPathComponent] stringByReplacingOccurrencesOfString:@"less" withString:@"css"]];
+    DDLogVerbose(@"LESS:: registering file: %@ with css file: %@", fileName, cssFile);
+    [dbQueue inDatabase:^(FMDatabase *db) {
+        if(![db executeUpdate:@"DELETE FROM less_files WHERE path = :path" withParameterDictionary:@{@"path" : fileName}])
+        {
+            DDLogError(@"LESS:: Whoa, big problem trying to delete sql rows");
+        }
+        
+        NSDictionary * args = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInteger:0], @"minify", cssFile, @"css_path", fileName, @"path", [NSNumber numberWithInteger:-1], @"parent_id", nil];
+
+        if(![db executeUpdate:@"INSERT OR REPLACE INTO less_files (minify, css_path, path, parent_id) VALUES (:minify, :css_path, :path, :parent_id)"
+    			withParameterDictionary:args ])
+        {
+			DDLogError(@"LESS:: SQL ERROR: %@", [db lastError]);
+            return;
+        }
+        DDLogVerbose(@"LESS:: Inserted registered file");
+        [self performSelectorOnMainThread:@selector(performDependencyCheckOnFile:) withObject:fileName waitUntilDone:FALSE];
+    }];
+}
+
+-(void) performDependencyCheckOnFile:(NSString *)path
+{
+    DDLogVerbose(@"LESS:: Performing dependency check on %@", path);
+
+    [dbQueue inDatabase:^(FMDatabase *db) {
+        
+        FMResultSet * parent = [db executeQuery:@"SELECT * FROM less_files WHERE path = :path" withParameterDictionary:[NSDictionary dictionaryWithObjectsAndKeys:path, @"path", nil]];
+        if(![parent next])
+        {
+            DDLogError(@"LESS:: Parent file not found in db!");
+            return;
+        }
+        
+        DDLogVerbose(@"LESS:: Continuing with dependency check");
+        int parentId = [parent intForColumn:@"id"];
+        [parent close];
+        
+        indexTask = [[NSTask alloc] init];
+        indexPipe = [[NSPipe alloc]  init];
+        
+        NSString * lessc = [NSString stringWithFormat:@"%@/less/bin/lessc", [plugInBundle resourcePath]];
+        
+        indexTask.launchPath = [NSString stringWithFormat:@"%@/node", [plugInBundle resourcePath]];
+        indexTask.arguments = @[lessc, @"--depends", path, @"DEPENDS"];
+        
+        indexTask.standardOutput = indexPipe;
+        
+        [[indexPipe fileHandleForReading] readToEndOfFileInBackgroundAndNotify];
+        [[NSNotificationCenter defaultCenter] addObserverForName:NSFileHandleReadToEndOfFileCompletionNotification object:[indexPipe fileHandleForReading] queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *notification) {
+        
+            NSData *output = [[notification userInfo ] objectForKey:@"NSFileHandleNotificationDataItem"];
+            NSString *outStr = [[NSString alloc] initWithData:output encoding:NSUTF8StringEncoding];
+            DDLogVerbose(@"LESS:: Output from --depends: %@", outStr);
+            NSError * error;
+            outStr = [outStr stringByReplacingOccurrencesOfString:@"DEPENDS: " withString:@""];
+            NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"(/.*?\.less)" options:nil error:&error];
+            NSArray * dependencies = [regex matchesInString:outStr options:nil range:NSMakeRange(0, [outStr length])];
+            
+            [dbQueue inDatabase:^(FMDatabase *db) {
+                if(![db executeUpdate:@"DELETE FROM less_files WHERE parent_id = :parent_id" withParameterDictionary:@{@"parent_id": [NSNumber numberWithInteger:parentId]}])
+                {
+                    DDLogError(@"LESS:: Whoa, big problem deleting old files");
+                }
+            }];
+            for(NSTextCheckingResult * ntcr in dependencies)
+            {
+                NSString * fileName =   [self getResolvedPathForPath:[outStr substringWithRange:[ntcr rangeAtIndex:1]]];
+                
+                DDLogVerbose(@"LESS:: dependency: \"%@\"", fileName);
+                [dbQueue inDatabase:^(FMDatabase *db) {
+                    NSDictionary * args = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInteger:0], @"minify", @"", @"css_path", fileName, @"path", [NSNumber numberWithInteger:parentId], @"parent_id", nil];
+                    
+                    if([db executeUpdate:@"INSERT OR REPLACE INTO less_files (minify, css_path, path, parent_id) VALUES (:minify, :css_path, :path, :parent_id)" withParameterDictionary:args])
+                    {
+                        DDLogVerbose(@"LESS:: dependency update succeeded: %@", fileName);
+                    }
+                    else
+                    {
+                        DDLogError(@"LESS:: dependency update failed: %@", fileName);
+                    }
+                }];
+            }
+            
+        }];
+        
+        [indexTask launch];
+        
+    }];
+}
 
 
 #pragma mark - LESS methods
 
 -(void) handleLessFile:(CodaTextView *)textView
 {
-    NSString *path = [textView path];
-    [self performDependencyCheckOnFile:path];
-//    
-//    
-//    [dbQueue inDatabase:^(FMDatabase *db) {
-//        FMResultSet * s = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM less_files WHERE path = '%@'", path]];
-//        while([s next])
-//        {
-//            FMResultSet * parentFile = s;
-//            int parent_id = [parentFile intForColumn:@"parent_id"];
-//            DDLogVerbose(@"LESS:: initial parent_id: %d", parent_id);
-//            while(parent_id > -1)
-//            {
-//                parentFile = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM less_files WHERE id = %d", parent_id]];
-//                if([parentFile next])
-//                {
-//                    parent_id = [parentFile intForColumn:@"parent_id"];
-//                }
-//                DDLogVerbose(@"LESS:: next parent_id: %d", parent_id);
-//            }
-//            
-//			NSString * parentPath = [parentFile stringForColumn:@"path"];
-//            NSString *cssPath = [parentFile stringForColumn:@"css_path"];
-//            DDLogVerbose(@"LESS:: parent Path: %@", parentPath);
-//            DDLogVerbose(@"LESS:: css Path: %@", cssPath);
-//            [self performDependencyCheckOnFile:parentPath];
-//            [self compileFile:textView toFile:cssPath];
-//        }
-//    }];
-    
 
-}
-
--(void) performDependencyCheckOnFile:(NSString *)path
-{
-    indexTask = [[NSTask alloc] init];
-    indexPipe = [[NSPipe alloc]  init];
-    
-    NSString * lessc = [NSString stringWithFormat:@"%@/less/bin/lessc", [plugInBundle resourcePath]];
-    
-    indexTask.launchPath = [NSString stringWithFormat:@"%@/node", [plugInBundle resourcePath]];
-    indexTask.arguments = @[lessc, @"--depends", path, @"DEPENDS"];
-    
-    indexTask.standardOutput = indexPipe;
-    
-    [[indexPipe fileHandleForReading] readToEndOfFileInBackgroundAndNotify];
-    [[NSNotificationCenter defaultCenter] addObserverForName:NSFileHandleReadToEndOfFileCompletionNotification object:[indexPipe fileHandleForReading] queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *notification) {
-        
-        NSData *output = [[notification userInfo ] objectForKey:@"NSFileHandleNotificationDataItem"];
-        NSString *outStr = [[NSString alloc] initWithData:output encoding:NSUTF8StringEncoding];
-        DDLogVerbose(@"LESS:: Output from --depends: %@", outStr);
-        NSError * error;
-        outStr = [outStr stringByReplacingOccurrencesOfString:@"DEPENDS: " withString:@""];
-        NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"(/.*?\.less)" options:nil error:&error];
-        NSArray * dependencies = [regex matchesInString:outStr options:nil range:NSMakeRange(0, [outStr length])];
-        for(NSTextCheckingResult * ntcr in dependencies)
+    NSString *path = [self getResolvedPathForPath:[textView path]];
+    DDLogVerbose(@"LESS:: Handling file: %@", path);
+    [dbQueue inDatabase:^(FMDatabase *db) {
+        FMResultSet * s = [db executeQuery:@"SELECT * FROM less_files WHERE path = :path" withParameterDictionary:@{@"path": path}];
+        if([s next])
         {
-            NSString * fileName = [outStr substringWithRange:[ntcr rangeAtIndex:1]];
-            DDLogVerbose(@"LESS:: dependency: \"%@\"", fileName);
+            FMResultSet * parentFile = s;
+            int parent_id = [parentFile intForColumn:@"parent_id"];
+            DDLogVerbose(@"LESS:: initial parent_id: %d", parent_id);
+            while(parent_id > -1)
+            {
+                parentFile = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM less_files WHERE id = %d", parent_id]];
+                if([parentFile next])
+                {
+                    parent_id = [parentFile intForColumn:@"parent_id"];
+                }
+                DDLogVerbose(@"LESS:: next parent_id: %d", parent_id);
+            }
+            
+			NSString * parentPath = [parentFile stringForColumn:@"path"];
+            NSString *cssPath = [parentFile stringForColumn:@"css_path"];
+            DDLogVerbose(@"LESS:: parent Path: %@", parentPath);
+            DDLogVerbose(@"LESS:: css Path: %@", cssPath);
+            [self performSelectorOnMainThread:@selector(performDependencyCheckOnFile:) withObject:parentPath waitUntilDone:false];
+            [self compileFile:parentPath toFile:cssPath];
         }
-
+        else
+        {
+            DDLogError(@"LESS:: No DB entry found for file: %@", path);
+        }
     }];
+    
 
-	[indexTask launch];
 }
 
--(void) compileFile:(CodaTextView *)textView toFile:(NSString *)cssFile
+-(void) compileFile:(NSString *)lessFile toFile:(NSString *)cssFile
 {
-    NSString * lessFile = [textView path];
     
     DDLogVerbose(@"LESS:: Compiling file: %@ to file: %@", lessFile, cssFile);
     task = [[NSTask alloc] init];
@@ -202,10 +328,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     NSString * lessc = [NSString stringWithFormat:@"%@/less/bin/lessc", [plugInBundle resourcePath]];
     
     task.launchPath = [NSString stringWithFormat:@"%@/node", [plugInBundle resourcePath]];
-    DDLogVerbose(@"LESS:: launchPath: %@", task.launchPath);
     task.arguments = @[lessc, @"--no-color", lessFile, cssFile];
     task.standardOutput = outputPipe;
-    DDLogVerbose(@"LESS:: %@", task.environment);
     
     [[outputPipe fileHandleForReading] readToEndOfFileInBackgroundAndNotify];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getOutput:) name:NSFileHandleReadToEndOfFileCompletionNotification object:[outputPipe fileHandleForReading]];
@@ -252,6 +376,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     NSData *output = [[notification userInfo ] objectForKey:@"NSFileHandleNotificationDataItem"];
     NSString *outStr = [[NSString alloc] initWithData:output encoding:NSUTF8StringEncoding];
+    if([outStr isEqualToString:@""])
+    {
+        return;
+    }
     DDLogError(@"LESS:: Encountered some error: %@", outStr);
 
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -304,6 +432,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 - (BOOL)userNotificationCenter:(NSUserNotificationCenter *)center shouldPresentNotification:(NSUserNotification *)notification{
     return YES;
+}
+
+
+#pragma mark - Site Settings
+- (IBAction)filePressed:(NSButton *)sender
+{
+    [self registerFile:[self getFileNameFromUser]];
 }
 
 @end

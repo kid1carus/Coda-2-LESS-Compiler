@@ -9,6 +9,7 @@
 @interface LESSPlugin : NSObject <CodaPlugIn, NSUserNotificationCenterDelegate>
 {
 	CodaPlugInsController* controller;
+    
 	NSObject <CodaPlugInBundle> * plugInBundle;
     NSBundle * oldBundle;
     
@@ -43,6 +44,10 @@
 
 
 #pragma mark - Site Settings Window
+@property (strong) IBOutlet NSButton *fileButton;
 
+@property (strong) IBOutlet NSScrollView *fileScrollView;
+
+- (IBAction)filePressed:(NSButton *)sender;
 
 @end
