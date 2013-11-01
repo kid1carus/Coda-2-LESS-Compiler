@@ -8,11 +8,7 @@
         <customObject id="-2" userLabel="File's Owner" customClass="LESSPlugin">
             <connections>
                 <outlet property="LESSVersionField" destination="haS-G1-iGo" id="e6j-dp-Cfo"/>
-                <outlet property="displayNotificationOnError" destination="4Oa-Fx-5cS" id="8Jl-oQ-g2v"/>
-                <outlet property="displayNotificationOnSuccess" destination="JRT-xv-ADk" id="0dj-Z1-olp"/>
-                <outlet property="openFileOnError" destination="6Ck-Gd-psu" id="ZSO-dt-2jh"/>
-                <outlet property="playSoundsOnError" destination="Mh0-Wo-B5H" id="h6E-LN-cRZ"/>
-                <outlet property="playSoundsOnSuccess" destination="dxl-3d-ZoG" id="PDX-Yl-NtY"/>
+                <outlet property="preferenceWindow" destination="2" id="2mZ-Ce-k5v"/>
                 <outlet property="versionField" destination="ohA-Eg-0lh" id="Ots-Og-DcP"/>
             </connections>
         </customObject>
@@ -36,37 +32,61 @@
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
-                    <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="dxl-3d-ZoG">
+                    <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="dxl-3d-ZoG" customClass="keyPrefButton">
                         <rect key="frame" x="18" y="131" width="210" height="18"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <buttonCell key="cell" type="check" title="Play Sounds On Success" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="p7J-Zp-8t8">
                             <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="prefKey" value="playOnSuccess"/>
+                        </userDefinedRuntimeAttributes>
+                        <connections>
+                            <action selector="userChangedPreference:" target="-2" id="vLF-mY-jgf"/>
+                        </connections>
                     </button>
-                    <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="4Oa-Fx-5cS">
+                    <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="4Oa-Fx-5cS" customClass="keyPrefButton">
                         <rect key="frame" x="18" y="219" width="210" height="18"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <buttonCell key="cell" type="check" title="Display Notifications On Error" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="Kcf-6w-eXW">
                             <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="prefKey" value="displayOnError"/>
+                        </userDefinedRuntimeAttributes>
+                        <connections>
+                            <action selector="userChangedPreference:" target="-2" id="aaY-P0-XYS"/>
+                        </connections>
                     </button>
-                    <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="JRT-xv-ADk">
+                    <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="JRT-xv-ADk" customClass="keyPrefButton">
                         <rect key="frame" x="18" y="199" width="231" height="18"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <buttonCell key="cell" type="check" title="Display Notifications On Success" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="Sps-eq-bXd">
                             <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="prefKey" value="displayOnSuccess"/>
+                        </userDefinedRuntimeAttributes>
+                        <connections>
+                            <action selector="userChangedPreference:" target="-2" id="5f2-zr-Bwr"/>
+                        </connections>
                     </button>
-                    <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="6Ck-Gd-psu">
+                    <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="6Ck-Gd-psu" customClass="keyPrefButton">
                         <rect key="frame" x="18" y="172" width="223" height="25"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <buttonCell key="cell" type="check" title="Open File On Error" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="Ukb-sS-lsB">
                             <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="prefKey" value="openFileOnError"/>
+                        </userDefinedRuntimeAttributes>
+                        <connections>
+                            <action selector="userChangedPreference:" target="-2" id="36n-cJ-spp"/>
+                        </connections>
                     </button>
                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ec9-Qf-mIY">
                         <rect key="frame" x="18" y="155" width="59" height="17"/>
@@ -77,13 +97,19 @@
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
-                    <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Mh0-Wo-B5H">
+                    <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Mh0-Wo-B5H" customClass="keyPrefButton">
                         <rect key="frame" x="18" y="111" width="210" height="18"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <buttonCell key="cell" type="check" title="Play Sounds On Error" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="mip-Td-OBY">
                             <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="prefKey" value="playOnError"/>
+                        </userDefinedRuntimeAttributes>
+                        <connections>
+                            <action selector="userChangedPreference:" target="-2" id="lUy-KM-NU5"/>
+                        </connections>
                     </button>
                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="1Bk-A3-79B">
                         <rect key="frame" x="282" y="243" width="201" height="17"/>

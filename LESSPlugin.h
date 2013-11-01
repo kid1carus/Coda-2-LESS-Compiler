@@ -26,25 +26,21 @@
     NSString * errorText;
     
     FMDatabaseQueue * dbQueue;
-    FMResultSet * prefs;
+	NSMutableDictionary * prefs;
     FMResultSet * currentSiteFiles;
+    NSArray * fileViews;
 }
 
-
 #pragma mark - preferences Window
-@property (strong) IBOutlet NSButton *displayNotificationOnError;
-@property (strong) IBOutlet NSButton *displayNotificationOnSuccess;
-@property (strong) IBOutlet NSButton *openFileOnError;
-
-@property (strong) IBOutlet NSButton *playSoundsOnSuccess;
-@property (strong) IBOutlet NSButton *playSoundsOnError;
-
+@property (strong) IBOutlet NSView *preferenceWindow;
 @property (strong) IBOutlet NSTextField *versionField;
 @property (strong) IBOutlet NSTextField *LESSVersionField;
 
+- (IBAction)userChangedPreference:(NSButton *)sender;
 
 #pragma mark - Site Settings Window
 @property (strong) IBOutlet NSButton *fileButton;
+@property (strong) IBOutlet NSView *fileSettingsWindow;
 
 @property (strong) IBOutlet NSScrollView *fileScrollView;
 

@@ -92,6 +92,26 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [NSBundle loadNibNamed:@"preferencesWindow" owner: self];
     [self.LESSVersionField setStringValue:@"1.4.2"];
     [self.versionField setStringValue:@"0.1"];
+    
+    if(prefs == nil)
+    {
+        return;
+    }
+    
+    DDLogVerbose(@"LESS:: setting up preference window");
+    for(NSButton * b in [self.preferenceWindow subviews])
+    {
+        if([b isKindOfClass:[NSButton class]] && [b valueForKey:@"prefKey"] != nil)
+        {
+            NSString * prefKey = [b valueForKey:@"prefKey"];
+            NSNumber * val = [prefs objectForKey:prefKey];
+            DDLogVerbose(@"LESS:: Preference: %@ : %@", prefKey, val);
+            if(val != nil)
+            {
+                [b setState:[val integerValue]];
+            }
+        }
+    }
 }
 
 -(NSURL *) getFileNameFromUser
@@ -133,12 +153,28 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     dbQueue = [FMDatabaseQueue databaseQueueWithPath:[[plugInBundle resourcePath] stringByAppendingString:@"/db.sqlite"]];
     
     [dbQueue inDatabase:^(FMDatabase *db) {
-		prefs = [db executeQuery:@"SELECT * FROM preferences"];
-        [prefs next];
+		FMResultSet * prefSet = [db executeQuery:@"SELECT * FROM preferences"];
+        if([prefSet next])
+        {
+            prefs = [[NSJSONSerialization JSONObjectWithData:[[prefSet stringForColumn:@"json"] dataUsingEncoding:NSUTF8StringEncoding] options:kNilOptions error:nil] mutableCopy];
+            DDLogVerbose(@"LESS:: prefs: %@", prefs);
+        }
+        else
+        {
+            DDLogVerbose(@"LESS:: no preferences found!");
+            prefs = [NSMutableDictionary dictionaryWithObjectsAndKeys: nil];
+        }
     }];
 }
 
-
+-(void) updatePreferenceNamed:(NSString *)pref withValue:(id)val
+{
+    [dbQueue inDatabase:^(FMDatabase *db) {
+        [prefs setObject:val forKey:pref];
+		NSData * jData = [NSJSONSerialization dataWithJSONObject:prefs options:kNilOptions error:nil];
+        [db executeUpdate:@"UPDATE preferences SET json = :json WHERE id == 1" withParameterDictionary:@{@"json" : jData}];
+    }];
+}
 -(FMResultSet *) getRegisteredFilesForSite:(NSString *) siteName
 {
     DDLogVerbose(@"LESS:: getting registered files for site: %@", siteName);
@@ -349,7 +385,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     DDLogVerbose(@"LESS:: Task terminated with status: %d", task.terminationStatus);
     if(task.terminationStatus == 0)
     {
-        [self sendUserNotificationWithTitle:@"LESS:: Compiled Successfully!" sound: NSUserNotificationDefaultSoundName andMessage:@"File compiled successfully!"];
+        if([[prefs objectForKey:@"displayOnSuccess"] intValue] == 1)
+        {
+            NSString * sound = nil;
+            if([[prefs objectForKey:@"playOnSuccess"] intValue] == 1)
+            {
+                sound = NSUserNotificationDefaultSoundName;
+            }
+            
+        	[self sendUserNotificationWithTitle:@"LESS:: Compiled Successfully!" sound:sound  andMessage:@"File compiled successfully!"];
+        }
     }
 }
 
@@ -386,7 +431,26 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         NSString * error = [self getErrorMessage:outStr];
         if(![error isEqualToString:@""])
         {
-        	[self sendUserNotificationWithTitle:@"LESS:: Parse Error" sound: @"Basso" andMessage:error];
+            if([[prefs objectForKey:@"displayOnError"] integerValue] == 1)
+            {
+                NSString * sound = nil;
+                if([[prefs objectForKey:@"playOnError"] integerValue] == 1)
+                {
+                    sound = @"Basso";
+                }
+                
+                [self sendUserNotificationWithTitle:@"LESS:: Parse Error" sound:sound andMessage:error];
+            }
+            
+            if([[prefs objectForKey:@"openFileOnError"] integerValue] == 1)
+            {
+                NSError * err;
+                [controller openFileAtPath:[self getFileNameFromError:outStr] error:&err];
+                if(err)
+                {
+                	DDLogVerbose(@"LESS:: error opening file: %@", err);
+                }
+            }
         }
     });
     
@@ -409,6 +473,20 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         NSString * fileName = [[fullError substringWithRange:[ntcr rangeAtIndex:2]] lastPathComponent];
         NSString * lineNumber = [fullError substringWithRange:[ntcr rangeAtIndex:3]];
 		output = [output stringByAppendingString:[NSString stringWithFormat:@"%@ in %@ %@", errorName, fileName, lineNumber]];
+    }
+    return output;
+}
+
+-(NSString *) getFileNameFromError:(NSString *)fullError
+{
+    NSError * error = nil;
+    NSString * output = [NSString stringWithFormat:@""];
+    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"ParseError:(.*?) in (.*?less) (.*):" options:nil error:&error];
+    
+    NSArray * errorList = [regex matchesInString:fullError options:nil range:NSMakeRange(0, [fullError length])];
+    for(NSTextCheckingResult * ntcr in errorList)
+    {
+        output = [fullError substringWithRange:[ntcr rangeAtIndex:2]];
     }
     return output;
 }
@@ -441,4 +519,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [self registerFile:[self getFileNameFromUser]];
 }
 
+#pragma mark - preferences
+
+- (IBAction)userChangedPreference:(NSButton *)sender
+{
+    if([sender valueForKey:@"prefKey"] == nil)
+    {
+        return;
+    }
+    NSString * pref = [sender valueForKey:@"prefKey"];
+    NSNumber * newState = [NSNumber numberWithInteger:[sender state]];
+    DDLogVerbose(@"LESS:: setting preference %@ : %@", pref, newState);
+    [self updatePreferenceNamed:pref withValue:newState];
+}
 @end

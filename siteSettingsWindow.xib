@@ -9,6 +9,7 @@
             <connections>
                 <outlet property="fileButton" destination="9nz-Dw-s7j" id="kBp-If-Ab2"/>
                 <outlet property="fileScrollView" destination="6jB-FP-Zl3" id="CSO-wH-Ji4"/>
+                <outlet property="fileSettingsWindow" destination="2" id="wPE-8v-irM"/>
             </connections>
         </customObject>
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
