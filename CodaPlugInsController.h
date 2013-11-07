@@ -60,7 +60,6 @@
 				  keyEquivalent:(NSString*)keyEquivalent
 					 pluginName:(NSString*)aName;
 
-
 // Causes the frontmost Coda window to save all documents that have unsaved changes.
 
 - (void)saveAll;
