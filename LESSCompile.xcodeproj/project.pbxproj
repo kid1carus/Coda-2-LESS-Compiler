@@ -16,7 +16,9 @@
 		4C0C4FD1181F118600E35333 /* DispatchQueueLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C0C4FC9181F118600E35333 /* DispatchQueueLogFormatter.m */; };
 		4C0C4FD2181F118600E35333 /* README.txt in Resources */ = {isa = PBXBuildFile; fileRef = 4C0C4FCA181F118600E35333 /* README.txt */; };
 		4C1DFC1B182063330078B179 /* growl in Resources */ = {isa = PBXBuildFile; fileRef = 4C1DFC1A182063330078B179 /* growl */; };
+		4C321FD01827F98700FE7058 /* FileView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4C321FCF1827F98700FE7058 /* FileView.xib */; };
 		4C5CB3CC18244CFF00A4DD66 /* keyPrefButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C5CB3CB18244CFF00A4DD66 /* keyPrefButton.m */; };
+		4C5CB3CE182456C400A4DD66 /* trash2-50.png in Resources */ = {isa = PBXBuildFile; fileRef = 4C5CB3CD182456C400A4DD66 /* trash2-50.png */; };
 		4C60E399182009D3003752C5 /* node in Resources */ = {isa = PBXBuildFile; fileRef = 4C60E398182009D3003752C5 /* node */; };
 		4C9DA7821820172600DFE9E5 /* less in Resources */ = {isa = PBXBuildFile; fileRef = 4C9DA7811820172600DFE9E5 /* less */; };
 		4CFCBB78182169690030FC08 /* preferencesWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4CFCBB77182169690030FC08 /* preferencesWindow.xib */; };
@@ -29,7 +31,6 @@
 		4CFCBB8C182180620030FC08 /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CFCBB8B182180620030FC08 /* libsqlite3.dylib */; };
 		4CFCBB9018218F2B0030FC08 /* db.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 4CFCBB8F18218F2B0030FC08 /* db.sqlite */; };
 		4CFCBB921821B12D0030FC08 /* siteSettingsWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4CFCBB911821B12D0030FC08 /* siteSettingsWindow.xib */; };
-		4CFCBB941821B1D80030FC08 /* FileView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4CFCBB931821B1D80030FC08 /* FileView.xib */; };
 		4CFCBB971821B5230030FC08 /* folder_filled-50.png in Resources */ = {isa = PBXBuildFile; fileRef = 4CFCBB961821B5230030FC08 /* folder_filled-50.png */; };
 		4CFCBB991821B6CA0030FC08 /* left-50.png in Resources */ = {isa = PBXBuildFile; fileRef = 4CFCBB981821B6CA0030FC08 /* left-50.png */; };
 		4CFCBB9B1821B6D80030FC08 /* right-50.png in Resources */ = {isa = PBXBuildFile; fileRef = 4CFCBB9A1821B6D80030FC08 /* right-50.png */; };
@@ -61,8 +62,10 @@
 		4C0C4FC9181F118600E35333 /* DispatchQueueLogFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DispatchQueueLogFormatter.m; sourceTree = "<group>"; };
 		4C0C4FCA181F118600E35333 /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
 		4C1DFC1A182063330078B179 /* growl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = growl; sourceTree = "<group>"; };
+		4C321FCF1827F98700FE7058 /* FileView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FileView.xib; sourceTree = "<group>"; };
 		4C5CB3CA18244CFF00A4DD66 /* keyPrefButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = keyPrefButton.h; sourceTree = "<group>"; };
 		4C5CB3CB18244CFF00A4DD66 /* keyPrefButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = keyPrefButton.m; sourceTree = "<group>"; };
+		4C5CB3CD182456C400A4DD66 /* trash2-50.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "trash2-50.png"; sourceTree = "<group>"; };
 		4C605F3E1677C20600C8F7D9 /* CodaPlugInsController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CodaPlugInsController.h; sourceTree = "<group>"; };
 		4C60E398182009D3003752C5 /* node */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = node; sourceTree = "<group>"; };
 		4C9DA7811820172600DFE9E5 /* less */ = {isa = PBXFileReference; lastKnownFileType = folder; path = less; sourceTree = "<group>"; };
@@ -81,7 +84,6 @@
 		4CFCBB8B182180620030FC08 /* libsqlite3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.dylib; path = usr/lib/libsqlite3.dylib; sourceTree = SDKROOT; };
 		4CFCBB8F18218F2B0030FC08 /* db.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = db.sqlite; sourceTree = "<group>"; };
 		4CFCBB911821B12D0030FC08 /* siteSettingsWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = siteSettingsWindow.xib; sourceTree = "<group>"; };
-		4CFCBB931821B1D80030FC08 /* FileView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FileView.xib; sourceTree = "<group>"; };
 		4CFCBB961821B5230030FC08 /* folder_filled-50.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "folder_filled-50.png"; sourceTree = "<group>"; };
 		4CFCBB981821B6CA0030FC08 /* left-50.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "left-50.png"; sourceTree = "<group>"; };
 		4CFCBB9A1821B6D80030FC08 /* right-50.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "right-50.png"; sourceTree = "<group>"; };
@@ -141,7 +143,7 @@
 				089C167DFE841241C02AAC07 /* InfoPlist.strings */,
 				4CFCBB77182169690030FC08 /* preferencesWindow.xib */,
 				4CFCBB911821B12D0030FC08 /* siteSettingsWindow.xib */,
-				4CFCBB931821B1D80030FC08 /* FileView.xib */,
+				4C321FCF1827F98700FE7058 /* FileView.xib */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -255,6 +257,7 @@
 		4CFCBB951821B51C0030FC08 /* images */ = {
 			isa = PBXGroup;
 			children = (
+				4C5CB3CD182456C400A4DD66 /* trash2-50.png */,
 				4CFCBB9A1821B6D80030FC08 /* right-50.png */,
 				4CFCBB981821B6CA0030FC08 /* left-50.png */,
 				4CFCBB961821B5230030FC08 /* folder_filled-50.png */,
@@ -311,12 +314,13 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4C321FD01827F98700FE7058 /* FileView.xib in Resources */,
+				4C5CB3CE182456C400A4DD66 /* trash2-50.png in Resources */,
 				4C1DFC1B182063330078B179 /* growl in Resources */,
 				4CFCBB9018218F2B0030FC08 /* db.sqlite in Resources */,
 				8D5B49B0048680CD000E48DA /* InfoPlist.strings in Resources */,
 				4CFCBB9B1821B6D80030FC08 /* right-50.png in Resources */,
 				4C0C4FD2181F118600E35333 /* README.txt in Resources */,
-				4CFCBB941821B1D80030FC08 /* FileView.xib in Resources */,
 				4CFCBB991821B6CA0030FC08 /* left-50.png in Resources */,
 				4C60E399182009D3003752C5 /* node in Resources */,
 				4CFCBB921821B12D0030FC08 /* siteSettingsWindow.xib in Resources */,

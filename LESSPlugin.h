@@ -11,7 +11,7 @@
 	CodaPlugInsController* controller;
     
 	NSObject <CodaPlugInBundle> * plugInBundle;
-    NSBundle * oldBundle;
+    NSBundle * bundle;
     
     /* compile tasks and pipes */
     NSTask * task;
@@ -27,8 +27,10 @@
     
     FMDatabaseQueue * dbQueue;
 	NSMutableDictionary * prefs;
-    FMResultSet * currentSiteFiles;
-    NSArray * fileViews;
+    NSMutableArray * currentParentFiles;
+    int currentParentFilesCount;
+    NSMutableArray * fileViews;
+    NSView * fileDocumentView;
 }
 
 #pragma mark - preferences Window
@@ -41,7 +43,6 @@
 #pragma mark - Site Settings Window
 @property (strong) IBOutlet NSButton *fileButton;
 @property (strong) IBOutlet NSView *fileSettingsWindow;
-
 @property (strong) IBOutlet NSScrollView *fileScrollView;
 
 - (IBAction)filePressed:(NSButton *)sender;

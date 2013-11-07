@@ -14,5 +14,10 @@
 @property (strong) IBOutlet NSTextField *cssPath;
 @property (strong) IBOutlet NSButton *changeCssPathButton;
 @property (strong) IBOutlet NSButton *shouldMinify;
+@property (strong) IBOutlet NSButton *deleteButton;
 
+@property (assign) NSInteger fileIndex;
+
+- (IBAction)changeCssPath:(id)sender;
+- (IBAction)deleteFile:(id)sender;
 @end

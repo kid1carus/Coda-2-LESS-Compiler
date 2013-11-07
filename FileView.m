@@ -10,20 +10,10 @@
 
 @implementation FileView
 
-- (id)initWithFrame:(NSRect)frame
-{
-    self = [super initWithFrame:frame];
-    if (self) {
-        // Initialization code here.
-    }
-    return self;
+- (IBAction)changeCssPath:(id)sender {
+    
 }
 
-- (void)drawRect:(NSRect)dirtyRect
-{
-	[super drawRect:dirtyRect];
-	
-    // Drawing code here.
+- (IBAction)deleteFile:(id)sender {
 }
-
 @end

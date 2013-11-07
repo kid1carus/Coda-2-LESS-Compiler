@@ -2,6 +2,8 @@
 #import "CodaPlugInsController.h"
 #import "DDLog.h"
 #import "DDASLLogger.h"
+#import "FileView.h"
+
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 @interface LESSPlugin ()
@@ -34,6 +36,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 		controller = inController;
 	}
     plugInBundle = p;
+    bundle = [NSBundle bundleWithIdentifier:[p bundleIdentifier]];
     [self registerActions];
     [self setupDb];
 	return self;
@@ -85,6 +88,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) openSitesMenu
 {
     [NSBundle loadNibNamed:@"siteSettingsWindow" owner: self];
+    fileDocumentView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 500, 500)];
+    [self.fileScrollView setDocumentView:fileDocumentView];
+    [self rebuildFileList];
 }
 
 -(void) openPreferencesMenu
@@ -146,6 +152,78 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     return chosenFile;
 }
 
+-(NSURL *) getSavenameFromUser
+{
+    NSURL * chosenFile = nil;
+    // Create the File Open Dialog class.
+    NSSavePanel* saveDlg = [NSSavePanel savePanel];
+    [saveDlg setCanCreateDirectories:TRUE];
+
+    if ( [saveDlg runModal] == NSOKButton )
+    {
+        chosenFile = [saveDlg URL];
+    }
+    return chosenFile;
+}
+
+-(void) rebuildFileList
+{
+    DDLogVerbose(@"LESS:: rebuildFileList");
+    DDLogVerbose(@"LESS:: subviews address: %p", [fileDocumentView subviews]);
+    [fileDocumentView setSubviews:[NSArray array]];
+
+    DDLogVerbose(@"LESS: rebuild 1");
+    fileViews = [NSMutableArray array];
+    NSRect fRect;
+    
+    [fileDocumentView setFrame:NSMakeRect(0, 0, 583, MAX( (111 * currentParentFilesCount), self.fileScrollView.frame.size.height - 10))];
+
+    DDLogVerbose(@"LESS: rebuild 2");
+    for(int i = currentParentFilesCount - 1; i >= 0; i--)
+    {
+        NSDictionary * currentFile = [currentParentFiles objectAtIndex:i];
+        DDLogVerbose(@"LESS: rebuild 3");
+        
+        NSArray *nibObjects = [NSArray array];
+        if(![bundle loadNibNamed:@"FileView" owner:self topLevelObjects:&nibObjects])
+        {
+            DDLogError(@"LESS:: couldn't load FileView nib...");
+            return;
+        }
+        
+        FileView * f;
+        for(FileView * o in nibObjects)
+        {
+            if([o isKindOfClass:[FileView class]])
+            {
+                f = o;
+                break;
+            }
+        }
+        fRect = f.frame;
+        
+        
+         NSURL * url = [NSURL fileURLWithPath:[currentFile objectForKey:@"path"] isDirectory:NO];
+        [f.fileName setStringValue:[url lastPathComponent]];
+        [f.lessPath setStringValue:[currentFile objectForKey:@"path"]];
+        [f.cssPath setStringValue:[currentFile objectForKey:@"css_path"]];
+        [f.shouldMinify setState:[[currentFile objectForKey:@"minify"] intValue]];
+        
+        [f.deleteButton setAction:@selector(deleteParentFile:)];
+        [f.deleteButton setTarget:self];
+        [f.changeCssPathButton setAction:@selector(changeCssFile:)];
+        [f.changeCssPathButton setTarget:self];
+        [f.shouldMinify setAction:@selector(changeMinify:)];
+        [f.shouldMinify setTarget:self];
+        
+		f.fileIndex = i;
+        float frameY = currentParentFilesCount > 3 ? i * fRect.size.height : (fileDocumentView.frame.size.height - ((currentParentFilesCount - i) * fRect.size.height));
+        [f setFrame:NSMakeRect(0, frameY, fRect.size.width, fRect.size.height)];
+        [fileViews addObject:f];
+        DDLogVerbose(@"LESS: rebuild 4");
+    	[fileDocumentView addSubview:f];
+    }
+}
 #pragma mark - database methods
 
 -(void) setupDb
@@ -163,6 +241,40 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         {
             DDLogVerbose(@"LESS:: no preferences found!");
             prefs = [NSMutableDictionary dictionaryWithObjectsAndKeys: nil];
+        }
+    }];
+    [self updateParentFilesListWithCompletion:nil];
+}
+
+
+
+-(void) updateParentFilesListWithCompletion:(void(^)(void))handler;
+{
+    [dbQueue inDatabase:^(FMDatabase *db) {
+        DDLogVerbose(@"LESS:: updateParentFilesWithCompletion");
+        FMResultSet * d = [db executeQuery:@"SELECT * FROM less_files WHERE parent_id == -1"];
+        if(currentParentFiles == nil)
+        {
+            currentParentFiles = [NSMutableArray array];
+        }
+        else
+        {
+            [currentParentFiles removeAllObjects];
+        }
+		while([d next])
+        {
+            [currentParentFiles addObject:[d resultDictionary]];
+        }
+        
+        FMResultSet *s = [db executeQuery:@"SELECT COUNT(*) FROM less_files WHERE parent_id == -1"];
+        if ([s next])
+        {
+            currentParentFilesCount = [s intForColumnIndex:0];
+        }
+        
+        if(handler != nil)
+        {
+            handler();
         }
     }];
 }
@@ -213,16 +325,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     if(url == nil)
     {
-        DDLogVerbose(@"LESS:: User canceled file selection");
         return;
     }
     
-	DDLogVerbose(@"LESS:: file system representation: %s", [url fileSystemRepresentation]);
-    
     NSString * fileName = [self getResolvedPathForPath:[url path]];
     NSString *cssFile = [fileName stringByReplacingOccurrencesOfString:[url lastPathComponent] withString:[[url lastPathComponent] stringByReplacingOccurrencesOfString:@"less" withString:@"css"]];
-    DDLogVerbose(@"LESS:: registering file: %@ with css file: %@", fileName, cssFile);
     [dbQueue inDatabase:^(FMDatabase *db) {
+        DDLogVerbose(@"LESS:: registerFile");
         if(![db executeUpdate:@"DELETE FROM less_files WHERE path = :path" withParameterDictionary:@{@"path" : fileName}])
         {
             DDLogError(@"LESS:: Whoa, big problem trying to delete sql rows");
@@ -241,6 +350,64 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }];
 }
 
+-(void) unregisterFile:(NSURL *)url
+{
+    NSString * fileName = [self getResolvedPathForPath:[url path]];
+    [dbQueue inDatabase:^(FMDatabase *db) {
+    	FMResultSet * parentFile = [db executeQuery:@"SELECT * FROM less_files WHERE path == :path" withParameterDictionary:@{@"path":fileName}];
+        if(![parentFile next])
+        {
+            DDLogVerbose(@"LESS:: unregisterFile: file %@ not found in db", fileName);
+            return;
+        }
+        
+        int parentFileId = [parentFile intForColumn:@"id"];
+        [db executeUpdate:@"DELETE FROM less_files WHERE parent_id == :parent_id" withParameterDictionary:@{@"parent_id" : [NSNumber numberWithInt:parentFileId]}];
+        
+        [db executeUpdate:@"DELETE FROM less_files WHERE id == :id" withParameterDictionary:@{@"id" : [NSNumber numberWithInt:parentFileId]}];
+        DDLogVerbose(@"LESS:: unregisterFile: unregistered file %@", fileName);
+        [parentFile close];
+    }];
+}
+
+-(void) setCssPath:(NSURL *)cssUrl forPath:(NSURL *)url
+{
+    NSString * fileName = [self getResolvedPathForPath:[url path]];
+    NSString * cssFileName = [self getResolvedPathForPath:[cssUrl path]];
+    [dbQueue inDatabase:^(FMDatabase *db) {
+        FMResultSet * parentFile = [db executeQuery:@"SELECT * FROM less_files WHERE path == :path" withParameterDictionary:@{@"path":fileName}];
+        if(![parentFile next])
+        {
+            DDLogVerbose(@"LESS:: setCssPath: file %@ not found in db", fileName);
+            return;
+        }
+		if([db executeUpdate:@"UPDATE less_files SET css_path == :css_path WHERE id == :id" withParameterDictionary:@{@"css_path":cssFileName, @"id": [NSNumber numberWithInt:[parentFile intForColumn:@"id"]]}])
+        {
+        	DDLogVerbose(@"LESS:: setCssPath: successfully set css path for file %@", fileName);
+        }
+        else
+        {
+            DDLogError(@"LESS:: setCssPath: error, %@",[db lastError]);
+        }
+        [parentFile close];
+    }];
+}
+
+-(void) setLessFilePreference:(NSString *)pref toValue:(id)val forPath:(NSURL *) url
+{
+    NSString * fileName = [self getResolvedPathForPath:[url path]];
+    [dbQueue inDatabase:^(FMDatabase *db) {
+        if([db executeUpdate:[NSString stringWithFormat:@"UPDATE less_files SET %@ == :val WHERE path == :path", pref] withParameterDictionary:@{@"val": val, @"path" : fileName}])
+        {
+            DDLogVerbose(@"LESS:: setLessFilePreferences: successfully updated preference for %@", fileName);
+        }
+        else
+        {
+            DDLogError(@"LESS:: setLessFilePreferences: error: %@", [db lastError]);
+        }
+    }];
+}
+
 -(void) performDependencyCheckOnFile:(NSString *)path
 {
     DDLogVerbose(@"LESS:: Performing dependency check on %@", path);
@@ -254,7 +421,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             return;
         }
         
-        DDLogVerbose(@"LESS:: Continuing with dependency check");
         int parentId = [parent intForColumn:@"id"];
         [parent close];
         
@@ -273,7 +439,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         
             NSData *output = [[notification userInfo ] objectForKey:@"NSFileHandleNotificationDataItem"];
             NSString *outStr = [[NSString alloc] initWithData:output encoding:NSUTF8StringEncoding];
-            DDLogVerbose(@"LESS:: Output from --depends: %@", outStr);
             NSError * error;
             outStr = [outStr stringByReplacingOccurrencesOfString:@"DEPENDS: " withString:@""];
             NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"(/.*?\.less)" options:nil error:&error];
@@ -289,7 +454,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             {
                 NSString * fileName =   [self getResolvedPathForPath:[outStr substringWithRange:[ntcr rangeAtIndex:1]]];
                 
-                DDLogVerbose(@"LESS:: dependency: \"%@\"", fileName);
                 [dbQueue inDatabase:^(FMDatabase *db) {
                     NSDictionary * args = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInteger:0], @"minify", @"", @"css_path", fileName, @"path", [NSNumber numberWithInteger:parentId], @"parent_id", nil];
                     
@@ -341,7 +505,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             DDLogVerbose(@"LESS:: parent Path: %@", parentPath);
             DDLogVerbose(@"LESS:: css Path: %@", cssPath);
             [self performSelectorOnMainThread:@selector(performDependencyCheckOnFile:) withObject:parentPath waitUntilDone:false];
-            [self compileFile:parentPath toFile:cssPath];
+            
+            NSMutableArray * options  = [NSMutableArray array];
+        	if([parentFile intForColumn:@"minify"] == 1)
+            {
+                [options addObject:@"-x"];
+            }
+            [self compileFile:parentPath toFile:cssPath withOptions:options];
         }
         else
         {
@@ -352,7 +522,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 }
 
--(void) compileFile:(NSString *)lessFile toFile:(NSString *)cssFile
+-(void) compileFile:(NSString *)lessFile toFile:(NSString *)cssFile withOptions:(NSArray *)options
 {
     
     DDLogVerbose(@"LESS:: Compiling file: %@ to file: %@", lessFile, cssFile);
@@ -362,9 +532,21 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     outputText = [[NSString alloc] init];
     errorText = [[NSString alloc] init];
     NSString * lessc = [NSString stringWithFormat:@"%@/less/bin/lessc", [plugInBundle resourcePath]];
+    NSMutableArray * arguments = [NSMutableArray array];
+    [arguments addObject:lessc];
+    [arguments addObject:@"--no-color"];
+    if(options)
+    {
+        for(NSString * arg in options)
+        {
+            [arguments addObject:arg];
+        }
+    }
+    [arguments addObject:lessFile];
+    [arguments addObject:cssFile];
     
     task.launchPath = [NSString stringWithFormat:@"%@/node", [plugInBundle resourcePath]];
-    task.arguments = @[lessc, @"--no-color", lessFile, cssFile];
+    task.arguments = arguments;
     task.standardOutput = outputPipe;
     
     [[outputPipe fileHandleForReading] readToEndOfFileInBackgroundAndNotify];
@@ -428,8 +610,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     DDLogError(@"LESS:: Encountered some error: %@", outStr);
 
     dispatch_async(dispatch_get_main_queue(), ^{
-        NSString * error = [self getErrorMessage:outStr];
-        if(![error isEqualToString:@""])
+        NSDictionary * error = [self getErrorMessage:outStr];
+        if(error != nil)
         {
             if([[prefs objectForKey:@"displayOnError"] integerValue] == 1)
             {
@@ -439,17 +621,20 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                     sound = @"Basso";
                 }
                 
-                [self sendUserNotificationWithTitle:@"LESS:: Parse Error" sound:sound andMessage:error];
+                [self sendUserNotificationWithTitle:@"LESS:: Parse Error" sound:sound andMessage:[error objectForKey:@"errorMessage"]];
             }
             
             if([[prefs objectForKey:@"openFileOnError"] integerValue] == 1)
             {
                 NSError * err;
-                [controller openFileAtPath:[self getFileNameFromError:outStr] error:&err];
+                CodaTextView * errorTextView = [controller openFileAtPath:[error objectForKey:@"filePath"] error:&err];
                 if(err)
                 {
                 	DDLogVerbose(@"LESS:: error opening file: %@", err);
+                    return;
                 }
+                
+                [errorTextView goToLine:[[error objectForKey:@"lineNumber"] integerValue] column:[[error objectForKey:@"columnNumber"] integerValue] ];
             }
         }
     });
@@ -460,20 +645,33 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
 }
 
--(NSString *) getErrorMessage:(NSString *)fullError
+-(NSDictionary *) getErrorMessage:(NSString *)fullError
 {
     NSError * error = nil;
-    NSString * output = [NSString stringWithFormat:@""];
-    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"ParseError:(.*?) in (.*?less) (.*):" options:nil error:&error];
+    NSDictionary * output = nil;
+    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"(.*?)Error:(.*?) in (.*?less) on line (.*?), column (.*?):" options:nil error:&error];
     
     NSArray * errorList = [regex matchesInString:fullError options:nil range:NSMakeRange(0, [fullError length])];
     for(NSTextCheckingResult * ntcr in errorList)
     {
-        NSString * errorName = [fullError substringWithRange:[ntcr rangeAtIndex:1]];
-        NSString * fileName = [[fullError substringWithRange:[ntcr rangeAtIndex:2]] lastPathComponent];
-        NSString * lineNumber = [fullError substringWithRange:[ntcr rangeAtIndex:3]];
-		output = [output stringByAppendingString:[NSString stringWithFormat:@"%@ in %@ %@", errorName, fileName, lineNumber]];
+        NSString * errorType = 	  [fullError substringWithRange:[ntcr rangeAtIndex:1]];
+        NSString * errorName = 	  [fullError substringWithRange:[ntcr rangeAtIndex:2]];
+        NSString * filePath = 	  [fullError substringWithRange:[ntcr rangeAtIndex:3]];
+        NSString * fileName = 	  [[fullError substringWithRange:[ntcr rangeAtIndex:3]] lastPathComponent];
+        NSNumber * lineNumber =   [NSNumber numberWithInteger: [[fullError substringWithRange:[ntcr rangeAtIndex:4]] integerValue]];
+        NSNumber * columnNumber = [NSNumber numberWithInteger: [[fullError substringWithRange:[ntcr rangeAtIndex:5]] integerValue]];
+        
+        NSString * errorMessage = [NSString stringWithFormat:@"%@ in %@, on line %@ column %@", errorName, fileName, lineNumber, columnNumber];
+        
+        output = @{@"errorMessage": errorMessage,
+                   @"errorType": errorType,
+                   @"filePath": filePath,
+                   @"fileName": fileName,
+                   @"lineNumber":lineNumber,
+                   @"columnNumber":columnNumber};
+        
     }
+    DDLogVerbose(@"LESS:: Error: %@", output);
     return output;
 }
 
@@ -513,10 +711,79 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 
+#pragma mark - NSTableViewDelegate/Datasource
+
+
 #pragma mark - Site Settings
 - (IBAction)filePressed:(NSButton *)sender
 {
     [self registerFile:[self getFileNameFromUser]];
+    [self updateParentFilesListWithCompletion:^{
+	    [self rebuildFileList];
+    }];
+
+}
+
+-(void) deleteParentFile:(NSButton *)sender
+{
+	FileView * f = (FileView *)[sender superview];
+    if(![f isKindOfClass:[FileView class]])
+    {
+        return;
+    }
+    
+    NSAlert *alert = [[NSAlert alloc] init];
+    [alert setAlertStyle:NSInformationalAlertStyle];
+    [alert addButtonWithTitle:@"Delete"];
+    [alert addButtonWithTitle:@"Cancel"];
+    [alert setMessageText:[NSString stringWithFormat:@"Really Delete %@?", f.fileName.stringValue]];
+    [alert setInformativeText:[NSString stringWithFormat:@"Are you sure you want to delete %@ ?", f.fileName.stringValue]];
+    NSInteger response = [alert runModal];
+    if(response == NSAlertFirstButtonReturn)
+    {
+        NSDictionary * fileInfo = [currentParentFiles objectAtIndex:f.fileIndex];
+        NSURL * url = [NSURL fileURLWithPath:[fileInfo objectForKey:@"path"]];
+        [self unregisterFile:url];
+        [self updateParentFilesListWithCompletion:^{
+            [self rebuildFileList];
+        }];
+    }
+    else
+    {
+        return;
+    }
+}
+
+-(void) changeCssFile:(NSButton *)sender
+{
+    FileView * f = (FileView *)[sender superview];
+    if(![f isKindOfClass:[FileView class]])
+    {
+        return;
+    }
+    NSDictionary * fileInfo = [currentParentFiles objectAtIndex:f.fileIndex];
+    NSURL * url = [NSURL fileURLWithPath:[fileInfo objectForKey:@"path"]];
+    [self setCssPath:[self getSavenameFromUser] forPath:url];
+    [self updateParentFilesListWithCompletion:^{
+        [self rebuildFileList];
+    }];
+}
+
+-(void) changeMinify:(NSButton *)sender
+{
+    FileView * f = (FileView *)[sender superview];
+    if(![f isKindOfClass:[FileView class]])
+    {
+        return;
+    }
+    
+    int shouldMinify = [sender state];
+    NSDictionary * fileInfo = [currentParentFiles objectAtIndex:f.fileIndex];
+    NSURL * url = [NSURL fileURLWithPath:[fileInfo objectForKey:@"path"]];
+    [self setLessFilePreference:@"minify" toValue:[NSNumber numberWithInt:shouldMinify] forPath:url];
+    [self updateParentFilesListWithCompletion:^{
+        [self rebuildFileList];
+    }];
 }
 
 #pragma mark - preferences
