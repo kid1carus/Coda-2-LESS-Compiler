@@ -22,11 +22,6 @@ Then, hit the folder icon and select your less file. LESS Compiler will add it, 
 The preferences menu provides various options for how LESS Compiler notifies you.
 ![Preferences](/stuff/Less preferences.png)
 
-Features
---------
-
-This plugin 
-
 Limitations
 -----------
 
