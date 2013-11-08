@@ -17,10 +17,19 @@ How do you use it?
 Once you install the plugin, you can add .less files to be watched by going to Plug-Ins > LESS Compiler > Site Settings.
 Then, hit the folder icon and select your less file. LESS Compiler will add it, and watch it AND any @imported files.
 
-The preferences menu provides various options for how LESS Compiler notifies you.
+![File Settings](/stuff/Less file settings.png)
 
+The preferences menu provides various options for how LESS Compiler notifies you.
+![Preferences](/stuff/Less preferences.png)
+
+Features
+--------
+
+This plugin 
 
 Limitations
 -----------
 
-The biggest current limitation is that LESS Compiler cannot yet mark the saved css file for publishing. Hopefully soon, this will be a possibility.
+The biggest current limitation is that LESS Compiler cannot yet mark the saved css file for publishing. Hopefully soon, this will be a possibility. 
+
+This compiler does not have its own log, but it DOES barf a lot of stuff into system.log. Lines from this plugin start with 'LESS::'.
