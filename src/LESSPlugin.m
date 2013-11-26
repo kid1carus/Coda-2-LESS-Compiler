@@ -5,7 +5,8 @@
 #import "FileView.h"
 
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
-
+static NSString * COMPVERSION = @"0.3";
+static NSString * LESSVERSION = @"1.4.2";
 @interface LESSPlugin ()
 
 - (id)initWithController:(CodaPlugInsController*)inController;
@@ -55,8 +56,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) registerActions
 {
-    [controller registerActionWithTitle:@"Site Settings" underSubmenuWithTitle:@"top menu" target:self selector:@selector(openSitesMenu) representedObject:nil keyEquivalent:nil pluginName:@"LESS Compiler"];
-    [controller registerActionWithTitle:@"Preferences" underSubmenuWithTitle:@"top menu" target:self selector:@selector(openPreferencesMenu) representedObject:nil keyEquivalent:nil pluginName:@"LESS Compiler"];
+    [controller registerActionWithTitle:@"File Settings" underSubmenuWithTitle:nil target:self selector:@selector(openSitesMenu) representedObject:nil keyEquivalent:nil pluginName:@"LESS Compiler"];
+    [controller registerActionWithTitle:@"Preferences" underSubmenuWithTitle:nil target:self selector:@selector(openPreferencesMenu) representedObject:nil keyEquivalent:nil pluginName:@"LESS Compiler"];
     
 }
 
@@ -96,8 +97,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) openPreferencesMenu
 {
     [NSBundle loadNibNamed:@"preferencesWindow" owner: self];
-    [self.LESSVersionField setStringValue:@"1.4.2"];
-    [self.versionField setStringValue:@"0.1"];
+    [self.LESSVersionField setStringValue:LESSVERSION];
+    [self.versionField setStringValue:COMPVERSION];
     
     if(prefs == nil)
     {
@@ -125,7 +126,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     NSURL * chosenFile = nil;
     // Create the File Open Dialog class.
     NSOpenPanel* openDlg = [NSOpenPanel openPanel];
-    
+    if([controller respondsToSelector:@selector(focusedTextView)] && [controller focusedTextView] != nil)
+    {
+    	[openDlg setDirectoryURL: [NSURL fileURLWithPath:[[controller focusedTextView] siteLocalPath] ]];
+    }
     // Enable the selection of files in the dialog.
     [openDlg setCanChooseFiles:YES];
     
@@ -157,6 +161,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     NSURL * chosenFile = nil;
     // Create the File Open Dialog class.
     NSSavePanel* saveDlg = [NSSavePanel savePanel];
+    if([controller respondsToSelector:@selector(focusedTextView)] && [controller focusedTextView] != nil)
+    {
+    	[saveDlg setDirectoryURL: [NSURL fileURLWithPath:[[controller focusedTextView] siteLocalPath] ]];
+    }
+    
     [saveDlg setCanCreateDirectories:TRUE];
 
     if ( [saveDlg runModal] == NSOKButton )
@@ -172,17 +181,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     DDLogVerbose(@"LESS:: subviews address: %p", [fileDocumentView subviews]);
     [fileDocumentView setSubviews:[NSArray array]];
 
-    DDLogVerbose(@"LESS: rebuild 1");
     fileViews = [NSMutableArray array];
     NSRect fRect;
     
     [fileDocumentView setFrame:NSMakeRect(0, 0, 583, MAX( (111 * currentParentFilesCount), self.fileScrollView.frame.size.height - 10))];
 
-    DDLogVerbose(@"LESS: rebuild 2");
     for(int i = currentParentFilesCount - 1; i >= 0; i--)
     {
         NSDictionary * currentFile = [currentParentFiles objectAtIndex:i];
-        DDLogVerbose(@"LESS: rebuild 3");
         
         NSArray *nibObjects = [NSArray array];
         if(![bundle loadNibNamed:@"FileView" owner:self topLevelObjects:&nibObjects])
@@ -220,7 +226,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         float frameY = currentParentFilesCount > 3 ? i * fRect.size.height : (fileDocumentView.frame.size.height - ((currentParentFilesCount - i) * fRect.size.height));
         [f setFrame:NSMakeRect(0, frameY, fRect.size.width, fRect.size.height)];
         [fileViews addObject:f];
-        DDLogVerbose(@"LESS: rebuild 4");
     	[fileDocumentView addSubview:f];
     }
 }
@@ -228,7 +233,36 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) setupDb
 {
-    dbQueue = [FMDatabaseQueue databaseQueueWithPath:[[plugInBundle resourcePath] stringByAppendingString:@"/db.sqlite"]];
+	//Create App directory if not exists:
+    NSFileManager* fileManager = [[NSFileManager alloc] init];
+	NSURL * dbFile = [NSURL fileURLWithPath:NSHomeDirectory()];
+    dbFile = [dbFile URLByAppendingPathComponent:@".LESSCompiler/"];
+    
+    //TODO: handle the error
+    if (![fileManager fileExistsAtPath:[dbFile path]]) {
+        DDLogVerbose(@"LESS:: db file does not exist. Attempting to create.");
+        NSError * error;
+        [fileManager createDirectoryAtURL:dbFile withIntermediateDirectories:NO attributes:nil error:&error];
+        if(error)
+        {
+            DDLogError(@"LESS:: Error creating database file: %@", error);
+            return;
+        }
+        dbFile = [dbFile URLByAppendingPathComponent:@"db.sqlite"];
+        [fileManager copyItemAtPath:[[plugInBundle resourcePath] stringByAppendingString:@"/db.sqlite"] toPath: [dbFile path] error:&error];
+        if(error)
+        {
+            DDLogError(@"LESS:: Error creating database file: %@", error);
+            return;
+        }
+        DDLogVerbose(@"LESS:: Successfully created db.sqlite file");
+    }
+    else
+    {
+        dbFile = [dbFile URLByAppendingPathComponent:@"db.sqlite"];
+    }
+    
+    dbQueue = [FMDatabaseQueue databaseQueueWithPath:[dbFile path]];
     
     [dbQueue inDatabase:^(FMDatabase *db) {
 		FMResultSet * prefSet = [db executeQuery:@"SELECT * FROM preferences"];
@@ -287,6 +321,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [db executeUpdate:@"UPDATE preferences SET json = :json WHERE id == 1" withParameterDictionary:@{@"json" : jData}];
     }];
 }
+
 -(FMResultSet *) getRegisteredFilesForSite:(NSString *) siteName
 {
     DDLogVerbose(@"LESS:: getting registered files for site: %@", siteName);
@@ -518,8 +553,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             DDLogError(@"LESS:: No DB entry found for file: %@", path);
         }
     }];
-    
-
 }
 
 -(void) compileFile:(NSString *)lessFile toFile:(NSString *)cssFile withOptions:(NSArray *)options
