@@ -9,7 +9,7 @@
 	<key>CFBundleIconFile</key>
 	<string></string>
 	<key>CFBundleIdentifier</key>
-	<string>com.panic.plugin.LESSPlugin</string>
+	<string>LESSCompile</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -19,9 +19,17 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>0.1</string>
+	<string>0.3</string>
+    <key>CFBundleShortVersionString</key>
+    <string>0.3</string>
+	<key>CodaPlugInMinimumAPIVersion</key>
+	<string>6</string>
 	<key>CodaPlugInSupportedAPIVersion</key>
 	<integer>6</integer>
+    <key>CodaAuthorString</key>
+    <string>Michael Votaw</string>
+    <key>CodaDescriptionString</key>
+    <string>A LESS compiler for Coda</string>
 	<key>NSPrincipalClass</key>
 	<string>LESSPlugin</string>
 </dict>

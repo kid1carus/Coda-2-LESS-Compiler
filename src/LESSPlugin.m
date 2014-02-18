@@ -32,14 +32,11 @@ static NSString * LESSVERSION = @"1.4.2";
 
 - (id)initWithController:(CodaPlugInsController*)inController andPlugInBundle:(NSObject <CodaPlugInBundle> *)p
 {
-    if ( (self = [super init]) != nil )
+    if ( (self = [super initWithController:inController andPlugInBundle:p]) != nil )
 	{
-		controller = inController;
-	}
-    plugInBundle = p;
-    bundle = [NSBundle bundleWithIdentifier:[p bundleIdentifier]];
-    [self registerActions];
-    [self setupDb];
+        [self registerActions];
+        [self setupDb];
+    }
 	return self;
 }
 
@@ -48,9 +45,8 @@ static NSString * LESSVERSION = @"1.4.2";
 	if ( (self = [super init]) != nil )
 	{
 		controller = inController;
-	}
-    
-    [self registerActions];
+        [self registerActions];
+    }
 	return self;
 }
 
@@ -121,60 +117,6 @@ static NSString * LESSVERSION = @"1.4.2";
     }
 }
 
--(NSURL *) getFileNameFromUser
-{
-    NSURL * chosenFile = nil;
-    // Create the File Open Dialog class.
-    NSOpenPanel* openDlg = [NSOpenPanel openPanel];
-    if([controller respondsToSelector:@selector(focusedTextView)] && [controller focusedTextView] != nil)
-    {
-    	[openDlg setDirectoryURL: [NSURL fileURLWithPath:[[controller focusedTextView] siteLocalPath] ]];
-    }
-    // Enable the selection of files in the dialog.
-    [openDlg setCanChooseFiles:YES];
-    
-    // Multiple files not allowed
-    [openDlg setAllowsMultipleSelection:NO];
-    
-    // Can't select a directory
-    [openDlg setCanChooseDirectories:NO];
-    
-    // Display the dialog. If the OK button was pressed,
-    // process the files.
-    if ( [openDlg runModal] == NSOKButton )
-    {
-        // Get an array containing the full filenames of all
-        // files and directories selected.
-        NSArray* files = [openDlg URLs];
-        
-        // Loop through all the files and process them.
-        for(NSURL * url in files)
-        {
-            chosenFile = url;
-        }
-    }
-    return chosenFile;
-}
-
--(NSURL *) getSavenameFromUser
-{
-    NSURL * chosenFile = nil;
-    // Create the File Open Dialog class.
-    NSSavePanel* saveDlg = [NSSavePanel savePanel];
-    if([controller respondsToSelector:@selector(focusedTextView)] && [controller focusedTextView] != nil)
-    {
-    	[saveDlg setDirectoryURL: [NSURL fileURLWithPath:[[controller focusedTextView] siteLocalPath] ]];
-    }
-    
-    [saveDlg setCanCreateDirectories:TRUE];
-
-    if ( [saveDlg runModal] == NSOKButton )
-    {
-        chosenFile = [saveDlg URL];
-    }
-    return chosenFile;
-}
-
 -(void) rebuildFileList
 {
     DDLogVerbose(@"LESS:: rebuildFileList");
@@ -234,22 +176,21 @@ static NSString * LESSVERSION = @"1.4.2";
 -(void) setupDb
 {
 	//Create App directory if not exists:
-    NSFileManager* fileManager = [[NSFileManager alloc] init];
-	NSURL * dbFile = [NSURL fileURLWithPath:NSHomeDirectory()];
-    dbFile = [dbFile URLByAppendingPathComponent:@".LESSCompiler/"];
-    
-    //TODO: handle the error
-    if (![fileManager fileExistsAtPath:[dbFile path]]) {
+    NSError * error;
+    NSURL * dbFile;
+    if (![self doesPersistantFileExist:@"db.sqlite"]) {
         DDLogVerbose(@"LESS:: db file does not exist. Attempting to create.");
-        NSError * error;
-        [fileManager createDirectoryAtURL:dbFile withIntermediateDirectories:NO attributes:nil error:&error];
-        if(error)
+        if(![self doesPersistantStorageDirectoryExist])
         {
-            DDLogError(@"LESS:: Error creating database file: %@", error);
-            return;
+            error = [self createPersistantStorageDirectory];
+            if(error)
+            {
+                DDLogError(@"LESS:: Error creating Persistant Storage Directory: %@", error);
+                return;
+            }
         }
-        dbFile = [dbFile URLByAppendingPathComponent:@"db.sqlite"];
-        [fileManager copyItemAtPath:[[plugInBundle resourcePath] stringByAppendingString:@"/db.sqlite"] toPath: [dbFile path] error:&error];
+        DDLogVerbose(@"LESS:: path for resource: %@",[plugInBundle pathForResource:@"db" ofType:@"sqlite"]);
+        error = [self copyFileToPersistantStorage:[plugInBundle pathForResource:@"db" ofType:@"sqlite"]];
         if(error)
         {
             DDLogError(@"LESS:: Error creating database file: %@", error);
@@ -257,10 +198,8 @@ static NSString * LESSVERSION = @"1.4.2";
         }
         DDLogVerbose(@"LESS:: Successfully created db.sqlite file");
     }
-    else
-    {
-        dbFile = [dbFile URLByAppendingPathComponent:@"db.sqlite"];
-    }
+    dbFile = [self urlForPeristantFilePath:@"db.sqlite"];
+    
     
     dbQueue = [FMDatabaseQueue databaseQueueWithPath:[dbFile path]];
     
@@ -332,29 +271,6 @@ static NSString * LESSVERSION = @"1.4.2";
     
     return ret;
 }
-
--(NSString *) getResourceIdFromURL:(NSURL *)url
-{
-    NSString * r;
-	NSError * error;
-    [url getResourceValue:&r forKey:NSURLFileResourceIdentifierKey error:&error];
-    if(error)
-    {
-        DDLogError(@"LESS:: Error getting file resource id: %@", error);
-        return nil;
-    }
-    return r;
-}
-
--(NSString *) getResolvedPathForPath:(NSString *)path
-{
-    NSURL * url = [NSURL fileURLWithPath:path];
-    url = [NSURL URLWithString:[url absoluteString]];	//absoluteString returns path in file:// format
-	NSString * newPath = [[url URLByResolvingSymlinksInPath] path];	//URLByResolvingSymlinksInPath expects file:// format for link, then resolves all symlinks
-    DDLogVerbose(@"LESS:: Converted from: %@ \n to: %@", path, newPath);
-    return newPath;
-}
-
 
 -(void) registerFile:(NSURL *)url
 {
@@ -575,6 +491,11 @@ static NSString * LESSVERSION = @"1.4.2";
             [arguments addObject:arg];
         }
     }
+    if([[prefs objectForKey:@"strictMath"] boolValue] == true)
+    {
+        [arguments addObject:@"--strict-math=on"];
+    }
+    
     [arguments addObject:lessFile];
     [arguments addObject:cssFile];
     
@@ -597,6 +518,7 @@ static NSString * LESSVERSION = @"1.4.2";
 
 -(void) taskDidTerminate:(NSNotification *) notification
 {
+   
     DDLogVerbose(@"LESS:: Task terminated with status: %d", task.terminationStatus);
     if(task.terminationStatus == 0)
     {
@@ -607,8 +529,8 @@ static NSString * LESSVERSION = @"1.4.2";
             {
                 sound = NSUserNotificationDefaultSoundName;
             }
-            
-        	[self sendUserNotificationWithTitle:@"LESS:: Compiled Successfully!" sound:sound  andMessage:@"File compiled successfully!"];
+           
+        	[self sendUserNotificationWithTitle:@"LESS:: Compiled Successfully!" sound:sound  andMessage:@"file compiled successfully!"];
         }
     }
 }
@@ -722,31 +644,6 @@ static NSString * LESSVERSION = @"1.4.2";
     return output;
 }
 
-#pragma mark - NSUserNotification
-
--(void) sendUserNotificationWithTitle:(NSString *)title sound:(NSString *)sound andMessage:(NSString * ) message
-{
-    NSUserNotification *notification = [[NSUserNotification alloc] init];
-    notification.title = title;
-    notification.informativeText = message;
-    notification.soundName = sound;
-
-	if([[NSUserNotificationCenter defaultUserNotificationCenter] delegate] == nil)
-    {
-        [[NSUserNotificationCenter defaultUserNotificationCenter] setDelegate:self];
-    }
-    
-    [[NSUserNotificationCenter defaultUserNotificationCenter] deliverNotification:notification];
-}
-
-- (BOOL)userNotificationCenter:(NSUserNotificationCenter *)center shouldPresentNotification:(NSUserNotification *)notification{
-    return YES;
-}
-
-
-#pragma mark - NSTableViewDelegate/Datasource
-
-
 #pragma mark - Site Settings
 - (IBAction)filePressed:(NSButton *)sender
 {
@@ -796,7 +693,7 @@ static NSString * LESSVERSION = @"1.4.2";
     }
     NSDictionary * fileInfo = [currentParentFiles objectAtIndex:f.fileIndex];
     NSURL * url = [NSURL fileURLWithPath:[fileInfo objectForKey:@"path"]];
-    [self setCssPath:[self getSavenameFromUser] forPath:url];
+    [self setCssPath:[self getSaveNameFromUser] forPath:url];
     [self updateParentFilesListWithCompletion:^{
         [self rebuildFileList];
     }];

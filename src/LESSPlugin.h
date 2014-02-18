@@ -1,17 +1,14 @@
 #import <Cocoa/Cocoa.h>
 #import "CodaPluginsController.h"
+#import "BaseCodaPlugin.h"
 #import "FMDatabase.h"
 #import "FMResultSet.h"
 #import "FMDatabaseQueue.h"
 
 @class CodaPlugInsController;
 
-@interface LESSPlugin : NSObject <CodaPlugIn, NSUserNotificationCenterDelegate>
+@interface LESSPlugin : BaseCodaPlugin <CodaPlugIn, NSUserNotificationCenterDelegate>
 {
-	CodaPlugInsController* controller;
-    
-	NSObject <CodaPlugInBundle> * plugInBundle;
-    NSBundle * bundle;
     
     /* compile tasks and pipes */
     NSTask * task;
