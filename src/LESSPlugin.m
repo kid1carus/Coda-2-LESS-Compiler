@@ -7,6 +7,7 @@
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 static NSString * COMPVERSION = @"0.3";
 static NSString * LESSVERSION = @"1.4.2";
+
 @interface LESSPlugin ()
 
 - (id)initWithController:(CodaPlugInsController*)inController;
@@ -55,6 +56,8 @@ static NSString * LESSVERSION = @"1.4.2";
     [controller registerActionWithTitle:@"File Settings" underSubmenuWithTitle:nil target:self selector:@selector(openSitesMenu) representedObject:nil keyEquivalent:nil pluginName:@"LESS Compiler"];
     [controller registerActionWithTitle:@"Preferences" underSubmenuWithTitle:nil target:self selector:@selector(openPreferencesMenu) representedObject:nil keyEquivalent:nil pluginName:@"LESS Compiler"];
     
+    isCompiling = false;
+    isDepenencying = false;
 }
 
 -(BOOL)validateMenuItem:(NSMenuItem *)menuItem
@@ -74,7 +77,8 @@ static NSString * LESSVERSION = @"1.4.2";
         NSURL *url = [NSURL fileURLWithPath:path isDirectory:NO];
         if ([[url pathExtension] isEqualToString:@"less"]) {
             
-            [self handleLessFile:textView];
+            [self performSelectorOnMainThread:@selector(handleLessFile:) withObject:textView waitUntilDone:true];
+//            [self handleLessFile:textView];
             
         }
     }
@@ -249,6 +253,7 @@ static NSString * LESSVERSION = @"1.4.2";
         {
             handler();
         }
+        [d close];
     }];
 }
 
@@ -361,14 +366,20 @@ static NSString * LESSVERSION = @"1.4.2";
 
 -(void) performDependencyCheckOnFile:(NSString *)path
 {
+    if(isDepenencying)
+    {
+        DDLogVerbose(@"~~~~~~~~LESS:: Already checking Dependencies!");
+        return;
+    }
     DDLogVerbose(@"LESS:: Performing dependency check on %@", path);
-
+	isDepenencying = true;
     [dbQueue inDatabase:^(FMDatabase *db) {
         
         FMResultSet * parent = [db executeQuery:@"SELECT * FROM less_files WHERE path = :path" withParameterDictionary:[NSDictionary dictionaryWithObjectsAndKeys:path, @"path", nil]];
         if(![parent next])
         {
             DDLogError(@"LESS:: Parent file not found in db!");
+            [parent close];
             return;
         }
         
@@ -418,7 +429,7 @@ static NSString * LESSVERSION = @"1.4.2";
                     }
                 }];
             }
-            
+            isDepenencying = false;
         }];
         
         [indexTask launch];
@@ -431,8 +442,14 @@ static NSString * LESSVERSION = @"1.4.2";
 
 -(void) handleLessFile:(CodaTextView *)textView
 {
-
+    if(isCompiling || isDepenencying || (task != nil && [task isRunning]))
+    {
+        DDLogVerbose(@"~~~~~~~LESS:: Compilation already happening!");
+        return;
+    }
+    
     NSString *path = [self getResolvedPathForPath:[textView path]];
+    DDLogVerbose(@"++++++++++++++++++++++++++++++++++++++++++++++++++++++");
     DDLogVerbose(@"LESS:: Handling file: %@", path);
     [dbQueue inDatabase:^(FMDatabase *db) {
         FMResultSet * s = [db executeQuery:@"SELECT * FROM less_files WHERE path = :path" withParameterDictionary:@{@"path": path}];
@@ -441,8 +458,11 @@ static NSString * LESSVERSION = @"1.4.2";
             FMResultSet * parentFile = s;
             int parent_id = [parentFile intForColumn:@"parent_id"];
             DDLogVerbose(@"LESS:: initial parent_id: %d", parent_id);
+            //Find the parent Less file (parent_id = -1)
+            //This could probably be done with one query, but I'm kind of bad with SQL recursion :welp:
             while(parent_id > -1)
             {
+                [parentFile close];
                 parentFile = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM less_files WHERE id = %d", parent_id]];
                 if([parentFile next])
                 {
@@ -453,10 +473,15 @@ static NSString * LESSVERSION = @"1.4.2";
             
 			NSString * parentPath = [parentFile stringForColumn:@"path"];
             NSString *cssPath = [parentFile stringForColumn:@"css_path"];
+            [parentFile close];
             DDLogVerbose(@"LESS:: parent Path: %@", parentPath);
             DDLogVerbose(@"LESS:: css Path: %@", cssPath);
+            
+            //start the dependency check back on the main thread
             [self performSelectorOnMainThread:@selector(performDependencyCheckOnFile:) withObject:parentPath waitUntilDone:false];
             
+            
+            //and keep doing the compilation
             NSMutableArray * options  = [NSMutableArray array];
         	if([parentFile intForColumn:@"minify"] == 1)
             {
@@ -468,13 +493,21 @@ static NSString * LESSVERSION = @"1.4.2";
         {
             DDLogError(@"LESS:: No DB entry found for file: %@", path);
         }
+        [s close];
     }];
 }
 
 -(void) compileFile:(NSString *)lessFile toFile:(NSString *)cssFile withOptions:(NSArray *)options
 {
-    
+    if(isCompiling || isDepenencying || (task!= nil && [task isRunning]))
+    {
+        DDLogVerbose(@"~~~~~~~LESS:: Compilation task is already running.");
+        return;
+    }
+    isCompiling = true;
+    compileCount++;
     DDLogVerbose(@"LESS:: Compiling file: %@ to file: %@", lessFile, cssFile);
+    DDLogVerbose(@"LESS:: Compile count: %d", compileCount);
     task = [[NSTask alloc] init];
     outputPipe = [[NSPipe alloc] init];
     errorPipe = [[NSPipe alloc]  init];
@@ -520,6 +553,8 @@ static NSString * LESSVERSION = @"1.4.2";
 {
    
     DDLogVerbose(@"LESS:: Task terminated with status: %d", task.terminationStatus);
+    DDLogVerbose(@"LESS:: =====================================================");
+    isCompiling = false;
     if(task.terminationStatus == 0)
     {
         if([[prefs objectForKey:@"displayOnSuccess"] intValue] == 1)
@@ -540,7 +575,7 @@ static NSString * LESSVERSION = @"1.4.2";
 
     NSData *output = [[notification userInfo ] objectForKey:@"NSFileHandleNotificationDataItem"];
     NSString *outStr = [[NSString alloc] initWithData:output encoding:NSUTF8StringEncoding];
-	DDLogVerbose(@"LESS:: getOutput: %@",outStr);
+//	DDLogVerbose(@"LESS:: getOutput: %@",outStr);
     
     dispatch_async(dispatch_get_main_queue(), ^{
         outputText = [outputText stringByAppendingString: outStr];
@@ -562,7 +597,7 @@ static NSString * LESSVERSION = @"1.4.2";
     {
         return;
     }
-    DDLogError(@"LESS:: Encountered some error: %@", outStr);
+    DDLogError(@"LESS:: Encountered some error on compilation task: %@", outStr);
 
     dispatch_async(dispatch_get_main_queue(), ^{
         NSDictionary * error = [self getErrorMessage:outStr];

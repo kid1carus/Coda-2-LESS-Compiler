@@ -401,6 +401,7 @@
 		1DEB913C08733D840010E9CD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				DEPLOYMENT_LOCATION = NO;
 				DSTROOT = "$(HOME)/Library/Application Support/Coda/PlugIns";

@@ -28,6 +28,9 @@
     int currentParentFilesCount;
     NSMutableArray * fileViews;
     NSView * fileDocumentView;
+    BOOL isCompiling;
+    BOOL isDepenencying;
+    int compileCount;
 }
 
 #pragma mark - preferences Window
