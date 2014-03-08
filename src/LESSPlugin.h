@@ -5,11 +5,8 @@
 #import "FMResultSet.h"
 #import "FMDatabaseQueue.h"
 
-@class CodaPlugInsController;
-
 @interface LESSPlugin : BaseCodaPlugin <CodaPlugIn, NSUserNotificationCenterDelegate>
 {
-    
     /* compile tasks and pipes */
     NSTask * task;
     NSPipe * outputPipe;

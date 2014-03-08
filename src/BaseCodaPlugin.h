@@ -10,6 +10,7 @@
     
 	NSObject <CodaPlugInBundle> * plugInBundle;
     NSBundle * bundle;
+    NSString * currentSiteUUID;
 }
 - (id)initWithController:(CodaPlugInsController*)inController;
 - (id)initWithController:(CodaPlugInsController*)inController andPlugInBundle:(NSObject <CodaPlugInBundle> *)p;

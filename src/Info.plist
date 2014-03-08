@@ -16,20 +16,20 @@
 	<string>${PRODUCT_NAME}</string>
 	<key>CFBundlePackageType</key>
 	<string>BNDL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>0.4</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>0.3</string>
-    <key>CFBundleShortVersionString</key>
-    <string>0.3</string>
+	<string>0.4</string>
+	<key>CodaAuthorString</key>
+	<string>Michael Votaw</string>
+	<key>CodaDescriptionString</key>
+	<string>A LESS compiler for Coda</string>
 	<key>CodaPlugInMinimumAPIVersion</key>
 	<string>6</string>
 	<key>CodaPlugInSupportedAPIVersion</key>
 	<integer>6</integer>
-    <key>CodaAuthorString</key>
-    <string>Michael Votaw</string>
-    <key>CodaDescriptionString</key>
-    <string>A LESS compiler for Coda</string>
 	<key>NSPrincipalClass</key>
 	<string>LESSPlugin</string>
 </dict>

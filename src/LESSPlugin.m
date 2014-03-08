@@ -5,9 +5,9 @@
 #import "FileView.h"
 
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
-static NSString * COMPVERSION = @"0.3";
+static NSString * COMPVERSION = @"0.4";
 static NSString * LESSVERSION = @"1.4.2";
-
+static float COMPATIBLEDB = 0.4f;
 @interface LESSPlugin ()
 
 - (id)initWithController:(CodaPlugInsController*)inController;
@@ -53,7 +53,7 @@ static NSString * LESSVERSION = @"1.4.2";
 
 -(void) registerActions
 {
-    [controller registerActionWithTitle:@"File Settings" underSubmenuWithTitle:nil target:self selector:@selector(openSitesMenu) representedObject:nil keyEquivalent:nil pluginName:@"LESS Compiler"];
+    [controller registerActionWithTitle:@"Site Settings" underSubmenuWithTitle:nil target:self selector:@selector(openSitesMenu) representedObject:nil keyEquivalent:nil pluginName:@"LESS Compiler"];
     [controller registerActionWithTitle:@"Preferences" underSubmenuWithTitle:nil target:self selector:@selector(openPreferencesMenu) representedObject:nil keyEquivalent:nil pluginName:@"LESS Compiler"];
     
     isCompiling = false;
@@ -91,7 +91,9 @@ static NSString * LESSVERSION = @"1.4.2";
     [NSBundle loadNibNamed:@"siteSettingsWindow" owner: self];
     fileDocumentView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 500, 500)];
     [self.fileScrollView setDocumentView:fileDocumentView];
-    [self rebuildFileList];
+    [self updateParentFilesListWithCompletion:^{
+        [self performSelectorOnMainThread:@selector(rebuildFileList) withObject:nil waitUntilDone:false];
+    }];
 }
 
 -(void) openPreferencesMenu
@@ -124,7 +126,7 @@ static NSString * LESSVERSION = @"1.4.2";
 -(void) rebuildFileList
 {
     DDLogVerbose(@"LESS:: rebuildFileList");
-    DDLogVerbose(@"LESS:: subviews address: %p", [fileDocumentView subviews]);
+
     [fileDocumentView setSubviews:[NSArray array]];
 
     fileViews = [NSMutableArray array];
@@ -184,26 +186,13 @@ static NSString * LESSVERSION = @"1.4.2";
     NSURL * dbFile;
     if (![self doesPersistantFileExist:@"db.sqlite"]) {
         DDLogVerbose(@"LESS:: db file does not exist. Attempting to create.");
-        if(![self doesPersistantStorageDirectoryExist])
-        {
-            error = [self createPersistantStorageDirectory];
-            if(error)
-            {
-                DDLogError(@"LESS:: Error creating Persistant Storage Directory: %@", error);
-                return;
-            }
-        }
-        DDLogVerbose(@"LESS:: path for resource: %@",[plugInBundle pathForResource:@"db" ofType:@"sqlite"]);
-        error = [self copyFileToPersistantStorage:[plugInBundle pathForResource:@"db" ofType:@"sqlite"]];
-        if(error)
-        {
-            DDLogError(@"LESS:: Error creating database file: %@", error);
-            return;
-        }
-        DDLogVerbose(@"LESS:: Successfully created db.sqlite file");
+       if(![self copyDbFile])
+       {
+           return;
+       }
     }
     dbFile = [self urlForPeristantFilePath:@"db.sqlite"];
-    
+    DDLogVerbose(@"LESS:: dbFile: %@", dbFile);
     
     dbQueue = [FMDatabaseQueue databaseQueueWithPath:[dbFile path]];
     
@@ -224,12 +213,41 @@ static NSString * LESSVERSION = @"1.4.2";
 }
 
 
+-(BOOL) copyDbFile
+{
+	NSError * error;
+    
+    DDLogVerbose(@"LESS:: db file does not exist. Attempting to create.");
+    if(![self doesPersistantStorageDirectoryExist])
+    {
+        error = [self createPersistantStorageDirectory];
+        if(error)
+        {
+            DDLogError(@"LESS:: Error creating Persistant Storage Directory: %@", error);
+            return false;
+        }
+    }
+    DDLogVerbose(@"LESS:: path for resource: %@",[plugInBundle pathForResource:@"db" ofType:@"sqlite"]);
+    error = [self copyFileToPersistantStorage:[plugInBundle pathForResource:@"db" ofType:@"sqlite"]];
+    if(error)
+    {
+        DDLogError(@"LESS:: Error creating database file: %@", error);
+        return false;
+    }
+    DDLogVerbose(@"LESS:: Successfully created db.sqlite file");
+    return true;
+}
 
 -(void) updateParentFilesListWithCompletion:(void(^)(void))handler;
 {
+    if(currentSiteUUID == nil)
+    {
+        return;
+    }
+    
     [dbQueue inDatabase:^(FMDatabase *db) {
         DDLogVerbose(@"LESS:: updateParentFilesWithCompletion");
-        FMResultSet * d = [db executeQuery:@"SELECT * FROM less_files WHERE parent_id == -1"];
+        FMResultSet * d = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM less_files WHERE parent_id == -1 AND site_uuid == '%@'", currentSiteUUID] ];
         if(currentParentFiles == nil)
         {
             currentParentFiles = [NSMutableArray array];
@@ -243,7 +261,7 @@ static NSString * LESSVERSION = @"1.4.2";
             [currentParentFiles addObject:[d resultDictionary]];
         }
         
-        FMResultSet *s = [db executeQuery:@"SELECT COUNT(*) FROM less_files WHERE parent_id == -1"];
+        FMResultSet *s = [db executeQuery:[NSString stringWithFormat:@"SELECT COUNT(*) FROM less_files WHERE parent_id == -1 AND site_uuid == '%@'", currentSiteUUID] ];
         if ([s next])
         {
             currentParentFilesCount = [s intForColumnIndex:0];
@@ -253,6 +271,7 @@ static NSString * LESSVERSION = @"1.4.2";
         {
             handler();
         }
+        [s close];
         [d close];
     }];
 }
@@ -266,17 +285,6 @@ static NSString * LESSVERSION = @"1.4.2";
     }];
 }
 
--(FMResultSet *) getRegisteredFilesForSite:(NSString *) siteName
-{
-    DDLogVerbose(@"LESS:: getting registered files for site: %@", siteName);
-    __block FMResultSet * ret;
-    [dbQueue inDatabase:^(FMDatabase *db) {
-       ret = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM less_files WHERE site_id == '%@'", siteName]];
-    }];
-    
-    return ret;
-}
-
 -(void) registerFile:(NSURL *)url
 {
     if(url == nil)
@@ -288,14 +296,44 @@ static NSString * LESSVERSION = @"1.4.2";
     NSString *cssFile = [fileName stringByReplacingOccurrencesOfString:[url lastPathComponent] withString:[[url lastPathComponent] stringByReplacingOccurrencesOfString:@"less" withString:@"css"]];
     [dbQueue inDatabase:^(FMDatabase *db) {
         DDLogVerbose(@"LESS:: registerFile");
+        
+        FMResultSet * file = [db executeQuery:@"SELECT * FROM less_files WHERE path = :path" withParameterDictionary:@{@"path": fileName}];
+        if([file next])
+        {
+            if([file intForColumn:@"parent_id"] > -1)
+            {
+                NSString * filePath = [[file stringForColumn:@"path"] lastPathComponent];
+                FMResultSet * parent = [db executeQuery:@"SELECT * FROM less_files WHERE id = :id" withParameterDictionary:@{@"id" : [NSNumber numberWithInt:[file intForColumn:@"parent_id"]] }];
+                if([parent next])
+                {
+                    NSString * parentPath = [[parent stringForColumn:@"path"] lastPathComponent];
+                    
+                   DDLogVerbose(@"LESS:: Trying to register dependency of file '%@'.", [parent stringForColumn:@"path"]);
+                    
+                    NSAlert *alert = [[NSAlert alloc] init];
+                    [alert addButtonWithTitle:@"OK"];
+                    [alert setMessageText:@"File already registered"];
+                    [alert setInformativeText:[NSString stringWithFormat:@"The file '%@' is already a dependency of '%@'", filePath, parentPath]];
+                    [alert setAlertStyle:NSWarningAlertStyle];
+                    
+                    [alert beginSheetModalForWindow:[[controller focusedTextView] window] modalDelegate:self didEndSelector:nil contextInfo:nil];
+                    [parent close];
+					[file close];
+                    return;
+                }
+                [parent close];
+            }
+        }
+        [file close];
+        
         if(![db executeUpdate:@"DELETE FROM less_files WHERE path = :path" withParameterDictionary:@{@"path" : fileName}])
         {
             DDLogError(@"LESS:: Whoa, big problem trying to delete sql rows");
         }
         
-        NSDictionary * args = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInteger:0], @"minify", cssFile, @"css_path", fileName, @"path", [NSNumber numberWithInteger:-1], @"parent_id", nil];
+        NSDictionary * args = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInteger:0], @"minify", cssFile, @"css_path", fileName, @"path", [NSNumber numberWithInteger:-1], @"parent_id", currentSiteUUID, @"site_uuid", nil];
 
-        if(![db executeUpdate:@"INSERT OR REPLACE INTO less_files (minify, css_path, path, parent_id) VALUES (:minify, :css_path, :path, :parent_id)"
+        if(![db executeUpdate:@"INSERT OR REPLACE INTO less_files (minify, css_path, path, parent_id, site_uuid) VALUES (:minify, :css_path, :path, :parent_id, :site_uuid)"
     			withParameterDictionary:args ])
         {
 			DDLogError(@"LESS:: SQL ERROR: %@", [db lastError]);
@@ -411,15 +449,14 @@ static NSString * LESSVERSION = @"1.4.2";
                 {
                     DDLogError(@"LESS:: Whoa, big problem deleting old files");
                 }
-            }];
-            for(NSTextCheckingResult * ntcr in dependencies)
-            {
-                NSString * fileName =   [self getResolvedPathForPath:[outStr substringWithRange:[ntcr rangeAtIndex:1]]];
                 
-                [dbQueue inDatabase:^(FMDatabase *db) {
-                    NSDictionary * args = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInteger:0], @"minify", @"", @"css_path", fileName, @"path", [NSNumber numberWithInteger:parentId], @"parent_id", nil];
+                for(NSTextCheckingResult * ntcr in dependencies)
+                {
+                    NSString * fileName =   [self getResolvedPathForPath:[outStr substringWithRange:[ntcr rangeAtIndex:1]]];
                     
-                    if([db executeUpdate:@"INSERT OR REPLACE INTO less_files (minify, css_path, path, parent_id) VALUES (:minify, :css_path, :path, :parent_id)" withParameterDictionary:args])
+                    NSDictionary * args = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInteger:0], @"minify", @"", @"css_path", fileName, @"path", [NSNumber numberWithInteger:parentId], @"parent_id", currentSiteUUID, @"site_uuid", nil];
+                    
+                    if([db executeUpdate:@"INSERT OR REPLACE INTO less_files (minify, css_path, path, parent_id, site_uuid) VALUES (:minify, :css_path, :path, :parent_id, :site_uuid)" withParameterDictionary:args])
                     {
                         DDLogVerbose(@"LESS:: dependency update succeeded: %@", fileName);
                     }
@@ -427,9 +464,9 @@ static NSString * LESSVERSION = @"1.4.2";
                     {
                         DDLogError(@"LESS:: dependency update failed: %@", fileName);
                     }
-                }];
-            }
-            isDepenencying = false;
+                }
+                isDepenencying = false;
+            }];
         }];
         
         [indexTask launch];
@@ -437,14 +474,13 @@ static NSString * LESSVERSION = @"1.4.2";
     }];
 }
 
-
 #pragma mark - LESS methods
 
 -(void) handleLessFile:(CodaTextView *)textView
 {
     if(isCompiling || isDepenencying || (task != nil && [task isRunning]))
     {
-        DDLogVerbose(@"~~~~~~~LESS:: Compilation already happening!");
+        DDLogVerbose(@"LESS:: Compilation already happening!");
         return;
     }
     
@@ -684,7 +720,7 @@ static NSString * LESSVERSION = @"1.4.2";
 {
     [self registerFile:[self getFileNameFromUser]];
     [self updateParentFilesListWithCompletion:^{
-	    [self rebuildFileList];
+	    [self performSelectorOnMainThread:@selector(rebuildFileList) withObject:nil waitUntilDone:false];
     }];
 
 }
@@ -710,7 +746,7 @@ static NSString * LESSVERSION = @"1.4.2";
         NSURL * url = [NSURL fileURLWithPath:[fileInfo objectForKey:@"path"]];
         [self unregisterFile:url];
         [self updateParentFilesListWithCompletion:^{
-            [self rebuildFileList];
+            [self performSelectorOnMainThread:@selector(rebuildFileList) withObject:nil waitUntilDone:false];
         }];
     }
     else
@@ -730,7 +766,7 @@ static NSString * LESSVERSION = @"1.4.2";
     NSURL * url = [NSURL fileURLWithPath:[fileInfo objectForKey:@"path"]];
     [self setCssPath:[self getSaveNameFromUser] forPath:url];
     [self updateParentFilesListWithCompletion:^{
-        [self rebuildFileList];
+        [self performSelectorOnMainThread:@selector(rebuildFileList) withObject:nil waitUntilDone:false];
     }];
 }
 
@@ -747,7 +783,7 @@ static NSString * LESSVERSION = @"1.4.2";
     NSURL * url = [NSURL fileURLWithPath:[fileInfo objectForKey:@"path"]];
     [self setLessFilePreference:@"minify" toValue:[NSNumber numberWithInt:shouldMinify] forPath:url];
     [self updateParentFilesListWithCompletion:^{
-        [self rebuildFileList];
+        [self performSelectorOnMainThread:@selector(rebuildFileList) withObject:nil waitUntilDone:false];
     }];
 }
 

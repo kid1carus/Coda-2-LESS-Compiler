@@ -50,6 +50,13 @@
 }
 
 
+#pragma mark - Site methods
+
+- (void)didLoadSiteNamed:(NSString*)name
+{
+    currentSiteUUID = controller.focusedTextView.siteUUID;
+}
+
 #pragma mark - Menu methods
 
 -(NSURL *) getFileNameFromUser
