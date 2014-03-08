@@ -88,7 +88,12 @@ static float COMPATIBLEDB = 0.4f;
 
 -(void) openSitesMenu
 {
+    if(self.fileSettingsWindow != nil)
+    {
+        return;
+    }
     [NSBundle loadNibNamed:@"siteSettingsWindow" owner: self];
+    [[self.fileSettingsWindow window] setDelegate:self];
     fileDocumentView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 500, 500)];
     [self.fileScrollView setDocumentView:fileDocumentView];
     [self updateParentFilesListWithCompletion:^{
@@ -98,6 +103,10 @@ static float COMPATIBLEDB = 0.4f;
 
 -(void) openPreferencesMenu
 {
+    if(self.preferenceWindow != nil)
+    {
+        return;
+    }
     [NSBundle loadNibNamed:@"preferencesWindow" owner: self];
     [self.LESSVersionField setStringValue:LESSVERSION];
     [self.versionField setStringValue:COMPVERSION];
@@ -177,6 +186,25 @@ static float COMPATIBLEDB = 0.4f;
     	[fileDocumentView addSubview:f];
     }
 }
+
+#pragma mark - NSWindowDelegate methods
+
+
+-(void)windowWillClose:(NSNotification *)notification
+{
+    if([[notification object] isEqualTo:[self.fileSettingsWindow window]])
+    {
+        self.fileSettingsWindow = nil;
+        self.fileScrollView = nil;
+        fileDocumentView = nil;
+    }
+    
+    if([[notification object] isEqualTo:[self.preferenceWindow window]])
+    {
+        self.preferenceWindow = nil;
+    }
+}
+
 #pragma mark - database methods
 
 -(void) setupDb
@@ -293,6 +321,16 @@ static float COMPATIBLEDB = 0.4f;
     }
     
     NSString * fileName = [self getResolvedPathForPath:[url path]];
+    if(![[fileName pathExtension] isEqualToString:@"less"])
+    {
+        NSAlert *alert = [[NSAlert alloc] init];
+        [alert addButtonWithTitle:@"OK"];
+        [alert setMessageText:@"Hey that file isn't a Less file"];
+        [alert setInformativeText:[NSString stringWithFormat:@"The file '%@' doesn't appear to be a Less file.", [fileName lastPathComponent]]];
+        [alert setAlertStyle:NSWarningAlertStyle];
+        [alert beginSheetModalForWindow:[[controller focusedTextView] window] modalDelegate:self didEndSelector:nil contextInfo:nil];
+        return;
+    }
     NSString *cssFile = [fileName stringByReplacingOccurrencesOfString:[url lastPathComponent] withString:[[url lastPathComponent] stringByReplacingOccurrencesOfString:@"less" withString:@"css"]];
     [dbQueue inDatabase:^(FMDatabase *db) {
         DDLogVerbose(@"LESS:: registerFile");
