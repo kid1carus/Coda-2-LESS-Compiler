@@ -7,7 +7,7 @@
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 static NSString * COMPVERSION = @"0.4.1";
 static NSString * LESSVERSION = @"1.4.2";
-static float COMPATIBLEDB = 0.4f;
+static float COMPATIBLEDB = 0.5f;
 @interface LESSPlugin ()
 
 - (id)initWithController:(CodaPlugInsController*)inController;
@@ -209,7 +209,7 @@ static float COMPATIBLEDB = 0.4f;
 
 -(void) setupDb
 {
-	//Create App directory if not exists:
+	//Create Db file if it doesn't exist
     NSError * error;
     NSURL * dbFile;
     if (![self doesPersistantFileExist:@"db.sqlite"]) {
@@ -223,7 +223,49 @@ static float COMPATIBLEDB = 0.4f;
     DDLogVerbose(@"LESS:: dbFile: %@", dbFile);
     
     dbQueue = [FMDatabaseQueue databaseQueueWithPath:[dbFile path]];
+    [dbQueue inDatabase:^(FMDatabase *db) {
+        FMResultSet * versionSet  = [db executeQuery:@"SELECT version from preferences"];
+        if([versionSet next])
+        {
+            float dbVersion = [versionSet doubleForColumn:@"version"];
+            [versionSet close];
+            //The current database version is lower than the latest, so we'll need to kill it :x
+            if(dbVersion < COMPATIBLEDB)
+            {
+                [self performSelectorOnMainThread:@selector(replaceDatabase) withObject:nil waitUntilDone:false];
+            }
+            else
+            {
+                [self performSelectorOnMainThread:@selector(getDbPreferences) withObject:nil waitUntilDone:false];
+            }
+        }
+        [versionSet close];
+    }];
     
+    [self updateParentFilesListWithCompletion:nil];
+}
+
+-(void) replaceDatabase
+{
+    DDLogError(@"LESS:: Current database incompatible with latest compiler release. So we're going to have to nuke it. Sorry :/");
+    NSError * error;
+    NSURL * dbFile;
+    
+    if(![self copyDbFile])
+    {
+        return;
+    }
+    
+    dbFile = [self urlForPeristantFilePath:@"db.sqlite"];
+    DDLogVerbose(@"LESS:: dbFile: %@", dbFile);
+    
+    [dbQueue close];
+    dbQueue = [FMDatabaseQueue databaseQueueWithPath:[dbFile path]];
+    [self getDbPreferences];
+}
+
+-(void) getDbPreferences
+{
     [dbQueue inDatabase:^(FMDatabase *db) {
 		FMResultSet * prefSet = [db executeQuery:@"SELECT * FROM preferences"];
         if([prefSet next])
@@ -237,15 +279,13 @@ static float COMPATIBLEDB = 0.4f;
             prefs = [NSMutableDictionary dictionaryWithObjectsAndKeys: nil];
         }
     }];
+    
     [self updateParentFilesListWithCompletion:nil];
 }
-
 
 -(BOOL) copyDbFile
 {
 	NSError * error;
-    
-    DDLogVerbose(@"LESS:: db file does not exist. Attempting to create.");
     if(![self doesPersistantStorageDirectoryExist])
     {
         error = [self createPersistantStorageDirectory];
@@ -364,11 +404,6 @@ static float COMPATIBLEDB = 0.4f;
         }
         [file close];
         
-        if(![db executeUpdate:@"DELETE FROM less_files WHERE path = :path" withParameterDictionary:@{@"path" : fileName}])
-        {
-            DDLogError(@"LESS:: Whoa, big problem trying to delete sql rows");
-        }
-        
         NSDictionary * args = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInteger:0], @"minify", cssFile, @"css_path", fileName, @"path", [NSNumber numberWithInteger:-1], @"parent_id", currentSiteUUID, @"site_uuid", nil];
 
         if(![db executeUpdate:@"INSERT OR REPLACE INTO less_files (minify, css_path, path, parent_id, site_uuid) VALUES (:minify, :css_path, :path, :parent_id, :site_uuid)"
@@ -483,11 +518,6 @@ static float COMPATIBLEDB = 0.4f;
             NSArray * dependencies = [regex matchesInString:outStr options:nil range:NSMakeRange(0, [outStr length])];
             
             [dbQueue inDatabase:^(FMDatabase *db) {
-                if(![db executeUpdate:@"DELETE FROM less_files WHERE parent_id = :parent_id" withParameterDictionary:@{@"parent_id": [NSNumber numberWithInteger:parentId]}])
-                {
-                    DDLogError(@"LESS:: Whoa, big problem deleting old files");
-                }
-                
                 for(NSTextCheckingResult * ntcr in dependencies)
                 {
                     NSString * fileName =   [self getResolvedPathForPath:[outStr substringWithRange:[ntcr rangeAtIndex:1]]];
@@ -525,6 +555,7 @@ static float COMPATIBLEDB = 0.4f;
     NSString *path = [self getResolvedPathForPath:[textView path]];
     DDLogVerbose(@"++++++++++++++++++++++++++++++++++++++++++++++++++++++");
     DDLogVerbose(@"LESS:: Handling file: %@", path);
+    
     [dbQueue inDatabase:^(FMDatabase *db) {
         FMResultSet * s = [db executeQuery:@"SELECT * FROM less_files WHERE path = :path" withParameterDictionary:@{@"path": path}];
         if([s next])

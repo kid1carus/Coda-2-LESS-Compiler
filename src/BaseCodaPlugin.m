@@ -155,12 +155,21 @@
 
 -(NSError *) copyFileToPersistantStorage:(NSString *)path
 {
-    NSError * error;
+    NSError * error = nil;
     NSFileManager* fileManager = [NSFileManager defaultManager];
-    NSURL * url = [self urlForPeristantFilePath: [path lastPathComponent]];
+    NSString * filename = [path lastPathComponent];
+    NSURL * url = [self urlForPeristantFilePath: filename];
     if(![self doesPersistantStorageDirectoryExist])
     {
         error = [self createPersistantStorageDirectory];
+        if(error != nil)
+        {
+            return error;
+        }
+    }
+    if([self doesPersistantFileExist:filename])
+    {
+        [fileManager moveItemAtPath:[url path] toPath:[[self urlForPeristantFilePath:[NSString stringWithFormat:@"%@.%ld", filename, time(nil)]] path] error:&error];
         if(error != nil)
         {
             return error;
@@ -173,6 +182,7 @@
 
 
 #pragma mark - url/path helper methods
+
 
 -(NSString *) getResolvedPathForPath:(NSString *)path
 {
