@@ -54,7 +54,14 @@
 
 - (void)didLoadSiteNamed:(NSString*)name
 {
-    currentSiteUUID = controller.focusedTextView.siteUUID;
+    if([controller.focusedTextView respondsToSelector:@selector(siteUUID)])
+    {
+    	currentSiteUUID = controller.focusedTextView.siteUUID;
+    }
+    else
+    {
+        currentSiteUUID = name;
+    }
 }
 
 #pragma mark - Menu methods
