@@ -31,6 +31,7 @@
 	}
     plugInBundle = p;
     bundle = [NSBundle bundleWithIdentifier:[p bundleIdentifier]];
+    currentSiteUUID = @"*"; //
 	return self;
 }
 
@@ -61,6 +62,10 @@
     else
     {
         currentSiteUUID = name;
+    }
+    if(currentSiteUUID == nil)
+    {
+        currentSiteUUID = @"*";
     }
 }
 

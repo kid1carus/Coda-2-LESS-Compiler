@@ -62,7 +62,22 @@ static float COMPATIBLEDB = 0.5f;
 
 -(BOOL)validateMenuItem:(NSMenuItem *)menuItem
 {
-    return true;
+    if(![[menuItem title] isEqualToString:@"Site Settings"])
+    {
+        return true;
+    }
+    
+    BOOL isSiteOpen = false;
+    if([controller respondsToSelector:@selector(focusedTextView)])
+    {
+        isSiteOpen = [controller focusedTextView] != nil && [[controller focusedTextView] siteUUID] != nil;
+    }
+    else if([controller respondsToSelector:@selector(focusedTextView:)])
+    {
+        isSiteOpen = [controller focusedTextView: nil] != nil && [[controller focusedTextView:nil] siteNickname] != nil;
+    }
+    
+    return isSiteOpen;
 }
 
 - (NSString*)name
@@ -92,6 +107,22 @@ static float COMPATIBLEDB = 0.5f;
     {
         return;
     }
+    
+    //if siteUUID is not available, that means that this is Coda 2.0
+    //so we have to make sure that the currentSiteUUID is set to at least something
+    if([controller respondsToSelector:@selector(focusedTextView)])
+    {
+        currentSiteUUID = [controller.focusedTextView siteUUID];
+    }
+    else if([controller respondsToSelector:@selector(focusedTextView:)])
+    {
+        currentSiteUUID = [[controller focusedTextView:nil] siteNickname];
+    }
+    else
+    {
+        currentSiteUUID = @"*";
+    }
+    
     [NSBundle loadNibNamed:@"siteSettingsWindow" owner: self];
     [[self.fileSettingsWindow window] setDelegate:self];
     fileDocumentView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 500, 500)];

@@ -105,6 +105,7 @@
  */
 - (CodaTextView*)focusedTextView;
 
+-(CodaTextView*)focusedTextView:(id)sender;
 
 ///-------------------------
 /// @name  Actions
