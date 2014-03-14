@@ -5,7 +5,7 @@
 #import "FileView.h"
 
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
-static NSString * COMPVERSION = @"0.4.1";
+static NSString * COMPVERSION = @"0.4.2";
 static NSString * LESSVERSION = @"1.4.2";
 static float COMPATIBLEDB = 0.5f;
 @interface LESSPlugin ()
