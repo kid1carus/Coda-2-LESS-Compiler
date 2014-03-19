@@ -14,7 +14,7 @@ This plugin provides LESS compilation straight into Coda--no more having to reme
 How do you use it?
 ------------------
 
-Once you install the plugin, you can add .less files to be watched by going to Plug-Ins > LESS Compiler > File Settings.
+Once you install the plugin, you can add .less files to be watched by going to Plug-Ins > LESS Compiler > Site Settings.
 Then, hit the folder icon and select your less file. LESS Compiler will add it, and watch it AND any @imported files.
 
 ![File Settings](/stuff/Less file settings.png)
@@ -32,6 +32,15 @@ This compiler does not have its own log, but it DOES barf a lot of stuff into sy
 
 Change Log
 ----------
+0.4.2
+-----
+- Now it actually works with older versions of Coda (2.0.1+)
+- Site Settings menu only opens when a Site is open, and shows only .less files from that Site (instead of everything).
+
+0.4
+---
+- Fixed some issues with depenencies sometimes getting deleted from the database
+- Added 'Strict Math' compilation option (defaults to on)
 
 0.3
 ---
