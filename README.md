@@ -29,9 +29,18 @@ The biggest current limitation is that LESS Compiler cannot yet mark the saved c
 
 This compiler does not have its own log, but it DOES barf a lot of stuff into system.log. Lines from this plugin start with 'LESS::'.
 
+Many of the command-line options for the Node.js compiler are not available-- if you have the need for any of these, let me know and I'll gladly add an option for it.
+
+Improvements
+------------
+
+If you have any ideas for how this plugin can work better, or any feature requests, please let me know by [opening an issue in the issue tracker](https://github.com/mjvotaw/Coda-2-LESS-Compiler/issues/new), or [emailing me](mike.votaw@thinkhappymedium.com).
+
+
 
 Change Log
-----------
+==========
+
 0.4.2
 -----
 - Now it actually works with older versions of Coda (2.0.1+)
