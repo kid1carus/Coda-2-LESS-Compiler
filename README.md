@@ -34,8 +34,7 @@ Many of the command-line options for the Node.js compiler are not available-- if
 Improvements
 ------------
 
-If you have any ideas for how this plugin can work better, or any feature requests, please let me know by [opening an issue in the issue tracker](https://github.com/mjvotaw/Coda-2-LESS-Compiler/issues/new) or [emailing me](mailto:mike.votaw@thinkhappymedium.com).
-
+If you have any ideas for how this plugin can work better, or any feature requests, please let me know by [opening an issue in the issue tracker](https://github.com/mjvotaw/Coda-2-LESS-Compiler/issues/new).
 
 
 Change Log
