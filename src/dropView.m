@@ -7,25 +7,43 @@
 //
 
 #import "dropView.h"
-
+#import "DDLog.h"
+#import "DDASLLogger.h"
+static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 @implementation dropView
 
-- (id)initWithFrame:(CGRect)frame
+- (id)initWithCoder:(NSCoder *)coder
 {
-    self = [super initWithFrame:frame];
+    self=[super initWithCoder:coder];
     if (self) {
-        // Initialization code
+		[self registerForDraggedTypes:@[ NSURLPboardType ]];
     }
     return self;
 }
 
-/*
-// Only override drawRect: if you perform custom drawing.
-// An empty implementation adversely affects performance during animation.
-- (void)drawRect:(CGRect)rect
+
+- (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender
 {
-    // Drawing code
+   return NSDragOperationEvery;
 }
-*/
+
+-(NSDragOperation)draggingUpdated:(id<NSDraggingInfo>)sender
+{
+    return NSDragOperationEvery;
+}
+- (BOOL)prepareForDragOperation:(id <NSDraggingInfo>)sender
+{
+    return true;
+}
+
+-(BOOL)performDragOperation:(id<NSDraggingInfo>)sender
+{
+    if(self.delegate)
+    {
+        [self.delegate draggingDestinationPerformedDragOperation:sender];
+    }
+    
+    return true;
+}
 
 @end

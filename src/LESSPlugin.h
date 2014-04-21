@@ -4,8 +4,9 @@
 #import "FMDatabase.h"
 #import "FMResultSet.h"
 #import "FMDatabaseQueue.h"
+#import "dropView.h"
 
-@interface LESSPlugin : BaseCodaPlugin <CodaPlugIn, NSUserNotificationCenterDelegate, NSWindowDelegate>
+@interface LESSPlugin : BaseCodaPlugin <CodaPlugIn, NSUserNotificationCenterDelegate, NSWindowDelegate, DraggingDestinationDelegate>
 {
     /* compile tasks and pipes */
     NSTask * task;
@@ -39,7 +40,7 @@
 
 #pragma mark - Site Settings Window
 @property (strong) IBOutlet NSButton *fileButton;
-@property (strong) IBOutlet NSView *fileSettingsWindow;
+@property (strong) IBOutlet dropView *fileSettingsWindow;
 @property (strong) IBOutlet NSScrollView *fileScrollView;
 
 - (IBAction)filePressed:(NSButton *)sender;

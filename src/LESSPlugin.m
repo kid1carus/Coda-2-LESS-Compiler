@@ -125,7 +125,11 @@ static float COMPATIBLEDB = 0.5f;
     
     [NSBundle loadNibNamed:@"siteSettingsWindow" owner: self];
     [[self.fileSettingsWindow window] setDelegate:self];
+    DDLogVerbose(@"LESS:: fileSettings:%@", [self.fileSettingsWindow class]);
+    
+    [self.fileSettingsWindow setDelegate:self];
     fileDocumentView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 500, 500)];
+    
     [self.fileScrollView setDocumentView:fileDocumentView];
     [self updateParentFilesListWithCompletion:^{
         [self performSelectorOnMainThread:@selector(rebuildFileList) withObject:nil waitUntilDone:false];
@@ -885,6 +889,35 @@ static float COMPATIBLEDB = 0.5f;
     [self updateParentFilesListWithCompletion:^{
         [self performSelectorOnMainThread:@selector(rebuildFileList) withObject:nil waitUntilDone:false];
     }];
+}
+
+
+#pragma mark - DraggingDestinationDelegate
+
+
+-(void) draggingDestinationPerformedDragOperation:(id<NSDraggingInfo>)sender
+{
+    
+    NSPasteboard *pboard = [sender draggingPasteboard];
+    
+    if ([[pboard types] containsObject:NSURLPboardType]) {
+        
+        NSArray *paths = [pboard propertyListForType:NSURLPboardType];
+ 		for(NSString * aPath in paths)
+        {
+            if([aPath isEqualToString:@""])
+            {
+                continue;
+            }
+            NSURL * aUrl = [NSURL URLWithString:aPath];
+            [self registerFile:aUrl];
+        }
+    }
+    
+    [self updateParentFilesListWithCompletion:^{
+	    [self performSelectorOnMainThread:@selector(rebuildFileList) withObject:nil waitUntilDone:false];
+    }];
+
 }
 
 #pragma mark - preferences

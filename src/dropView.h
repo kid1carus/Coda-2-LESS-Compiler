@@ -6,8 +6,16 @@
 //
 //
 
-#import <UIKit/UIKit.h>
+#import <Cocoa/Cocoa.h>
 
-@interface dropView : UIView
+@protocol DraggingDestinationDelegate <NSObject>
+@optional
+-(void) draggingDestinationPerformedDragOperation:(id<NSDraggingInfo>)sender;
+@end;
+
+
+@interface dropView : NSView <NSDraggingDestination>
+
+@property(strong, nonatomic) id<DraggingDestinationDelegate> delegate;
 
 @end
