@@ -176,7 +176,7 @@ static float COMPATIBLEDB = 0.5f;
     fileViews = [NSMutableArray array];
     NSRect fRect;
     
-    [fileDocumentView setFrame:NSMakeRect(0, 0, 583, MAX( (111 * currentParentFilesCount), self.fileScrollView.frame.size.height - 10))];
+    [fileDocumentView setFrame:NSMakeRect(0, 0, 583, MAX( (111 * (currentParentFilesCount + 1)), self.fileScrollView.frame.size.height - 10))];
 
     for(int i = currentParentFilesCount - 1; i >= 0; i--)
     {
@@ -219,6 +219,33 @@ static float COMPATIBLEDB = 0.5f;
         [f setFrame:NSMakeRect(0, frameY, fRect.size.width, fRect.size.height)];
         [fileViews addObject:f];
     	[fileDocumentView addSubview:f];
+    }
+    
+    if(currentParentFilesCount == 0)
+    {
+        NSView * footerView;
+        NSArray *nibObjects = [NSArray array];
+        if(![bundle loadNibNamed:@"FileFooter" owner:self topLevelObjects:&nibObjects])
+        {
+            DDLogError(@"LESS:: couldn't load FileFooter nib...");
+            return;
+        }
+        
+        for(NSView * o in nibObjects)
+        {
+            if([o isKindOfClass:[NSView class]])
+            {
+                footerView = o;
+                break;
+            }
+        }
+        
+        fRect = footerView.frame;
+        fRect.origin.y = 0;
+        DDLogVerbose(@"LESS:: footer origin: %f", fRect.origin.y);
+        footerView.frame = fRect;
+        
+        [fileDocumentView addSubview:footerView];
     }
 }
 
