@@ -140,14 +140,17 @@ static float COMPATIBLEDB = 0.5f;
 {
     if(self.preferenceWindow != nil)
     {
+        DDLogVerbose(@"LESS:: window is already open? %@", self.preferenceWindow);
         return;
     }
     [NSBundle loadNibNamed:@"preferencesWindow" owner: self];
+    [[self.preferenceWindow window] setDelegate:self];
     [self.LESSVersionField setStringValue:LESSVERSION];
     [self.versionField setStringValue:COMPVERSION];
     
     if(prefs == nil)
     {
+        DDLogVerbose(@"LESS:: prefs is nil");
         return;
     }
     
@@ -266,6 +269,7 @@ static float COMPATIBLEDB = 0.5f;
         self.preferenceWindow = nil;
     }
 }
+
 
 #pragma mark - database methods
 

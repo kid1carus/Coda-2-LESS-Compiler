@@ -36,6 +36,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     return true;
 }
 
+
+-(BOOL)acceptsFirstResponder
+{
+    return true;
+}
+
+-(void)cancelOperation:(id)sender
+{
+    [self.window close];
+}
+
 -(BOOL)performDragOperation:(id<NSDraggingInfo>)sender
 {
     if(self.delegate)

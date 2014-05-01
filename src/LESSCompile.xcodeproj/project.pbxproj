@@ -25,6 +25,7 @@
 		4CCDB1871846503900B0C66C /* BaseCodaPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CCDB1861846503900B0C66C /* BaseCodaPlugin.m */; };
 		4CE8C353191298C30023524E /* FileFooter.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4CE8C352191298C30023524E /* FileFooter.xib */; };
 		4CE8C3551912993B0023524E /* folder_plus_icon&48.png in Resources */ = {isa = PBXBuildFile; fileRef = 4CE8C3541912993B0023524E /* folder_plus_icon&48.png */; };
+		4CE8C35819129FC10023524E /* PreferenceView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CE8C35719129FC10023524E /* PreferenceView.m */; };
 		4CFCBB78182169690030FC08 /* preferencesWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4CFCBB77182169690030FC08 /* preferencesWindow.xib */; };
 		4CFCBB8518217EDC0030FC08 /* FMDatabase.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CFCBB7B18217EDC0030FC08 /* FMDatabase.m */; };
 		4CFCBB8618217EDC0030FC08 /* FMDatabaseAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CFCBB7D18217EDC0030FC08 /* FMDatabaseAdditions.m */; };
@@ -79,6 +80,8 @@
 		4CCDB1861846503900B0C66C /* BaseCodaPlugin.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BaseCodaPlugin.m; sourceTree = "<group>"; };
 		4CE8C352191298C30023524E /* FileFooter.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FileFooter.xib; sourceTree = "<group>"; };
 		4CE8C3541912993B0023524E /* folder_plus_icon&48.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "folder_plus_icon&48.png"; sourceTree = "<group>"; };
+		4CE8C35619129FC10023524E /* PreferenceView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PreferenceView.h; sourceTree = "<group>"; };
+		4CE8C35719129FC10023524E /* PreferenceView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PreferenceView.m; sourceTree = "<group>"; };
 		4CFCBB77182169690030FC08 /* preferencesWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = preferencesWindow.xib; sourceTree = "<group>"; };
 		4CFCBB7A18217EDC0030FC08 /* FMDatabase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMDatabase.h; sourceTree = "<group>"; };
 		4CFCBB7B18217EDC0030FC08 /* FMDatabase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FMDatabase.m; sourceTree = "<group>"; };
@@ -144,7 +147,6 @@
 		089C167CFE841241C02AAC07 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				4CE8C352191298C30023524E /* FileFooter.xib */,
 				4CFCBB951821B51C0030FC08 /* images */,
 				4CFCBB8F18218F2B0030FC08 /* db.sqlite */,
 				4C1DFC1A182063330078B179 /* growl */,
@@ -155,6 +157,7 @@
 				4CFCBB77182169690030FC08 /* preferencesWindow.xib */,
 				4CFCBB911821B12D0030FC08 /* siteSettingsWindow.xib */,
 				4C321FCF1827F98700FE7058 /* FileView.xib */,
+				4CE8C352191298C30023524E /* FileFooter.xib */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -247,6 +250,8 @@
 				4C5CB3CB18244CFF00A4DD66 /* keyPrefButton.m */,
 				4C8B098B1905BEF4002D30DE /* dropView.h */,
 				4C8B098C1905BEF4002D30DE /* dropView.m */,
+				4CE8C35619129FC10023524E /* PreferenceView.h */,
+				4CE8C35719129FC10023524E /* PreferenceView.m */,
 			);
 			name = classes;
 			sourceTree = "<group>";
@@ -359,6 +364,7 @@
 				4C8B098D1905BEF4002D30DE /* dropView.m in Sources */,
 				4CFCBB8918217EDC0030FC08 /* fmdb.m in Sources */,
 				F163D8F50C67D694000A99F5 /* LESSPlugin.m in Sources */,
+				4CE8C35819129FC10023524E /* PreferenceView.m in Sources */,
 				4CFCBB8A18217EDC0030FC08 /* FMResultSet.m in Sources */,
 				4C0C4FCB181F118600E35333 /* DDAbstractDatabaseLogger.m in Sources */,
 				4C0C4FCC181F118600E35333 /* DDASLLogger.m in Sources */,
