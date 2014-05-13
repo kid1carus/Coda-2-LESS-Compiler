@@ -21,7 +21,7 @@
 		4C5CB3CE182456C400A4DD66 /* trash2-50.png in Resources */ = {isa = PBXBuildFile; fileRef = 4C5CB3CD182456C400A4DD66 /* trash2-50.png */; };
 		4C60E399182009D3003752C5 /* node in Resources */ = {isa = PBXBuildFile; fileRef = 4C60E398182009D3003752C5 /* node */; };
 		4C8B098D1905BEF4002D30DE /* dropView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C8B098C1905BEF4002D30DE /* dropView.m */; };
-		4C9DA7821820172600DFE9E5 /* less in Resources */ = {isa = PBXBuildFile; fileRef = 4C9DA7811820172600DFE9E5 /* less */; };
+		4CCA70CB19228C78001617FC /* less in Resources */ = {isa = PBXBuildFile; fileRef = 4CCA70CA19228C78001617FC /* less */; };
 		4CCDB1871846503900B0C66C /* BaseCodaPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CCDB1861846503900B0C66C /* BaseCodaPlugin.m */; };
 		4CE8C353191298C30023524E /* FileFooter.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4CE8C352191298C30023524E /* FileFooter.xib */; };
 		4CE8C3551912993B0023524E /* folder_plus_icon&48.png in Resources */ = {isa = PBXBuildFile; fileRef = 4CE8C3541912993B0023524E /* folder_plus_icon&48.png */; };
@@ -75,7 +75,7 @@
 		4C60E398182009D3003752C5 /* node */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = node; sourceTree = "<group>"; };
 		4C8B098B1905BEF4002D30DE /* dropView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dropView.h; sourceTree = "<group>"; };
 		4C8B098C1905BEF4002D30DE /* dropView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = dropView.m; sourceTree = "<group>"; };
-		4C9DA7811820172600DFE9E5 /* less */ = {isa = PBXFileReference; lastKnownFileType = folder; path = less; sourceTree = "<group>"; };
+		4CCA70CA19228C78001617FC /* less */ = {isa = PBXFileReference; lastKnownFileType = folder; path = less; sourceTree = "<group>"; };
 		4CCDB1851846503900B0C66C /* BaseCodaPlugin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BaseCodaPlugin.h; sourceTree = "<group>"; };
 		4CCDB1861846503900B0C66C /* BaseCodaPlugin.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BaseCodaPlugin.m; sourceTree = "<group>"; };
 		4CE8C352191298C30023524E /* FileFooter.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FileFooter.xib; sourceTree = "<group>"; };
@@ -148,9 +148,9 @@
 			isa = PBXGroup;
 			children = (
 				4CFCBB951821B51C0030FC08 /* images */,
+				4CCA70CA19228C78001617FC /* less */,
 				4CFCBB8F18218F2B0030FC08 /* db.sqlite */,
 				4C1DFC1A182063330078B179 /* growl */,
-				4C9DA7811820172600DFE9E5 /* less */,
 				4C60E398182009D3003752C5 /* node */,
 				8D5B49B7048680CD000E48DA /* Info.plist */,
 				089C167DFE841241C02AAC07 /* InfoPlist.strings */,
@@ -336,6 +336,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4CE8C353191298C30023524E /* FileFooter.xib in Resources */,
+				4CCA70CB19228C78001617FC /* less in Resources */,
 				4C321FD01827F98700FE7058 /* FileView.xib in Resources */,
 				4C5CB3CE182456C400A4DD66 /* trash2-50.png in Resources */,
 				4C1DFC1B182063330078B179 /* growl in Resources */,
@@ -349,7 +350,6 @@
 				4CFCBB921821B12D0030FC08 /* siteSettingsWindow.xib in Resources */,
 				4CFCBB78182169690030FC08 /* preferencesWindow.xib in Resources */,
 				4CFCBB971821B5230030FC08 /* folder_filled-50.png in Resources */,
-				4C9DA7821820172600DFE9E5 /* less in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

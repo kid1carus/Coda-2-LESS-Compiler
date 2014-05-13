@@ -4,7 +4,7 @@ Coda-2-LESS-Compiler
 A LESS compiler for Coda 2
 
 [Download the plugin here!](https://github.com/mjvotaw/Coda-2-LESS-Compiler/raw/master/LESSCompile.codaplugin.zip)
-
+[Check out Less at lesscss.org](http://lesscss.org/)
 
 What does this do?
 ------------------
@@ -39,6 +39,14 @@ If you have any ideas for how this plugin can work better, or any feature reques
 
 Change Log
 ==========
+
+0.5
+---
+- Updated Less to 1.7.0
+- Added drag and drop capability to the Site Settings window.
+- Added a missing Less dependency when @import'ing remote url's.
+- ESC key now closes windows.
+- Added a Strict Math compilation option in Preferences.
 
 0.4.2
 -----

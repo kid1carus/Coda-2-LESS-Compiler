@@ -6,7 +6,7 @@
 
 static int ddLogLevel = LOG_LEVEL_ERROR;
 static NSString * COMPVERSION = @"0.5.0";
-static NSString * LESSVERSION = @"1.4.2";
+static NSString * LESSVERSION = @"1.7.0";
 static float COMPATIBLEDB = 0.5f;
 @interface LESSPlugin ()
 
