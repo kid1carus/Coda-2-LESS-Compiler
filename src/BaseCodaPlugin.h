@@ -28,4 +28,8 @@
 -(NSString *) getResolvedPathForPath:(NSString *)path;
 #pragma mark - NSUserNotification methods
 -(void) sendUserNotificationWithTitle:(NSString *)title sound:(NSString *)sound andMessage:(NSString * ) message;
+#pragma mark - other helpers
+-(BOOL) isSiteOpen;
+-(NSString *) getCurrentSiteUUID;
+-(NSString *) updateCurrentSiteUUID;
 @end

@@ -218,4 +218,47 @@
     return YES;
 }
 
+
+#pragma mark - other helpers
+
+-(BOOL) isSiteOpen
+{
+    BOOL isSiteOpen = false;
+    if([controller respondsToSelector:@selector(focusedTextView)])
+    {
+        isSiteOpen = [controller focusedTextView] != nil && [[controller focusedTextView] siteUUID] != nil;
+    }
+    else if([controller respondsToSelector:@selector(focusedTextView:)])
+    {
+        isSiteOpen = [controller focusedTextView: nil] != nil && [[controller focusedTextView:nil] siteNickname] != nil;
+    }
+    
+    return isSiteOpen;
+}
+
+-(NSString *) getCurrentSiteUUID
+{
+    if([controller respondsToSelector:@selector(focusedTextView)])
+    {
+        return [controller.focusedTextView siteUUID];
+    }
+    else if([controller respondsToSelector:@selector(focusedTextView:)])
+    {
+        return [[controller focusedTextView:nil] siteNickname];
+    }
+	return nil;
+}
+-(NSString *) updateCurrentSiteUUID;
+{
+    //if siteUUID is not available, that means that this is Coda 2.0
+    //so we have to make sure that the currentSiteUUID is set to at least something
+    currentSiteUUID = [self getCurrentSiteUUID];
+    if(currentSiteUUID == nil)
+    {
+        currentSiteUUID = @"*";
+    }
+    
+    return currentSiteUUID;
+}
+
 @end

@@ -4,8 +4,8 @@
 #import "DDASLLogger.h"
 #import "FileView.h"
 
-static const int ddLogLevel = LOG_LEVEL_VERBOSE;
-static NSString * COMPVERSION = @"0.4.2";
+static int ddLogLevel = LOG_LEVEL_ERROR;
+static NSString * COMPVERSION = @"0.5.0";
 static NSString * LESSVERSION = @"1.4.2";
 static float COMPATIBLEDB = 0.5f;
 @interface LESSPlugin ()
@@ -54,6 +54,7 @@ static float COMPATIBLEDB = 0.5f;
 -(void) registerActions
 {
     [controller registerActionWithTitle:@"Site Settings" underSubmenuWithTitle:nil target:self selector:@selector(openSitesMenu) representedObject:nil keyEquivalent:nil pluginName:@"LESS Compiler"];
+    
     [controller registerActionWithTitle:@"Preferences" underSubmenuWithTitle:nil target:self selector:@selector(openPreferencesMenu) representedObject:nil keyEquivalent:nil pluginName:@"LESS Compiler"];
     
     isCompiling = false;
@@ -62,22 +63,13 @@ static float COMPATIBLEDB = 0.5f;
 
 -(BOOL)validateMenuItem:(NSMenuItem *)menuItem
 {
-    if(![[menuItem title] isEqualToString:@"Site Settings"])
+    //preference menu can always be opened.
+    if([[menuItem title] isEqualToString:@"Preferences"])
     {
         return true;
     }
     
-    BOOL isSiteOpen = false;
-    if([controller respondsToSelector:@selector(focusedTextView)])
-    {
-        isSiteOpen = [controller focusedTextView] != nil && [[controller focusedTextView] siteUUID] != nil;
-    }
-    else if([controller respondsToSelector:@selector(focusedTextView:)])
-    {
-        isSiteOpen = [controller focusedTextView: nil] != nil && [[controller focusedTextView:nil] siteNickname] != nil;
-    }
-    
-    return isSiteOpen;
+    return [self isSiteOpen];
 }
 
 - (NSString*)name
@@ -88,13 +80,12 @@ static float COMPATIBLEDB = 0.5f;
 -(void)textViewWillSave:(CodaTextView *)textView
 {
     NSString *path = [textView path];
-    if ([path length]) {
+    if([path length] > 0)
+    {
         NSURL *url = [NSURL fileURLWithPath:path isDirectory:NO];
-        if ([[url pathExtension] isEqualToString:@"less"]) {
-            
+        if([[url pathExtension] isEqualToString:@"less"])
+        {
             [self performSelectorOnMainThread:@selector(handleLessFile:) withObject:textView waitUntilDone:true];
-//            [self handleLessFile:textView];
-            
         }
     }
 }
@@ -108,20 +99,8 @@ static float COMPATIBLEDB = 0.5f;
         return;
     }
     
-    //if siteUUID is not available, that means that this is Coda 2.0
-    //so we have to make sure that the currentSiteUUID is set to at least something
-    if([controller respondsToSelector:@selector(focusedTextView)])
-    {
-        currentSiteUUID = [controller.focusedTextView siteUUID];
-    }
-    else if([controller respondsToSelector:@selector(focusedTextView:)])
-    {
-        currentSiteUUID = [[controller focusedTextView:nil] siteNickname];
-    }
-    else
-    {
-        currentSiteUUID = @"*";
-    }
+	//make sure currentSiteUUID is up to date.
+   	[self updateCurrentSiteUUID];
     
     [NSBundle loadNibNamed:@"siteSettingsWindow" owner: self];
     [[self.fileSettingsWindow window] setDelegate:self];
@@ -140,7 +119,6 @@ static float COMPATIBLEDB = 0.5f;
 {
     if(self.preferenceWindow != nil)
     {
-        DDLogVerbose(@"LESS:: window is already open? %@", self.preferenceWindow);
         return;
     }
     [NSBundle loadNibNamed:@"preferencesWindow" owner: self];
@@ -181,6 +159,37 @@ static float COMPATIBLEDB = 0.5f;
     
     [fileDocumentView setFrame:NSMakeRect(0, 0, 583, MAX( (111 * (currentParentFilesCount + 1)), self.fileScrollView.frame.size.height - 10))];
 
+    // if there are no files to display, then display a footer.
+    
+    if(currentParentFilesCount == 0)
+    {
+        NSView * footerView;
+        NSArray *nibObjects = [NSArray array];
+        if(![bundle loadNibNamed:@"FileFooter" owner:self topLevelObjects:&nibObjects])
+        {
+            DDLogError(@"LESS:: couldn't load FileFooter nib...");
+            return;
+        }
+        
+        for(NSView * o in nibObjects)
+        {
+            if([o isKindOfClass:[NSView class]])
+            {
+                footerView = o;
+                break;
+            }
+        }
+        
+        fRect = footerView.frame;
+        fRect.origin.y = 0;
+        footerView.frame = fRect;
+        
+        [fileDocumentView addSubview:footerView];
+        return;
+    }
+    
+    //otherwise, display the list of files.
+    
     for(int i = currentParentFilesCount - 1; i >= 0; i--)
     {
         NSDictionary * currentFile = [currentParentFiles objectAtIndex:i];
@@ -204,7 +213,7 @@ static float COMPATIBLEDB = 0.5f;
         fRect = f.frame;
         
         
-         NSURL * url = [NSURL fileURLWithPath:[currentFile objectForKey:@"path"] isDirectory:NO];
+        NSURL * url = [NSURL fileURLWithPath:[currentFile objectForKey:@"path"] isDirectory:NO];
         [f.fileName setStringValue:[url lastPathComponent]];
         [f.lessPath setStringValue:[currentFile objectForKey:@"path"]];
         [f.cssPath setStringValue:[currentFile objectForKey:@"css_path"]];
@@ -218,37 +227,11 @@ static float COMPATIBLEDB = 0.5f;
         [f.shouldMinify setTarget:self];
         
 		f.fileIndex = i;
+        
         float frameY = currentParentFilesCount > 3 ? i * fRect.size.height : (fileDocumentView.frame.size.height - ((currentParentFilesCount - i) * fRect.size.height));
         [f setFrame:NSMakeRect(0, frameY, fRect.size.width, fRect.size.height)];
         [fileViews addObject:f];
     	[fileDocumentView addSubview:f];
-    }
-    
-    if(currentParentFilesCount == 0)
-    {
-        NSView * footerView;
-        NSArray *nibObjects = [NSArray array];
-        if(![bundle loadNibNamed:@"FileFooter" owner:self topLevelObjects:&nibObjects])
-        {
-            DDLogError(@"LESS:: couldn't load FileFooter nib...");
-            return;
-        }
-        
-        for(NSView * o in nibObjects)
-        {
-            if([o isKindOfClass:[NSView class]])
-            {
-                footerView = o;
-                break;
-            }
-        }
-        
-        fRect = footerView.frame;
-        fRect.origin.y = 0;
-        DDLogVerbose(@"LESS:: footer origin: %f", fRect.origin.y);
-        footerView.frame = fRect;
-        
-        [fileDocumentView addSubview:footerView];
     }
 }
 
@@ -441,18 +424,22 @@ static float COMPATIBLEDB = 0.5f;
     [dbQueue inDatabase:^(FMDatabase *db) {
         DDLogVerbose(@"LESS:: registerFile");
         
+        // check if the file has already been registered
         FMResultSet * file = [db executeQuery:@"SELECT * FROM less_files WHERE path = :path" withParameterDictionary:@{@"path": fileName}];
         if([file next])
         {
+            // is it a dependency of a parent file?
             if([file intForColumn:@"parent_id"] > -1)
             {
                 NSString * filePath = [[file stringForColumn:@"path"] lastPathComponent];
                 FMResultSet * parent = [db executeQuery:@"SELECT * FROM less_files WHERE id = :id" withParameterDictionary:@{@"id" : [NSNumber numberWithInt:[file intForColumn:@"parent_id"]] }];
+                
+                //make sure that the parent file actually exists. If it does, then throw an alert.
                 if([parent next])
                 {
                     NSString * parentPath = [[parent stringForColumn:@"path"] lastPathComponent];
                     
-                   DDLogVerbose(@"LESS:: Trying to register dependency of file '%@'.", [parent stringForColumn:@"path"]);
+                   DDLogError(@"LESS:: Trying to register dependency of file '%@'.", [parent stringForColumn:@"path"]);
                     
                     NSAlert *alert = [[NSAlert alloc] init];
                     [alert addButtonWithTitle:@"OK"];
@@ -467,6 +454,7 @@ static float COMPATIBLEDB = 0.5f;
                 }
                 [parent close];
             }
+            //otherwise, we could maybe throw another alert here. But instead, let's just re-register the file.
         }
         [file close];
         
@@ -490,7 +478,7 @@ static float COMPATIBLEDB = 0.5f;
     	FMResultSet * parentFile = [db executeQuery:@"SELECT * FROM less_files WHERE path == :path" withParameterDictionary:@{@"path":fileName}];
         if(![parentFile next])
         {
-            DDLogVerbose(@"LESS:: unregisterFile: file %@ not found in db", fileName);
+            DDLogError(@"LESS:: unregisterFile: file %@ not found in db", fileName);
             return;
         }
         
@@ -511,7 +499,7 @@ static float COMPATIBLEDB = 0.5f;
         FMResultSet * parentFile = [db executeQuery:@"SELECT * FROM less_files WHERE path == :path" withParameterDictionary:@{@"path":fileName}];
         if(![parentFile next])
         {
-            DDLogVerbose(@"LESS:: setCssPath: file %@ not found in db", fileName);
+            DDLogError(@"LESS:: setCssPath: file %@ not found in db", fileName);
             return;
         }
 		if([db executeUpdate:@"UPDATE less_files SET css_path == :css_path WHERE id == :id" withParameterDictionary:@{@"css_path":cssFileName, @"id": [NSNumber numberWithInt:[parentFile intForColumn:@"id"]]}])
@@ -545,7 +533,7 @@ static float COMPATIBLEDB = 0.5f;
 {
     if(isDepenencying)
     {
-        DDLogVerbose(@"~~~~~~~~LESS:: Already checking Dependencies!");
+        DDLogVerbose(@"LESS:: Already checking Dependencies!");
         return;
     }
     DDLogVerbose(@"LESS:: Performing dependency check on %@", path);
@@ -672,7 +660,7 @@ static float COMPATIBLEDB = 0.5f;
 {
     if(isCompiling || isDepenencying || (task!= nil && [task isRunning]))
     {
-        DDLogVerbose(@"~~~~~~~LESS:: Compilation task is already running.");
+        DDLogVerbose(@"LESS:: Compilation task is already running.");
         return;
     }
     isCompiling = true;
@@ -805,6 +793,8 @@ static float COMPATIBLEDB = 0.5f;
     	[[errorPipe fileHandleForReading] readToEndOfFileInBackgroundAndNotify];
     }
 }
+
+/* parse the error message and pull the useful bits from it. */
 
 -(NSDictionary *) getErrorMessage:(NSString *)fullError
 {
@@ -963,5 +953,19 @@ static float COMPATIBLEDB = 0.5f;
     NSNumber * newState = [NSNumber numberWithInteger:[sender state]];
     DDLogVerbose(@"LESS:: setting preference %@ : %@", pref, newState);
     [self updatePreferenceNamed:pref withValue:newState];
+    
+    if([pref isEqualToString:@"verboseLog"])
+    {
+        if([sender state] == NSOffState)
+        {
+            ddLogLevel = LOG_LEVEL_ERROR;
+            DDLogError(@"LESS:: Verbose logging disabled.");
+        }
+        else if([sender state] == NSOnState)
+        {
+            ddLogLevel = LOG_LEVEL_VERBOSE;
+            DDLogVerbose(@"LESS:: Verbose logging enabled.");
+        }
+    }
 }
 @end
