@@ -568,7 +568,7 @@ static float COMPATIBLEDB = 0.5f;
             NSString *outStr = [[NSString alloc] initWithData:output encoding:NSUTF8StringEncoding];
             NSError * error;
             outStr = [outStr stringByReplacingOccurrencesOfString:@"DEPENDS: " withString:@""];
-            NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"(/.*?\.less)" options:nil error:&error];
+            NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"(/.*?\\.less)" options:nil error:&error];
             NSArray * dependencies = [regex matchesInString:outStr options:nil range:NSMakeRange(0, [outStr length])];
             
             [dbQueue inDatabase:^(FMDatabase *db) {
