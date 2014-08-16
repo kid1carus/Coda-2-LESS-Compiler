@@ -57,7 +57,7 @@
 {
     if([controller.focusedTextView respondsToSelector:@selector(siteUUID)])
     {
-    	currentSiteUUID = controller.focusedTextView.siteUUID;
+    	currentSiteUUID = controller.siteUUID;
     }
     else
     {
@@ -226,12 +226,12 @@
     BOOL isSiteOpen = false;
     if([controller respondsToSelector:@selector(focusedTextView)])
     {
-        isSiteOpen = [controller focusedTextView] != nil && [[controller focusedTextView] siteUUID] != nil;
+        isSiteOpen = [controller focusedTextView] != nil && [controller siteUUID] != nil;
     }
-    else if([controller respondsToSelector:@selector(focusedTextView:)])
-    {
-        isSiteOpen = [controller focusedTextView: nil] != nil && [[controller focusedTextView:nil] siteNickname] != nil;
-    }
+//    else if([controller respondsToSelector:@selector(focusedTextView:)])
+//    {
+//        isSiteOpen = [controller focusedTextView: nil] != nil && [[controller focusedTextView:nil] siteNickname] != nil;
+//    }
     
     return isSiteOpen;
 }
@@ -240,12 +240,12 @@
 {
     if([controller respondsToSelector:@selector(focusedTextView)])
     {
-        return [controller.focusedTextView siteUUID];
+        return [controller siteUUID];
     }
-    else if([controller respondsToSelector:@selector(focusedTextView:)])
-    {
-        return [[controller focusedTextView:nil] siteNickname];
-    }
+//    else if([controller respondsToSelector:@selector(focusedTextView:)])
+//    {
+//        return [[controller focusedTextView:nil] siteNickname];
+//    }
 	return nil;
 }
 -(NSString *) updateCurrentSiteUUID;
