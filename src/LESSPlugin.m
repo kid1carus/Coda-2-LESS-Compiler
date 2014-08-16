@@ -327,6 +327,12 @@ static float COMPATIBLEDB = 0.5f;
             DDLogVerbose(@"LESS:: no preferences found!");
             prefs = [NSMutableDictionary dictionaryWithObjectsAndKeys: nil];
         }
+        
+        if([prefs objectForKey:@"verboseLog"] != nil && [[prefs objectForKey:@"verboseLog"] intValue] == 1)
+        {
+            ddLogLevel = LOG_LEVEL_VERBOSE;
+        }
+		[prefSet close];
     }];
     
     [self updateParentFilesListWithCompletion:nil];
@@ -627,12 +633,11 @@ static float COMPATIBLEDB = 0.5f;
                 {
                     parent_id = [parentFile intForColumn:@"parent_id"];
                 }
-                DDLogVerbose(@"LESS:: next parent_id: %d", parent_id);
             }
             
 			NSString * parentPath = [parentFile stringForColumn:@"path"];
             NSString *cssPath = [parentFile stringForColumn:@"css_path"];
-            [parentFile close];
+
             DDLogVerbose(@"LESS:: parent Path: %@", parentPath);
             DDLogVerbose(@"LESS:: css Path: %@", cssPath);
             
@@ -640,12 +645,14 @@ static float COMPATIBLEDB = 0.5f;
             [self performSelectorOnMainThread:@selector(performDependencyCheckOnFile:) withObject:parentPath waitUntilDone:false];
             
             
-            //and keep doing the compilation
+            //Set compilation options
             NSMutableArray * options  = [NSMutableArray array];
         	if([parentFile intForColumn:@"minify"] == 1)
             {
                 [options addObject:@"-x"];
             }
+            
+            [parentFile close];
             [self compileFile:parentPath toFile:cssPath withOptions:options];
         }
         else
@@ -690,7 +697,7 @@ static float COMPATIBLEDB = 0.5f;
     
     [arguments addObject:lessFile];
     [arguments addObject:cssFile];
-    
+    DDLogVerbose(@"LESS:: Node arguments: %@", arguments);
     task.launchPath = [NSString stringWithFormat:@"%@/node", [plugInBundle resourcePath]];
     task.arguments = arguments;
     task.standardOutput = outputPipe;
@@ -710,23 +717,20 @@ static float COMPATIBLEDB = 0.5f;
 
 -(void) taskDidTerminate:(NSNotification *) notification
 {
-   
+    DDLogVerbose(@"LESS:: Received taskDidTerminate.");
+    
+    if(task.isRunning)
+    {
+        DDLogVerbose(@"LESS:: Psyche, task is still running.");
+        return;
+    }
     DDLogVerbose(@"LESS:: Task terminated with status: %d", task.terminationStatus);
     DDLogVerbose(@"LESS:: =====================================================");
-    isCompiling = false;
-    if(task.terminationStatus == 0)
-    {
-        if([[prefs objectForKey:@"displayOnSuccess"] intValue] == 1)
-        {
-            NSString * sound = nil;
-            if([[prefs objectForKey:@"playOnSuccess"] intValue] == 1)
-            {
-                sound = NSUserNotificationDefaultSoundName;
-            }
-           
-        	[self sendUserNotificationWithTitle:@"LESS:: Compiled Successfully!" sound:sound  andMessage:@"file compiled successfully!"];
-        }
-    }
+//    isCompiling = false;
+//    if(task.terminationStatus == 0)
+//    {
+//        [self displaySuccess];
+//    }
 }
 
 -(void) getOutput:(NSNotification *) notification
@@ -743,6 +747,16 @@ static float COMPATIBLEDB = 0.5f;
     if([task isRunning])
     {
         [[outputPipe fileHandleForReading] readToEndOfFileInBackgroundAndNotify];
+    }
+    else
+    {
+        DDLogVerbose(@"LESS:: Task terminated with status: %d", task.terminationStatus);
+        DDLogVerbose(@"LESS:: =====================================================");
+        isCompiling = false;
+        if(task.terminationStatus == 0)
+        {
+        	[self displaySuccess];
+        }
     }
 }
 
@@ -840,6 +854,21 @@ static float COMPATIBLEDB = 0.5f;
     return output;
 }
 
+
+
+-(void) displaySuccess
+{
+    if([[prefs objectForKey:@"displayOnSuccess"] intValue] == 1)
+    {
+        NSString * sound = nil;
+        if([[prefs objectForKey:@"playOnSuccess"] intValue] == 1)
+        {
+            sound = NSUserNotificationDefaultSoundName;
+        }
+        
+        [self sendUserNotificationWithTitle:@"LESS:: Compiled Successfully!" sound:sound  andMessage:@"file compiled successfully!"];
+    }
+}
 #pragma mark - Site Settings
 - (IBAction)filePressed:(NSButton *)sender
 {
