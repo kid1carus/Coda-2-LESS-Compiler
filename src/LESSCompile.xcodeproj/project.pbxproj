@@ -7,13 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		4C0C4FCB181F118600E35333 /* DDAbstractDatabaseLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C0C4FBC181F118600E35333 /* DDAbstractDatabaseLogger.m */; };
-		4C0C4FCC181F118600E35333 /* DDASLLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C0C4FBE181F118600E35333 /* DDASLLogger.m */; };
-		4C0C4FCD181F118600E35333 /* DDFileLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C0C4FC0181F118600E35333 /* DDFileLogger.m */; };
-		4C0C4FCE181F118600E35333 /* DDLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C0C4FC2181F118600E35333 /* DDLog.m */; };
-		4C0C4FCF181F118600E35333 /* DDTTYLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C0C4FC4181F118600E35333 /* DDTTYLogger.m */; };
-		4C0C4FD0181F118600E35333 /* ContextFilterLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C0C4FC7181F118600E35333 /* ContextFilterLogFormatter.m */; };
-		4C0C4FD1181F118600E35333 /* DispatchQueueLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C0C4FC9181F118600E35333 /* DispatchQueueLogFormatter.m */; };
 		4C0C4FD2181F118600E35333 /* README.txt in Resources */ = {isa = PBXBuildFile; fileRef = 4C0C4FCA181F118600E35333 /* README.txt */; };
 		4C1DFC1B182063330078B179 /* growl in Resources */ = {isa = PBXBuildFile; fileRef = 4C1DFC1A182063330078B179 /* growl */; };
 		4C321FD01827F98700FE7058 /* FileView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4C321FCF1827F98700FE7058 /* FileView.xib */; };
@@ -21,6 +14,11 @@
 		4C5CB3CE182456C400A4DD66 /* trash2-50.png in Resources */ = {isa = PBXBuildFile; fileRef = 4C5CB3CD182456C400A4DD66 /* trash2-50.png */; };
 		4C60E399182009D3003752C5 /* node in Resources */ = {isa = PBXBuildFile; fileRef = 4C60E398182009D3003752C5 /* node */; };
 		4C8B098D1905BEF4002D30DE /* dropView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C8B098C1905BEF4002D30DE /* dropView.m */; };
+		4C935B29199AC37B00AD1D5A /* DDAbstractDatabaseLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C0C4FBC181F118600E35333 /* DDAbstractDatabaseLogger.m */; };
+		4C935B2A199AC37D00AD1D5A /* DDASLLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C0C4FBE181F118600E35333 /* DDASLLogger.m */; };
+		4C935B2B199AC37F00AD1D5A /* DDFileLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C0C4FC0181F118600E35333 /* DDFileLogger.m */; };
+		4C935B2C199AC38100AD1D5A /* DDLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C935B27199AC16800AD1D5A /* DDLog.m */; };
+		4C935B2D199AC38300AD1D5A /* DDTTYLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C0C4FC4181F118600E35333 /* DDTTYLogger.m */; };
 		4CCA70CB19228C78001617FC /* less in Resources */ = {isa = PBXBuildFile; fileRef = 4CCA70CA19228C78001617FC /* less */; };
 		4CCDB1871846503900B0C66C /* BaseCodaPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CCDB1861846503900B0C66C /* BaseCodaPlugin.m */; };
 		4CE8C353191298C30023524E /* FileFooter.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4CE8C352191298C30023524E /* FileFooter.xib */; };
@@ -58,7 +56,6 @@
 		4C0C4FBF181F118600E35333 /* DDFileLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDFileLogger.h; sourceTree = "<group>"; };
 		4C0C4FC0181F118600E35333 /* DDFileLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDFileLogger.m; sourceTree = "<group>"; };
 		4C0C4FC1181F118600E35333 /* DDLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDLog.h; sourceTree = "<group>"; };
-		4C0C4FC2181F118600E35333 /* DDLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDLog.m; sourceTree = "<group>"; };
 		4C0C4FC3181F118600E35333 /* DDTTYLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDTTYLogger.h; sourceTree = "<group>"; };
 		4C0C4FC4181F118600E35333 /* DDTTYLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDTTYLogger.m; sourceTree = "<group>"; };
 		4C0C4FC6181F118600E35333 /* ContextFilterLogFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContextFilterLogFormatter.h; sourceTree = "<group>"; };
@@ -75,6 +72,7 @@
 		4C60E398182009D3003752C5 /* node */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = node; sourceTree = "<group>"; };
 		4C8B098B1905BEF4002D30DE /* dropView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dropView.h; sourceTree = "<group>"; };
 		4C8B098C1905BEF4002D30DE /* dropView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = dropView.m; sourceTree = "<group>"; };
+		4C935B27199AC16800AD1D5A /* DDLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDLog.m; sourceTree = "<group>"; };
 		4CCA70CA19228C78001617FC /* less */ = {isa = PBXFileReference; lastKnownFileType = folder; path = less; sourceTree = "<group>"; };
 		4CCDB1851846503900B0C66C /* BaseCodaPlugin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BaseCodaPlugin.h; sourceTree = "<group>"; };
 		4CCDB1861846503900B0C66C /* BaseCodaPlugin.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BaseCodaPlugin.m; sourceTree = "<group>"; };
@@ -221,7 +219,7 @@
 				4C0C4FBF181F118600E35333 /* DDFileLogger.h */,
 				4C0C4FC0181F118600E35333 /* DDFileLogger.m */,
 				4C0C4FC1181F118600E35333 /* DDLog.h */,
-				4C0C4FC2181F118600E35333 /* DDLog.m */,
+				4C935B27199AC16800AD1D5A /* DDLog.m */,
 				4C0C4FC3181F118600E35333 /* DDTTYLogger.h */,
 				4C0C4FC4181F118600E35333 /* DDTTYLogger.m */,
 				4C0C4FC5181F118600E35333 /* Extensions */,
@@ -362,22 +360,20 @@
 			files = (
 				4CFCBB9E1821B82A0030FC08 /* FileView.m in Sources */,
 				4C8B098D1905BEF4002D30DE /* dropView.m in Sources */,
+				4C935B29199AC37B00AD1D5A /* DDAbstractDatabaseLogger.m in Sources */,
+				4C935B2A199AC37D00AD1D5A /* DDASLLogger.m in Sources */,
+				4C935B2B199AC37F00AD1D5A /* DDFileLogger.m in Sources */,
+				4C935B2C199AC38100AD1D5A /* DDLog.m in Sources */,
+				4C935B2D199AC38300AD1D5A /* DDTTYLogger.m in Sources */,
 				4CFCBB8918217EDC0030FC08 /* fmdb.m in Sources */,
 				F163D8F50C67D694000A99F5 /* LESSPlugin.m in Sources */,
 				4CE8C35819129FC10023524E /* PreferenceView.m in Sources */,
 				4CFCBB8A18217EDC0030FC08 /* FMResultSet.m in Sources */,
-				4C0C4FCB181F118600E35333 /* DDAbstractDatabaseLogger.m in Sources */,
-				4C0C4FCC181F118600E35333 /* DDASLLogger.m in Sources */,
 				4CFCBB8518217EDC0030FC08 /* FMDatabase.m in Sources */,
-				4C0C4FCD181F118600E35333 /* DDFileLogger.m in Sources */,
 				4CFCBB8818217EDC0030FC08 /* FMDatabaseQueue.m in Sources */,
 				4CFCBB8718217EDC0030FC08 /* FMDatabasePool.m in Sources */,
-				4C0C4FCE181F118600E35333 /* DDLog.m in Sources */,
 				4CCDB1871846503900B0C66C /* BaseCodaPlugin.m in Sources */,
-				4C0C4FCF181F118600E35333 /* DDTTYLogger.m in Sources */,
 				4C5CB3CC18244CFF00A4DD66 /* keyPrefButton.m in Sources */,
-				4C0C4FD0181F118600E35333 /* ContextFilterLogFormatter.m in Sources */,
-				4C0C4FD1181F118600E35333 /* DispatchQueueLogFormatter.m in Sources */,
 				4CFCBB8618217EDC0030FC08 /* FMDatabaseAdditions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
