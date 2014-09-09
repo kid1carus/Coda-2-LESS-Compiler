@@ -21,6 +21,13 @@
 
 @interface CodaPlugInsController : NSObject
 
+/** backwards compatability methods for 2.0
+ */
+
+
+
+- (CodaTextView*)focusedTextView:(id)sender;
+
 ///-------------------------
 /// @name  Determaining Versions
 ///-------------------------

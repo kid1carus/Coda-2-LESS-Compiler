@@ -21,6 +21,8 @@
 		4C935B2D199AC38300AD1D5A /* DDTTYLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C0C4FC4181F118600E35333 /* DDTTYLogger.m */; };
 		4CCA70CB19228C78001617FC /* less in Resources */ = {isa = PBXBuildFile; fileRef = 4CCA70CA19228C78001617FC /* less */; };
 		4CCDB1871846503900B0C66C /* BaseCodaPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CCDB1861846503900B0C66C /* BaseCodaPlugin.m */; };
+		4CCF170D19BF6463002E0650 /* Growl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CCF170A19BF6463002E0650 /* Growl.framework */; };
+		4CCF170E19BF6463002E0650 /* Growl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CCF170C19BF6463002E0650 /* Growl.framework */; };
 		4CE8C353191298C30023524E /* FileFooter.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4CE8C352191298C30023524E /* FileFooter.xib */; };
 		4CE8C3551912993B0023524E /* folder_plus_icon&48.png in Resources */ = {isa = PBXBuildFile; fileRef = 4CE8C3541912993B0023524E /* folder_plus_icon&48.png */; };
 		4CE8C35819129FC10023524E /* PreferenceView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CE8C35719129FC10023524E /* PreferenceView.m */; };
@@ -76,6 +78,8 @@
 		4CCA70CA19228C78001617FC /* less */ = {isa = PBXFileReference; lastKnownFileType = folder; path = less; sourceTree = "<group>"; };
 		4CCDB1851846503900B0C66C /* BaseCodaPlugin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BaseCodaPlugin.h; sourceTree = "<group>"; };
 		4CCDB1861846503900B0C66C /* BaseCodaPlugin.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BaseCodaPlugin.m; sourceTree = "<group>"; };
+		4CCF170A19BF6463002E0650 /* Growl.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Growl.framework; sourceTree = "<group>"; };
+		4CCF170C19BF6463002E0650 /* Growl.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Growl.framework; sourceTree = "<group>"; };
 		4CE8C352191298C30023524E /* FileFooter.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FileFooter.xib; sourceTree = "<group>"; };
 		4CE8C3541912993B0023524E /* folder_plus_icon&48.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "folder_plus_icon&48.png"; sourceTree = "<group>"; };
 		4CE8C35619129FC10023524E /* PreferenceView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PreferenceView.h; sourceTree = "<group>"; };
@@ -114,6 +118,8 @@
 			files = (
 				4CFCBB8C182180620030FC08 /* libsqlite3.dylib in Frameworks */,
 				8D5B49B4048680CD000E48DA /* Cocoa.framework in Frameworks */,
+				4CCF170E19BF6463002E0650 /* Growl.framework in Frameworks */,
+				4CCF170D19BF6463002E0650 /* Growl.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -123,7 +129,7 @@
 		089C166AFE841209C02AAC07 /* Capitalize */ = {
 			isa = PBXGroup;
 			children = (
-				4CFCBB8B182180620030FC08 /* libsqlite3.dylib */,
+				4C27CAAD19BF458700FA70A1 /* external */,
 				08FB77AFFE84173DC02AAC07 /* Classes */,
 				32C88E010371C26100C91783 /* Other Sources */,
 				089C167CFE841241C02AAC07 /* Resources */,
@@ -164,8 +170,6 @@
 			isa = PBXGroup;
 			children = (
 				4C5CB3C918244CD700A4DD66 /* classes */,
-				4CFCBB7918217EDC0030FC08 /* fmdb */,
-				4C0C4FBA181F118600E35333 /* Lumberjack */,
 				4C605F3E1677C20600C8F7D9 /* CodaPlugInsController.h */,
 				F163D8F30C67D694000A99F5 /* LESSPlugin.h */,
 				F163D8F40C67D694000A99F5 /* LESSPlugin.m */,
@@ -239,6 +243,17 @@
 			path = Extensions;
 			sourceTree = "<group>";
 		};
+		4C27CAAD19BF458700FA70A1 /* external */ = {
+			isa = PBXGroup;
+			children = (
+				4CCF170F19BF6469002E0650 /* Growl */,
+				4CFCBB8B182180620030FC08 /* libsqlite3.dylib */,
+				4C0C4FBA181F118600E35333 /* Lumberjack */,
+				4CFCBB7918217EDC0030FC08 /* fmdb */,
+			);
+			name = external;
+			sourceTree = "<group>";
+		};
 		4C5CB3C918244CD700A4DD66 /* classes */ = {
 			isa = PBXGroup;
 			children = (
@@ -252,6 +267,23 @@
 				4CE8C35719129FC10023524E /* PreferenceView.m */,
 			);
 			name = classes;
+			sourceTree = "<group>";
+		};
+		4CCF170B19BF6463002E0650 /* Legacy */ = {
+			isa = PBXGroup;
+			children = (
+				4CCF170C19BF6463002E0650 /* Growl.framework */,
+			);
+			path = Legacy;
+			sourceTree = "<group>";
+		};
+		4CCF170F19BF6469002E0650 /* Growl */ = {
+			isa = PBXGroup;
+			children = (
+				4CCF170A19BF6463002E0650 /* Growl.framework */,
+				4CCF170B19BF6463002E0650 /* Legacy */,
+			);
+			name = Growl;
 			sourceTree = "<group>";
 		};
 		4CFCBB7918217EDC0030FC08 /* fmdb */ = {
@@ -399,6 +431,11 @@
 				COPY_PHASE_STRIP = NO;
 				DEPLOYMENT_LOCATION = NO;
 				DSTROOT = "$(HOME)/Library/Application Support/Coda/PlugIns";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/Legacy",
+				);
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -421,6 +458,11 @@
 				CLANG_ENABLE_OBJC_ARC = YES;
 				DEPLOYMENT_LOCATION = NO;
 				DSTROOT = "$(HOME)/Library/Application Support/Coda/PlugIns";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/Legacy",
+				);
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = LESSCompile_Prefix.pch;

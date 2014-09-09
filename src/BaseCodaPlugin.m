@@ -31,7 +31,7 @@
 	}
     plugInBundle = p;
     bundle = [NSBundle bundleWithIdentifier:[p bundleIdentifier]];
-    currentSiteUUID = @"*"; //
+    currentSiteUUID = @"*";
 	return self;
 }
 
@@ -55,14 +55,9 @@
 
 - (void)didLoadSiteNamed:(NSString*)name
 {
-    if([controller.focusedTextView respondsToSelector:@selector(siteUUID)])
-    {
-    	currentSiteUUID = controller.siteUUID;
-    }
-    else
-    {
-        currentSiteUUID = name;
-    }
+    
+    currentSiteUUID = [self getCurrentSiteUUID];
+    
     if(currentSiteUUID == nil)
     {
         currentSiteUUID = @"*";
@@ -198,6 +193,17 @@
 }
 
 #pragma mark - NSUserNotification
+-(void) sendUserNotificationWithTitle:(NSString *)title andMessage:(NSString *)message
+{
+    if(NSClassFromString(@"NSUserNotification"))
+    {
+		[self sendUserNotificationWithTitle:title sound:nil andMessage:message];
+    }
+    else
+    {
+    	[GrowlApplicationBridge notifyWithTitle:title description:message notificationName:@"GrowlCompleteUpload" iconData:nil priority:0 isSticky:false clickContext:nil];
+    }
+}
 
 -(void) sendUserNotificationWithTitle:(NSString *)title sound:(NSString *)sound andMessage:(NSString * ) message
 {
@@ -219,33 +225,63 @@
 }
 
 
+#pragma mark - Growl delegate
+
+-(NSDictionary *)registrationDictionaryForGrowl
+{
+    NSDictionary * dictionary = @{GROWL_APP_NAME: @"Coda 2", GROWL_NOTIFICATIONS_ALL: @[@"CodaPluginNotification"], GROWL_NOTIFICATIONS_DEFAULT: @[@"CodaPluginNotification"]};
+    
+    return dictionary;
+}
+
+#pragma mark - OS X compatability methods
+
+-(NSArray *) loadNibNamed:(NSString *)nibName
+{
+    NSMutableArray * nibObjects = [NSMutableArray array];
+    if([bundle respondsToSelector:@selector(loadNibNamed:owner:topLevelObjects:)])
+    {
+
+        [bundle loadNibNamed:nibName owner:self topLevelObjects:&nibObjects];
+    }
+    else if([bundle respondsToSelector:@selector(loadNibFile:externalNameTable:withZone:)])
+    {
+		NSDictionary * nameTable = @{NSNibOwner:self, NSNibTopLevelObjects: nibObjects};
+        [bundle loadNibFile:nibName externalNameTable:nameTable withZone:nil];
+    }
+    
+    return nibObjects;
+}
+
+
 #pragma mark - other helpers
 
 -(BOOL) isSiteOpen
 {
     BOOL isSiteOpen = false;
-    if([controller respondsToSelector:@selector(focusedTextView)])
+    if([controller respondsToSelector:@selector(siteUUID)])
     {
-        isSiteOpen = [controller focusedTextView] != nil && [controller siteUUID] != nil;
+        isSiteOpen = [controller siteUUID] != nil;
     }
-//    else if([controller respondsToSelector:@selector(focusedTextView:)])
-//    {
-//        isSiteOpen = [controller focusedTextView: nil] != nil && [[controller focusedTextView:nil] siteNickname] != nil;
-//    }
+	else if([controller respondsToSelector:@selector(focusedTextView:)])
+    {
+        isSiteOpen = [controller focusedTextView:nil] != nil && [[controller focusedTextView:nil] siteNickname] != nil;
+    }
     
     return isSiteOpen;
 }
 
 -(NSString *) getCurrentSiteUUID
 {
-    if([controller respondsToSelector:@selector(focusedTextView)])
+    if([controller respondsToSelector:@selector(siteUUID)])
     {
         return [controller siteUUID];
     }
-//    else if([controller respondsToSelector:@selector(focusedTextView:)])
-//    {
-//        return [[controller focusedTextView:nil] siteNickname];
-//    }
+	else if([controller respondsToSelector:@selector(focusedTextView:)] && [controller focusedTextView:nil] != nil)
+    {
+        return [[controller focusedTextView:nil] siteNickname];
+    }
+    
 	return nil;
 }
 -(NSString *) updateCurrentSiteUUID;

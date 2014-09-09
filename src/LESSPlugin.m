@@ -98,13 +98,12 @@ static float COMPATIBLEDB = 0.5f;
     {
         return;
     }
-    
+    DDLogError(@"growl delegate: %@", [GrowlApplicationBridge growlDelegate]);
 	//make sure currentSiteUUID is up to date.
    	[self updateCurrentSiteUUID];
     
     [NSBundle loadNibNamed:@"siteSettingsWindow" owner: self];
     [[self.fileSettingsWindow window] setDelegate:self];
-    DDLogVerbose(@"LESS:: fileSettings:%@", [self.fileSettingsWindow class]);
     
     [self.fileSettingsWindow setDelegate:self];
     fileDocumentView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 500, 500)];
@@ -164,12 +163,7 @@ static float COMPATIBLEDB = 0.5f;
     if(currentParentFilesCount == 0)
     {
         NSView * footerView;
-        NSArray *nibObjects = [NSArray array];
-        if(![bundle loadNibNamed:@"FileFooter" owner:self topLevelObjects:&nibObjects])
-        {
-            DDLogError(@"LESS:: couldn't load FileFooter nib...");
-            return;
-        }
+        NSArray *nibObjects = [self loadNibNamed:@"FileFooter"];
         
         for(NSView * o in nibObjects)
         {
@@ -194,12 +188,7 @@ static float COMPATIBLEDB = 0.5f;
     {
         NSDictionary * currentFile = [currentParentFiles objectAtIndex:i];
         
-        NSArray *nibObjects = [NSArray array];
-        if(![bundle loadNibNamed:@"FileView" owner:self topLevelObjects:&nibObjects])
-        {
-            DDLogError(@"LESS:: couldn't load FileView nib...");
-            return;
-        }
+        NSArray *nibObjects = [self loadNibNamed:@"FileView"];
         
         FileView * f;
         for(FileView * o in nibObjects)
@@ -613,7 +602,7 @@ static float COMPATIBLEDB = 0.5f;
     }
     
     NSString *path = [self getResolvedPathForPath:[textView path]];
-    DDLogVerbose(@"++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+    DDLogVerbose(@"LESS:: ++++++++++++++++++++++++++++++++++++++++++++++++++++++");
     DDLogVerbose(@"LESS:: Handling file: %@", path);
     
     [dbQueue inDatabase:^(FMDatabase *db) {
@@ -784,7 +773,7 @@ static float COMPATIBLEDB = 0.5f;
                     sound = @"Basso";
                 }
                 
-                [self sendUserNotificationWithTitle:@"LESS:: Parse Error" sound:sound andMessage:[error objectForKey:@"errorMessage"]];
+                [self sendUserNotificationWithTitle:@"LESS:: Parse Error" andMessage:[error objectForKey:@"errorMessage"]];
             }
             
             if([[prefs objectForKey:@"openFileOnError"] integerValue] == 1)
@@ -866,7 +855,7 @@ static float COMPATIBLEDB = 0.5f;
             sound = NSUserNotificationDefaultSoundName;
         }
         
-        [self sendUserNotificationWithTitle:@"LESS:: Compiled Successfully!" sound:sound  andMessage:@"file compiled successfully!"];
+        [self sendUserNotificationWithTitle:@"LESS:: Compiled Successfully!" andMessage:@"file compiled successfully!"];
     }
 }
 #pragma mark - Site Settings

@@ -1,6 +1,6 @@
 #import <Cocoa/Cocoa.h>
 #import "CodaPluginsController.h"
-
+#import "Growl.framework/Headers/Growl.h"
 
 @class CodaPlugInsController;
 
@@ -27,7 +27,10 @@
 #pragma mark - url/path helpers
 -(NSString *) getResolvedPathForPath:(NSString *)path;
 #pragma mark - NSUserNotification methods
+-(void) sendUserNotificationWithTitle:(NSString *)title andMessage:(NSString *)message;
 -(void) sendUserNotificationWithTitle:(NSString *)title sound:(NSString *)sound andMessage:(NSString * ) message;
+#pragma mark - OS X Compatability methods
+-(NSArray *) loadNibNamed:(NSString *)nibName;
 #pragma mark - other helpers
 -(BOOL) isSiteOpen;
 -(NSString *) getCurrentSiteUUID;

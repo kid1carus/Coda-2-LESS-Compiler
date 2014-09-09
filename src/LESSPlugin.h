@@ -6,6 +6,7 @@
 #import "FMDatabaseQueue.h"
 #import "dropView.h"
 
+
 @interface LESSPlugin : BaseCodaPlugin <CodaPlugIn, NSUserNotificationCenterDelegate, NSWindowDelegate, DraggingDestinationDelegate>
 {
     /* compile tasks and pipes */
@@ -32,6 +33,7 @@
 }
 
 #pragma mark - preferences Window
+
 @property (strong) IBOutlet NSView *preferenceWindow;
 @property (strong) IBOutlet NSTextField *versionField;
 @property (strong) IBOutlet NSTextField *LESSVersionField;
