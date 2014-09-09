@@ -3,7 +3,7 @@ Coda-2-LESS-Compiler
 
 A LESS compiler for Coda 2
 
-[Download the plugin here!](https://github.com/mjvotaw/Coda-2-LESS-Compiler/raw/master/LESSCompile_2.0.codaplugin.zip)
+[Download the plugin here!](https://github.com/mjvotaw/Coda-2-LESS-Compiler/raw/master/LESSCompile.codaplugin.zip)
 
 
 [Check out Less at lesscss.org](http://lesscss.org/)
