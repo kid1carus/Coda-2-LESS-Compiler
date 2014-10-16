@@ -1,10 +1,11 @@
 Coda-2-LESS-Compiler
 ====================
 
-A LESS compiler for Coda 2
+A LESS compiler for Coda 2/2.5
 
 [Download the plugin here!](https://github.com/mjvotaw/Coda-2-LESS-Compiler/raw/master/LESSCompile.codaplugin.zip)
 
+If you haven't, [check out Coda as well!](http://panic.com/coda/)
 
 [Check out Less at lesscss.org](http://lesscss.org/)
 
@@ -17,7 +18,7 @@ How do you use it?
 ------------------
 
 Once you install the plugin, you can add .less files to be watched by going to Plug-Ins > LESS Compiler > Site Settings.
-You can drag and drop the desired .less file, or hit the folder icon and select it. LESS Compiler will add it, and watch it AND any @imported files for changes.
+You can drag and drop the desired .less file, or hit the folder icon and select it. LESS Compiler will add it, and watch it *AND* any @imported files for changes.
 
 ![File Settings](/stuff/Less file settings.png)
 
@@ -27,7 +28,7 @@ The preferences menu provides various options for how LESS Compiler notifies you
 Limitations
 -----------
 
-The biggest current limitation is that LESS Compiler cannot yet mark the saved css file for publishing. Hopefully soon, this will be a possibility. 
+If you're still using Coda 2.0.x, the plugin cannot mark the compiled files for publishing. Fortunately, Coda 2.5 takes care of this!
 
 This compiler does not have its own log, but it DOES barf a lot of stuff into system.log. Lines from this plugin start with 'LESS::'.
 
