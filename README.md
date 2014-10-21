@@ -40,6 +40,13 @@ Improvements
 If you have any ideas for how this plugin can work better, or any feature requests, please let me know by [opening an issue in the issue tracker](https://github.com/mjvotaw/Coda-2-LESS-Compiler/issues/new).
 
 
+Plans for the Plugin
+--------------------
+
+My immediate goals are:
+- Add a fuller set of 'advanced' compilation options on a per-file basis.
+- Setup the database to better handle changes to structure, so that future releases don't completely nuke the user's settings and compile lists.
+
 Change Log
 ==========
 
