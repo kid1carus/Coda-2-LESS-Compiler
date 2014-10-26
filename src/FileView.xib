@@ -1,20 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="5053" systemVersion="13C64" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="6245" systemVersion="13F34" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
-        <deployment version="1070" defaultVersion="1060" identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="5053"/>
+        <deployment version="1070" identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="6245"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner"/>
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
-        <customObject id="-3" userLabel="Application"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <customView wantsLayer="YES" id="xi1-zP-psv" customClass="FileView">
-            <rect key="frame" x="0.0" y="0.0" width="583" height="96"/>
+            <rect key="frame" x="0.0" y="0.0" width="583" height="285"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Jxs-h4-ezP">
-                    <rect key="frame" x="18" y="59" width="217" height="17"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <rect key="frame" x="18" y="260" width="217" height="17"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="FileName.less" id="KcU-Tw-VEU">
                         <font key="font" metaFont="system"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -22,8 +21,7 @@
                     </textFieldCell>
                 </textField>
                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="yaj-73-L6o">
-                    <rect key="frame" x="30" y="25" width="449" height="26"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <rect key="frame" x="30" y="231" width="449" height="26"/>
                     <textFieldCell key="cell" allowsUndo="NO" sendsActionOnEndEditing="YES" title="/Volumes/Macintosh HD/Users/michael/Documents/xcode stuff/hM github/LESS Compiler/dep2.less" id="rt6-Zv-hDq">
                         <font key="font" metaFont="miniSystem"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -31,8 +29,7 @@
                     </textFieldCell>
                 </textField>
                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Zq1-E0-fpK">
-                    <rect key="frame" x="30" y="-3" width="451" height="26"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <rect key="frame" x="30" y="203" width="451" height="26"/>
                     <textFieldCell key="cell" allowsUndo="NO" sendsActionOnEndEditing="YES" title="/Volumes/Macintosh HD/Users/michael/Documents/xcode stuff/hM github/LESS Compiler/dep2.css" id="qrN-zP-sT9">
                         <font key="font" metaFont="miniSystem"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -40,8 +37,7 @@
                     </textFieldCell>
                 </textField>
                 <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="08F-PQ-sjk">
-                    <rect key="frame" x="488" y="5" width="25" height="19"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <rect key="frame" x="488" y="219" width="25" height="19"/>
                     <buttonCell key="cell" type="roundRect" bezelStyle="roundedRect" image="folder_filled-50" imagePosition="left" alignment="center" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="sXj-9V-72D">
                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                         <font key="font" metaFont="cellTitle"/>
@@ -50,27 +46,26 @@
                         <action selector="changeCssPath:" target="xi1-zP-psv" id="As7-N3-YIF"/>
                     </connections>
                 </button>
-                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="wMc-wW-yTH">
-                    <rect key="frame" x="486" y="57" width="79" height="18"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="wMc-wW-yTH" customClass="keyPrefButton">
+                    <rect key="frame" x="486" y="246" width="79" height="18"/>
                     <buttonCell key="cell" type="check" title="minify" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="OQy-vt-mCc">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                         <font key="font" metaFont="system"/>
                     </buttonCell>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="prefKey" value="--compress"/>
+                    </userDefinedRuntimeAttributes>
                 </button>
                 <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="xHp-0u-E3W">
-                    <rect key="frame" x="10" y="10" width="18" height="16"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <rect key="frame" x="10" y="216" width="18" height="16"/>
                     <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="left-50" id="hNI-bG-ERy"/>
                 </imageView>
                 <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ocz-F4-RIB">
-                    <rect key="frame" x="10" y="36" width="18" height="16"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <rect key="frame" x="10" y="242" width="18" height="16"/>
                     <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="right-50" id="XXZ-y5-drG"/>
                 </imageView>
                 <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="zJx-yb-FD0">
-                    <rect key="frame" x="546" y="65" width="37" height="28"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <rect key="frame" x="546" y="254" width="37" height="28"/>
                     <buttonCell key="cell" type="push" bezelStyle="rounded" image="trash2-50" imagePosition="only" alignment="center" controlSize="small" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="8Lg-ZK-7e0">
                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                         <font key="font" metaFont="smallSystem"/>
@@ -79,15 +74,183 @@
                         <action selector="deleteFile:" target="xi1-zP-psv" id="S5a-61-ZZQ"/>
                     </connections>
                 </button>
+                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="GvW-ck-VCR">
+                    <rect key="frame" x="481" y="193" width="88" height="19"/>
+                    <buttonCell key="cell" type="roundRect" title="Advanced" bezelStyle="roundedRect" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="qA6-0f-xlt">
+                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" metaFont="cellTitle"/>
+                    </buttonCell>
+                    <connections>
+                        <action selector="toggleAdvanced:" target="xi1-zP-psv" id="9Jv-4Q-zKE"/>
+                    </connections>
+                </button>
+                <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="YU8-Zs-Jn5" userLabel="Advanced Settings">
+                    <rect key="frame" x="0.0" y="-126" width="583" height="315"/>
+                    <subviews>
+                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="zmX-AH-G6D">
+                            <rect key="frame" x="18" y="291" width="142" height="19"/>
+                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Advanced Settings" id="fxV-WY-4ut">
+                                <font key="font" metaFont="system" size="15"/>
+                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                            </textFieldCell>
+                        </textField>
+                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="NbW-g0-Lhq">
+                            <rect key="frame" x="391" y="196" width="136" height="17"/>
+                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Include line numbers" id="yYf-Z1-Gtr">
+                                <font key="font" metaFont="system"/>
+                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                            </textFieldCell>
+                        </textField>
+                        <button toolTip="Generates a sourcemap with the same name as your less file." fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="t1b-Zd-0gN" customClass="keyPrefButton">
+                            <rect key="frame" x="18" y="173" width="156" height="18"/>
+                            <buttonCell key="cell" type="check" title="Generate source map" bezelStyle="regularSquare" imagePosition="left" inset="2" id="ppW-Qm-jYK">
+                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                <font key="font" metaFont="system"/>
+                            </buttonCell>
+                            <userDefinedRuntimeAttributes>
+                                <userDefinedRuntimeAttribute type="string" keyPath="prefKey" value="--source-map"/>
+                            </userDefinedRuntimeAttributes>
+                        </button>
+                        <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="EPC-x3-dJI">
+                            <rect key="frame" x="288" y="189" width="100" height="26"/>
+                            <popUpButtonCell key="cell" type="push" title="Off" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="vuz-Om-5GA" id="m6f-z6-DYp">
+                                <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                <font key="font" size="12" name="LucidaGrande"/>
+                                <menu key="menu" id="Yee-mh-Iyh">
+                                    <items>
+                                        <menuItem title="Off" state="on" id="vuz-Om-5GA"/>
+                                        <menuItem title="Item 2" id="npA-wN-TpY"/>
+                                        <menuItem title="Item 3" id="sdC-Fe-Jgj"/>
+                                    </items>
+                                </menu>
+                            </popUpButtonCell>
+                        </popUpButton>
+                        <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="x7p-KK-bOk" customClass="keyPrefButton">
+                            <rect key="frame" x="18" y="261" width="144" height="18"/>
+                            <string key="toolTip">Currently only used for the data-uri function to ensure that images aren't created that are too large for the browser to handle.</string>
+                            <buttonCell key="cell" type="check" title="No IE compatability" bezelStyle="regularSquare" imagePosition="left" inset="2" id="WGK-Nf-XEf">
+                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                <font key="font" metaFont="system"/>
+                            </buttonCell>
+                            <userDefinedRuntimeAttributes>
+                                <userDefinedRuntimeAttribute type="string" keyPath="prefKey" value="--no-ie-compat"/>
+                            </userDefinedRuntimeAttributes>
+                        </button>
+                        <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="g1e-rD-j4F" customClass="keyPrefButton">
+                            <rect key="frame" x="18" y="217" width="107" height="18"/>
+                            <buttonCell key="cell" type="check" title="Strict imports" bezelStyle="regularSquare" imagePosition="left" inset="2" id="cct-xq-bAF">
+                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                <font key="font" metaFont="system"/>
+                            </buttonCell>
+                            <userDefinedRuntimeAttributes>
+                                <userDefinedRuntimeAttribute type="string" keyPath="prefKey" value="--strict-imports"/>
+                            </userDefinedRuntimeAttributes>
+                        </button>
+                        <button toolTip="Allow imports from insecure https hosts" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="zfh-V3-7uC" customClass="keyPrefButton">
+                            <rect key="frame" x="18" y="195" width="166" height="18"/>
+                            <buttonCell key="cell" type="check" title="Allow insecure imports" bezelStyle="regularSquare" imagePosition="left" inset="2" id="QmR-eH-d62">
+                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                <font key="font" metaFont="system"/>
+                            </buttonCell>
+                            <userDefinedRuntimeAttributes>
+                                <userDefinedRuntimeAttribute type="string" keyPath="prefKey" value="--insecure"/>
+                            </userDefinedRuntimeAttributes>
+                        </button>
+                        <button toolTip="This option allows you to re-write URL's in imported files so that the URL is always relative to the base imported file." fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="egs-gB-Ayr" customClass="keyPrefButton">
+                            <rect key="frame" x="291" y="261" width="106" height="18"/>
+                            <buttonCell key="cell" type="check" title="Relative URLs" bezelStyle="regularSquare" imagePosition="left" inset="2" id="PMJ-36-lHf">
+                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                <font key="font" metaFont="system"/>
+                            </buttonCell>
+                            <userDefinedRuntimeAttributes>
+                                <userDefinedRuntimeAttribute type="string" keyPath="prefKey" value="--relative-urls"/>
+                            </userDefinedRuntimeAttributes>
+                        </button>
+                        <button toolTip="With strict math on, maths must be enclosed in parentheses to be evaluated." fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="sxt-Mz-o3e" customClass="keyPrefButton">
+                            <rect key="frame" x="291" y="239" width="91" height="18"/>
+                            <buttonCell key="cell" type="check" title="Strict math" bezelStyle="regularSquare" imagePosition="left" inset="2" id="cYe-2j-icN">
+                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                <font key="font" metaFont="system"/>
+                            </buttonCell>
+                            <userDefinedRuntimeAttributes>
+                                <userDefinedRuntimeAttribute type="string" keyPath="prefKey" value="--strict-math=on"/>
+                            </userDefinedRuntimeAttributes>
+                        </button>
+                        <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Mv5-GI-IQT" customClass="keyPrefButton">
+                            <rect key="frame" x="18" y="239" width="132" height="18"/>
+                            <buttonCell key="cell" type="check" title="Disable javascript" bezelStyle="regularSquare" imagePosition="left" inset="2" id="mFl-AF-bc1">
+                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                <font key="font" metaFont="system"/>
+                            </buttonCell>
+                            <userDefinedRuntimeAttributes>
+                                <userDefinedRuntimeAttribute type="string" keyPath="prefKey" value="--no-js"/>
+                            </userDefinedRuntimeAttributes>
+                        </button>
+                        <button toolTip="Force less to evaluate math by considering units--if they don't make sense, Less will throw an error." fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Q7J-1f-SCL" customClass="keyPrefButton">
+                            <rect key="frame" x="292" y="217" width="90" height="18"/>
+                            <buttonCell key="cell" type="check" title="Strict units" bezelStyle="regularSquare" imagePosition="left" inset="2" id="f54-X8-izY">
+                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                <font key="font" metaFont="system"/>
+                            </buttonCell>
+                            <userDefinedRuntimeAttributes>
+                                <userDefinedRuntimeAttribute type="string" keyPath="prefKey" value="--strict-units=on"/>
+                            </userDefinedRuntimeAttributes>
+                        </button>
+                        <button toolTip="This option specifies that we should include all of the Less files in to the sourcemap." fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="efz-aJ-ZAh" customClass="keyPrefButton">
+                            <rect key="frame" x="18" y="151" width="158" height="18"/>
+                            <buttonCell key="cell" type="check" title="Sourcemap less inline" bezelStyle="regularSquare" imagePosition="left" inset="2" id="v7B-WZ-J9j">
+                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                <font key="font" metaFont="system"/>
+                            </buttonCell>
+                            <userDefinedRuntimeAttributes>
+                                <userDefinedRuntimeAttribute type="string" keyPath="prefKey" value="--source-map-less-inline"/>
+                            </userDefinedRuntimeAttributes>
+                        </button>
+                        <button toolTip="This option specifies that the map file should be inline in the output CSS." fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="5bC-lt-7fs" customClass="keyPrefButton">
+                            <rect key="frame" x="18" y="130" width="163" height="18"/>
+                            <buttonCell key="cell" type="check" title="Sourcemap map inline" bezelStyle="regularSquare" imagePosition="left" inset="2" id="cqs-mR-SOd">
+                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                <font key="font" metaFont="system"/>
+                            </buttonCell>
+                            <userDefinedRuntimeAttributes>
+                                <userDefinedRuntimeAttribute type="string" keyPath="prefKey" value="--source-map-map-inline"/>
+                            </userDefinedRuntimeAttributes>
+                        </button>
+                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" translatesAutoresizingMaskIntoConstraints="NO" id="V8v-sO-GVk">
+                            <rect key="frame" x="195" y="114" width="390" height="51"/>
+                            <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="(check out http://lesscss.org/usage/#command-line-usage for more info on these options)" id="7Xg-B2-1hF">
+                                <font key="font" metaFont="cellTitle"/>
+                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                            </textFieldCell>
+                        </textField>
+                    </subviews>
+                </customView>
             </subviews>
             <connections>
+                <outlet property="advancedButton" destination="GvW-ck-VCR" id="zVG-MY-IQ3"/>
+                <outlet property="advancedSettingsView" destination="YU8-Zs-Jn5" id="ezz-Ev-KlO"/>
                 <outlet property="changeCssPathButton" destination="08F-PQ-sjk" id="Hak-Ru-Lm0"/>
                 <outlet property="cssPath" destination="Zq1-E0-fpK" id="VFd-lV-9xD"/>
                 <outlet property="deleteButton" destination="zJx-yb-FD0" id="Ulw-6g-HlG"/>
+                <outlet property="disableJavascript" destination="Mv5-GI-IQT" id="52E-3V-WrX"/>
                 <outlet property="fileName" destination="Jxs-h4-ezP" id="FJ6-Au-W7w"/>
+                <outlet property="insecureImports" destination="zfh-V3-7uC" id="UZp-vQ-ztp"/>
                 <outlet property="lessPath" destination="yaj-73-L6o" id="4MO-ii-40Y"/>
+                <outlet property="lineNumbers" destination="EPC-x3-dJI" id="Afn-4R-joe"/>
+                <outlet property="noIE" destination="x7p-KK-bOk" id="2LJ-Yp-bRU"/>
+                <outlet property="relativeUrls" destination="egs-gB-Ayr" id="tbr-9y-5bn"/>
                 <outlet property="shouldMinify" destination="wMc-wW-yTH" id="Gfi-ec-i47"/>
+                <outlet property="soucemapInline" destination="5bC-lt-7fs" id="PuM-VP-A2Z"/>
+                <outlet property="sourceMap" destination="t1b-Zd-0gN" id="2Rp-We-TsV"/>
+                <outlet property="sourcemapLessInline" destination="efz-aJ-ZAh" id="6ti-37-IjR"/>
+                <outlet property="strictImports" destination="g1e-rD-j4F" id="VG5-ZU-t7J"/>
+                <outlet property="strictMath" destination="sxt-Mz-o3e" id="DTX-XC-6Zt"/>
+                <outlet property="strictUnits" destination="Q7J-1f-SCL" id="jAO-0F-RWS"/>
             </connections>
+            <point key="canvasLocation" x="334.5" y="213.5"/>
         </customView>
     </objects>
     <resources>

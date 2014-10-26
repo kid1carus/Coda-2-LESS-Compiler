@@ -6,12 +6,12 @@
 
 @interface BaseCodaPlugin : NSObject <CodaPlugIn, NSUserNotificationCenterDelegate>
 {
-	CodaPlugInsController* controller;
-    
-	NSObject <CodaPlugInBundle> * plugInBundle;
-    NSBundle * bundle;
     NSString * currentSiteUUID;
 }
+@property (strong) 	CodaPlugInsController* controller;
+@property (strong) NSObject <CodaPlugInBundle> * pluginBundle;
+@property (strong) NSBundle * bundle;
+
 - (id)initWithController:(CodaPlugInsController*)inController;
 - (id)initWithController:(CodaPlugInsController*)inController andPlugInBundle:(NSObject <CodaPlugInBundle> *)p;
 #pragma mark - open/save file dialogs

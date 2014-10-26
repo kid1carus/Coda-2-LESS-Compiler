@@ -1,5 +1,8 @@
 #import "BaseCodaPlugin.h"
+#import "DDLog.h"
+#import "DDASLLogger.h"
 
+static int ddLogLevel = LOG_LEVEL_ERROR;
 
 @interface BaseCodaPlugin ()
 
@@ -27,10 +30,10 @@
 {
     if ( (self = [super init]) != nil )
 	{
-		controller = inController;
+		_controller = inController;
 	}
-    plugInBundle = p;
-    bundle = [NSBundle bundleWithIdentifier:[p bundleIdentifier]];
+    _pluginBundle = p;
+    _bundle = [NSBundle bundleWithIdentifier:[p bundleIdentifier]];
     currentSiteUUID = @"*";
 	return self;
 }
@@ -39,7 +42,7 @@
 {
 	if ( (self = [super init]) != nil )
 	{
-		controller = inController;
+		_controller = inController;
 	}
 	return self;
 }
@@ -71,9 +74,9 @@
     NSURL * chosenFile = nil;
     // Create the File Open Dialog class.
     NSOpenPanel* openDlg = [NSOpenPanel openPanel];
-    if([controller respondsToSelector:@selector(focusedTextView)] && [controller focusedTextView] != nil)
+    if([_controller respondsToSelector:@selector(focusedTextView)] && [_controller focusedTextView] != nil)
     {
-    	[openDlg setDirectoryURL: [NSURL fileURLWithPath:[[controller focusedTextView] siteLocalPath] ]];
+    	[openDlg setDirectoryURL: [NSURL fileURLWithPath:[[_controller focusedTextView] siteLocalPath] ]];
     }
     // Enable the selection of files in the dialog.
     [openDlg setCanChooseFiles:YES];
@@ -106,9 +109,9 @@
     NSURL * chosenFile = nil;
     // Create the File Open Dialog class.
     NSSavePanel* saveDlg = [NSSavePanel savePanel];
-    if([controller respondsToSelector:@selector(focusedTextView)] && [controller focusedTextView] != nil)
+    if([_controller respondsToSelector:@selector(focusedTextView)] && [_controller focusedTextView] != nil)
     {
-    	[saveDlg setDirectoryURL: [NSURL fileURLWithPath:[[controller focusedTextView] siteLocalPath] ]];
+    	[saveDlg setDirectoryURL: [NSURL fileURLWithPath:[[_controller focusedTextView] siteLocalPath] ]];
     }
     
     [saveDlg setCanCreateDirectories:TRUE];
@@ -238,16 +241,17 @@
 
 -(NSArray *) loadNibNamed:(NSString *)nibName
 {
+    DDLogVerbose(@"LESS:: loading nib: %@", nibName);
     NSMutableArray * nibObjects = [NSMutableArray array];
-    if([bundle respondsToSelector:@selector(loadNibNamed:owner:topLevelObjects:)])
+    if([_bundle respondsToSelector:@selector(loadNibNamed:owner:topLevelObjects:)])
     {
 
-        [bundle loadNibNamed:nibName owner:self topLevelObjects:&nibObjects];
+        [_bundle loadNibNamed:nibName owner:self topLevelObjects:&nibObjects];
     }
-    else if([bundle respondsToSelector:@selector(loadNibFile:externalNameTable:withZone:)])
+    else if([_bundle respondsToSelector:@selector(loadNibFile:externalNameTable:withZone:)])
     {
 		NSDictionary * nameTable = @{NSNibOwner:self, NSNibTopLevelObjects: nibObjects};
-        [bundle loadNibFile:nibName externalNameTable:nameTable withZone:nil];
+        [_bundle loadNibFile:nibName externalNameTable:nameTable withZone:nil];
     }
     
     return nibObjects;
@@ -259,13 +263,13 @@
 -(BOOL) isSiteOpen
 {
     BOOL isSiteOpen = false;
-    if([controller respondsToSelector:@selector(siteUUID)])
+    if([_controller respondsToSelector:@selector(siteUUID)])
     {
-        isSiteOpen = [controller siteUUID] != nil;
+        isSiteOpen = [_controller siteUUID] != nil;
     }
-	else if([controller respondsToSelector:@selector(focusedTextView:)])
+	else if([_controller respondsToSelector:@selector(focusedTextView:)])
     {
-        isSiteOpen = [controller focusedTextView:nil] != nil && [[controller focusedTextView:nil] siteNickname] != nil;
+        isSiteOpen = [_controller focusedTextView:nil] != nil && [[_controller focusedTextView:nil] siteNickname] != nil;
     }
     
     return isSiteOpen;
@@ -273,13 +277,13 @@
 
 -(NSString *) getCurrentSiteUUID
 {
-    if([controller respondsToSelector:@selector(siteUUID)])
+    if([_controller respondsToSelector:@selector(siteUUID)])
     {
-        return [controller siteUUID];
+        return [_controller siteUUID];
     }
-	else if([controller respondsToSelector:@selector(focusedTextView:)] && [controller focusedTextView:nil] != nil)
+	else if([_controller respondsToSelector:@selector(focusedTextView:)] && [_controller focusedTextView:nil] != nil)
     {
-        return [[controller focusedTextView:nil] siteNickname];
+        return [[_controller focusedTextView:nil] siteNickname];
     }
     
 	return nil;

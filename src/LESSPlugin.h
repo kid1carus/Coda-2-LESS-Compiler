@@ -1,35 +1,28 @@
 #import <Cocoa/Cocoa.h>
 #import "CodaPluginsController.h"
 #import "BaseCodaPlugin.h"
-#import "FMDatabase.h"
-#import "FMResultSet.h"
-#import "FMDatabaseQueue.h"
+
+#import "LessDb.h"
 #import "dropView.h"
+#import "keyPrefButton.h"
 
-
-@interface LESSPlugin : BaseCodaPlugin <CodaPlugIn, NSUserNotificationCenterDelegate, NSWindowDelegate, DraggingDestinationDelegate>
+@interface LESSPlugin : BaseCodaPlugin <CodaPlugIn, NSUserNotificationCenterDelegate, NSWindowDelegate, DraggingDestinationDelegate, LessDbDelegate>
 {
+    
     /* compile tasks and pipes */
     NSTask * task;
     NSPipe * outputPipe;
     NSPipe * errorPipe;
     
-    /* indexing tasks and pipes */
-    NSTask * indexTask;
-    NSPipe * indexPipe;
-    
     NSString * outputText;
     NSString * errorText;
     
-    FMDatabaseQueue * dbQueue;
-	NSMutableDictionary * prefs;
-    NSMutableArray * currentParentFiles;
-    int currentParentFilesCount;
     NSMutableArray * fileViews;
     NSView * fileDocumentView;
-    BOOL isCompiling;
-    BOOL isDepenencying;
-    int compileCount;
+    LessDb * Ldb;
+    
+	BOOL isCompiling;
+	int compileCount;
 }
 
 #pragma mark - preferences Window
