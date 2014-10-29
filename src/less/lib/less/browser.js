@@ -416,7 +416,7 @@ function pathDiff(url, baseUrl) {
 }
 
 function getXMLHttpRequest() {
-    if (window.XMLHttpRequest && (window.location.protocol !== "file:" || !window.ActiveXObject)) {
+    if (window.XMLHttpRequest && (window.location.protocol !== "file:" || !("ActiveXObject" in window))) {
         return new XMLHttpRequest();
     } else {
         try {
@@ -469,7 +469,7 @@ function doXHR(url, type, callback, errback) {
 
 function loadFile(originalHref, currentFileInfo, callback, env, modifyVars) {
 
-    if (currentFileInfo && currentFileInfo.currentDirectory && !/^([a-z-]+:)?\//.test(originalHref)) {
+    if (currentFileInfo && currentFileInfo.currentDirectory && !/^([A-Za-z-]+:)?\//.test(originalHref)) {
         originalHref = currentFileInfo.currentDirectory + originalHref;
     }
 
