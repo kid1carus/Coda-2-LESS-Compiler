@@ -95,20 +95,23 @@ static NSString * LESSVERSION = @"1.7.0";
     {
         return;
     }
-    DDLogError(@"growl delegate: %@", [GrowlApplicationBridge growlDelegate]);
+    [self updateCurrentSiteUUID];
+    siteSettingsController = [[siteSettingsWindowController alloc] init];
+    [siteSettingsController showWindow:self];
+    
 	//make sure currentSiteUUID is up to date.
-   	[self updateCurrentSiteUUID];
+   	
     
-    [NSBundle loadNibNamed:@"siteSettingsWindow" owner: self];
-    [[self.fileSettingsWindow window] setDelegate:self];
-    
-    [self.fileSettingsWindow setDelegate:self];
-    fileDocumentView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 500, 500)];
-    
-    [self.fileScrollView setDocumentView:fileDocumentView];
-    [Ldb updateParentFilesListWithCompletion:^{
-        [self performSelectorOnMainThread:@selector(rebuildFileList) withObject:nil waitUntilDone:false];
-    }];
+//    [NSBundle loadNibNamed:@"siteSettingsWindow" owner: self];
+//    [[self.fileSettingsWindow window] setDelegate:self];
+
+//    [self.fileSettingsWindow setDelegate:self];
+//    fileDocumentView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 500, 500)];
+//    
+//    [self.fileScrollView setDocumentView:fileDocumentView];
+//    [Ldb updateParentFilesListWithCompletion:^{
+//        [self performSelectorOnMainThread:@selector(rebuildFileList) withObject:nil waitUntilDone:false];
+//    }];
 }
 
 -(void) openPreferencesMenu
@@ -515,110 +518,6 @@ static NSString * LESSVERSION = @"1.7.0";
         
         [self sendUserNotificationWithTitle:@"LESS:: Compiled Successfully!" andMessage:@"file compiled successfully!"];
     }
-}
-#pragma mark - Site Settings
-- (IBAction)filePressed:(NSButton *)sender
-{
-    [Ldb registerFile:[self getFileNameFromUser]];
-    [Ldb updateParentFilesListWithCompletion:^{
-	    [self performSelectorOnMainThread:@selector(rebuildFileList) withObject:nil waitUntilDone:false];
-    }];
-
-}
-
--(void) deleteParentFile:(NSButton *)sender
-{
-	FileView * f = (FileView *)[sender superview];
-    if(![f isKindOfClass:[FileView class]])
-    {
-        return;
-    }
-    
-    NSAlert *alert = [[NSAlert alloc] init];
-    [alert setAlertStyle:NSInformationalAlertStyle];
-    [alert addButtonWithTitle:@"Delete"];
-    [alert addButtonWithTitle:@"Cancel"];
-    [alert setMessageText:[NSString stringWithFormat:@"Really Delete %@?", f.fileName.stringValue]];
-    [alert setInformativeText:[NSString stringWithFormat:@"Are you sure you want to delete %@ ?", f.fileName.stringValue]];
-    NSInteger response = [alert runModal];
-    if(response == NSAlertFirstButtonReturn)
-    {
-        NSDictionary * fileInfo = [Ldb.currentParentFiles objectAtIndex:f.fileIndex];
-        NSURL * url = [NSURL fileURLWithPath:[fileInfo objectForKey:@"path"]];
-        [Ldb unregisterFile:url];
-        [Ldb updateParentFilesListWithCompletion:^{
-            [self performSelectorOnMainThread:@selector(rebuildFileList) withObject:nil waitUntilDone:false];
-        }];
-    }
-    else
-    {
-        return;
-    }
-}
-
--(void) changeCssFile:(NSButton *)sender
-{
-    FileView * f = (FileView *)[sender superview];
-    if(![f isKindOfClass:[FileView class]])
-    {
-        return;
-    }
-    NSDictionary * fileInfo = [Ldb.currentParentFiles objectAtIndex:f.fileIndex];
-    NSURL * url = [NSURL fileURLWithPath:[fileInfo objectForKey:@"path"]];
-    [Ldb setCssPath:[self getSaveNameFromUser] forPath:url];
-    [Ldb updateParentFilesListWithCompletion:^{
-        [self performSelectorOnMainThread:@selector(rebuildFileList) withObject:nil waitUntilDone:false];
-    }];
-}
-
--(void) userUpdatedLessFilePreference:(NSButton *)sender
-{
-    FileView * f = (FileView *)[sender superview];
-    while(![f isKindOfClass:[FileView class]] && [f superview] != nil)
-    {
-        f = (FileView *)[f superview];
-    }
-    
-    if(![f isKindOfClass:[FileView class]])
-    {
-        return;
-    }
-    
-    NSDictionary * fileInfo = [Ldb.currentParentFiles objectAtIndex:f.fileIndex];
-    NSURL * url = [NSURL fileURLWithPath:[fileInfo objectForKey:@"path"]];
-    [Ldb updateLessFilePreferences:[f getOptionValues] forPath:url];
-    [Ldb updateParentFilesListWithCompletion:^{
-        [self performSelectorOnMainThread:@selector(rebuildFileList) withObject:nil waitUntilDone:false];
-    }];
-}
-
-
-#pragma mark - DraggingDestinationDelegate
-
-
--(void) draggingDestinationPerformedDragOperation:(id<NSDraggingInfo>)sender
-{
-    
-    NSPasteboard *pboard = [sender draggingPasteboard];
-    
-    if ([[pboard types] containsObject:NSURLPboardType]) {
-        
-        NSArray *paths = [pboard propertyListForType:NSURLPboardType];
- 		for(NSString * aPath in paths)
-        {
-            if([aPath isEqualToString:@""])
-            {
-                continue;
-            }
-            NSURL * aUrl = [NSURL URLWithString:aPath];
-            [Ldb registerFile:aUrl];
-        }
-    }
-    
-    [Ldb updateParentFilesListWithCompletion:^{
-	    [self performSelectorOnMainThread:@selector(rebuildFileList) withObject:nil waitUntilDone:false];
-    }];
-
 }
 
 #pragma mark - preferences

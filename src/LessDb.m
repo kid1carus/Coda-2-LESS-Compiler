@@ -304,6 +304,7 @@ static LessDb * sharedDb;
 {
     
     NSData * preferenceData = [NSJSONSerialization dataWithJSONObject:options options:kNilOptions error:nil];
+    DDLogVerbose(@"LESS:: updating preferences to: %@", [[NSString alloc] initWithData:preferenceData encoding:NSUTF8StringEncoding]);
     
     NSString * fileName = [_delegate getResolvedPathForPath:[url path]];
     [_dbQueue inDatabase:^(FMDatabase *db) {

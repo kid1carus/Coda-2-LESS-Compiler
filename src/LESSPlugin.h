@@ -5,6 +5,7 @@
 #import "LessDb.h"
 #import "dropView.h"
 #import "keyPrefButton.h"
+#import "siteSettingsWindowController.h"
 
 @interface LESSPlugin : BaseCodaPlugin <CodaPlugIn, NSUserNotificationCenterDelegate, NSWindowDelegate, DraggingDestinationDelegate, LessDbDelegate>
 {
@@ -17,6 +18,7 @@
     NSString * outputText;
     NSString * errorText;
     
+    siteSettingsWindowController * siteSettingsController;
     NSMutableArray * fileViews;
     NSView * fileDocumentView;
     LessDb * Ldb;

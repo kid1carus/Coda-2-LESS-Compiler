@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="6245" systemVersion="13F34" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="6250" systemVersion="13F34" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
         <deployment version="1070" identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="6245"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="6250"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner"/>
@@ -21,7 +21,7 @@
                     </textFieldCell>
                 </textField>
                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="yaj-73-L6o">
-                    <rect key="frame" x="30" y="231" width="449" height="26"/>
+                    <rect key="frame" x="30" y="241" width="449" height="16"/>
                     <textFieldCell key="cell" allowsUndo="NO" sendsActionOnEndEditing="YES" title="/Volumes/Macintosh HD/Users/michael/Documents/xcode stuff/hM github/LESS Compiler/dep2.less" id="rt6-Zv-hDq">
                         <font key="font" metaFont="miniSystem"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -29,25 +29,25 @@
                     </textFieldCell>
                 </textField>
                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Zq1-E0-fpK">
-                    <rect key="frame" x="30" y="203" width="451" height="26"/>
+                    <rect key="frame" x="30" y="224" width="451" height="17"/>
                     <textFieldCell key="cell" allowsUndo="NO" sendsActionOnEndEditing="YES" title="/Volumes/Macintosh HD/Users/michael/Documents/xcode stuff/hM github/LESS Compiler/dep2.css" id="qrN-zP-sT9">
                         <font key="font" metaFont="miniSystem"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="08F-PQ-sjk">
-                    <rect key="frame" x="488" y="219" width="25" height="19"/>
-                    <buttonCell key="cell" type="roundRect" bezelStyle="roundedRect" image="folder_filled-50" imagePosition="left" alignment="center" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="sXj-9V-72D">
+                <button toolTip="Change output directory" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="08F-PQ-sjk">
+                    <rect key="frame" x="481" y="217" width="37" height="32"/>
+                    <buttonCell key="cell" type="push" bezelStyle="rounded" image="NSFolder" imagePosition="only" alignment="center" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="sXj-9V-72D">
                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                        <font key="font" metaFont="cellTitle"/>
+                        <font key="font" metaFont="system"/>
                     </buttonCell>
                     <connections>
                         <action selector="changeCssPath:" target="xi1-zP-psv" id="As7-N3-YIF"/>
                     </connections>
                 </button>
                 <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="wMc-wW-yTH" customClass="keyPrefButton">
-                    <rect key="frame" x="486" y="246" width="79" height="18"/>
+                    <rect key="frame" x="460" y="259" width="79" height="18"/>
                     <buttonCell key="cell" type="check" title="minify" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="OQy-vt-mCc">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                         <font key="font" metaFont="system"/>
@@ -57,35 +57,31 @@
                     </userDefinedRuntimeAttributes>
                 </button>
                 <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="xHp-0u-E3W">
-                    <rect key="frame" x="10" y="216" width="18" height="16"/>
-                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="left-50" id="hNI-bG-ERy"/>
+                    <rect key="frame" x="9" y="226" width="21" height="16"/>
+                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="NSGoLeftTemplate" id="hNI-bG-ERy"/>
                 </imageView>
-                <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ocz-F4-RIB">
-                    <rect key="frame" x="10" y="242" width="18" height="16"/>
-                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="right-50" id="XXZ-y5-drG"/>
-                </imageView>
-                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="zJx-yb-FD0">
-                    <rect key="frame" x="546" y="254" width="37" height="28"/>
-                    <buttonCell key="cell" type="push" bezelStyle="rounded" image="trash2-50" imagePosition="only" alignment="center" controlSize="small" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="8Lg-ZK-7e0">
+                <button toolTip="Remove this entry" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="zJx-yb-FD0">
+                    <rect key="frame" x="532" y="251" width="37" height="32"/>
+                    <buttonCell key="cell" type="push" bezelStyle="rounded" image="NSTrashEmpty" imagePosition="only" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="8Lg-ZK-7e0">
                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                        <font key="font" metaFont="smallSystem"/>
+                        <font key="font" metaFont="system"/>
                     </buttonCell>
                     <connections>
                         <action selector="deleteFile:" target="xi1-zP-psv" id="S5a-61-ZZQ"/>
                     </connections>
                 </button>
-                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="GvW-ck-VCR">
-                    <rect key="frame" x="481" y="193" width="88" height="19"/>
-                    <buttonCell key="cell" type="roundRect" title="Advanced" bezelStyle="roundedRect" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="qA6-0f-xlt">
+                <button toolTip="Advanced settings" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="GvW-ck-VCR">
+                    <rect key="frame" x="532" y="217" width="37" height="32"/>
+                    <buttonCell key="cell" type="push" bezelStyle="rounded" image="NSAdvanced" imagePosition="only" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="qA6-0f-xlt">
                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                        <font key="font" metaFont="cellTitle"/>
+                        <font key="font" metaFont="system"/>
                     </buttonCell>
                     <connections>
                         <action selector="toggleAdvanced:" target="xi1-zP-psv" id="9Jv-4Q-zKE"/>
                     </connections>
                 </button>
                 <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="YU8-Zs-Jn5" userLabel="Advanced Settings">
-                    <rect key="frame" x="0.0" y="-126" width="583" height="315"/>
+                    <rect key="frame" x="0.0" y="-100" width="583" height="315"/>
                     <subviews>
                         <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="zmX-AH-G6D">
                             <rect key="frame" x="18" y="291" width="142" height="19"/>
@@ -219,15 +215,19 @@
                             </userDefinedRuntimeAttributes>
                         </button>
                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" translatesAutoresizingMaskIntoConstraints="NO" id="V8v-sO-GVk">
-                            <rect key="frame" x="195" y="114" width="390" height="51"/>
+                            <rect key="frame" x="209" y="122" width="356" height="45"/>
                             <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="(check out http://lesscss.org/usage/#command-line-usage for more info on these options)" id="7Xg-B2-1hF">
-                                <font key="font" metaFont="cellTitle"/>
+                                <font key="font" metaFont="system" size="10"/>
                                 <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                 <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                             </textFieldCell>
                         </textField>
                     </subviews>
                 </customView>
+                <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ocz-F4-RIB">
+                    <rect key="frame" x="11" y="241" width="21" height="16"/>
+                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="NSGoRightTemplate" id="XXZ-y5-drG"/>
+                </imageView>
             </subviews>
             <connections>
                 <outlet property="advancedButton" destination="GvW-ck-VCR" id="zVG-MY-IQ3"/>
@@ -250,13 +250,14 @@
                 <outlet property="strictMath" destination="sxt-Mz-o3e" id="DTX-XC-6Zt"/>
                 <outlet property="strictUnits" destination="Q7J-1f-SCL" id="jAO-0F-RWS"/>
             </connections>
-            <point key="canvasLocation" x="334.5" y="213.5"/>
+            <point key="canvasLocation" x="255.5" y="128.5"/>
         </customView>
     </objects>
     <resources>
-        <image name="folder_filled-50" width="50" height="50"/>
-        <image name="left-50" width="50" height="50"/>
-        <image name="right-50" width="50" height="50"/>
-        <image name="trash2-50" width="50" height="50"/>
+        <image name="NSAdvanced" width="32" height="32"/>
+        <image name="NSFolder" width="32" height="32"/>
+        <image name="NSGoLeftTemplate" width="9" height="9"/>
+        <image name="NSGoRightTemplate" width="9" height="9"/>
+        <image name="NSTrashEmpty" width="32" height="32"/>
     </resources>
 </document>

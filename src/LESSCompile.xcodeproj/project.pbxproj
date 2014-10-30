@@ -20,6 +20,9 @@
 		4C935B2B199AC37F00AD1D5A /* DDFileLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C0C4FC0181F118600E35333 /* DDFileLogger.m */; };
 		4C935B2C199AC38100AD1D5A /* DDLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C935B27199AC16800AD1D5A /* DDLog.m */; };
 		4C935B2D199AC38300AD1D5A /* DDTTYLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C0C4FC4181F118600E35333 /* DDTTYLogger.m */; };
+		4CA289EC19FE8E5C008D523C /* node_modules in Resources */ = {isa = PBXBuildFile; fileRef = 4CA289EB19FE8E5C008D523C /* node_modules */; };
+		4CA9B3A81A01425E00934524 /* siteSettingsWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CA9B3A61A01425E00934524 /* siteSettingsWindowController.m */; };
+		4CA9B3A91A01425E00934524 /* siteSettingsWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4CA9B3A71A01425E00934524 /* siteSettingsWindowController.xib */; };
 		4CCA70CB19228C78001617FC /* less in Resources */ = {isa = PBXBuildFile; fileRef = 4CCA70CA19228C78001617FC /* less */; };
 		4CCDB1871846503900B0C66C /* BaseCodaPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CCDB1861846503900B0C66C /* BaseCodaPlugin.m */; };
 		4CCF170D19BF6463002E0650 /* Growl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CCF170A19BF6463002E0650 /* Growl.framework */; };
@@ -36,7 +39,6 @@
 		4CFCBB8A18217EDC0030FC08 /* FMResultSet.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CFCBB8418217EDC0030FC08 /* FMResultSet.m */; };
 		4CFCBB8C182180620030FC08 /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CFCBB8B182180620030FC08 /* libsqlite3.dylib */; };
 		4CFCBB9018218F2B0030FC08 /* db.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 4CFCBB8F18218F2B0030FC08 /* db.sqlite */; };
-		4CFCBB921821B12D0030FC08 /* siteSettingsWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4CFCBB911821B12D0030FC08 /* siteSettingsWindow.xib */; };
 		4CFCBB971821B5230030FC08 /* folder_filled-50.png in Resources */ = {isa = PBXBuildFile; fileRef = 4CFCBB961821B5230030FC08 /* folder_filled-50.png */; };
 		4CFCBB991821B6CA0030FC08 /* left-50.png in Resources */ = {isa = PBXBuildFile; fileRef = 4CFCBB981821B6CA0030FC08 /* left-50.png */; };
 		4CFCBB9B1821B6D80030FC08 /* right-50.png in Resources */ = {isa = PBXBuildFile; fileRef = 4CFCBB9A1821B6D80030FC08 /* right-50.png */; };
@@ -78,6 +80,10 @@
 		4C8B098B1905BEF4002D30DE /* dropView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dropView.h; sourceTree = "<group>"; };
 		4C8B098C1905BEF4002D30DE /* dropView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = dropView.m; sourceTree = "<group>"; };
 		4C935B27199AC16800AD1D5A /* DDLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDLog.m; sourceTree = "<group>"; };
+		4CA289EB19FE8E5C008D523C /* node_modules */ = {isa = PBXFileReference; lastKnownFileType = folder; path = node_modules; sourceTree = "<group>"; };
+		4CA9B3A51A01425E00934524 /* siteSettingsWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = siteSettingsWindowController.h; sourceTree = "<group>"; };
+		4CA9B3A61A01425E00934524 /* siteSettingsWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = siteSettingsWindowController.m; sourceTree = "<group>"; };
+		4CA9B3A71A01425E00934524 /* siteSettingsWindowController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = siteSettingsWindowController.xib; sourceTree = "<group>"; };
 		4CCA70CA19228C78001617FC /* less */ = {isa = PBXFileReference; lastKnownFileType = folder; path = less; sourceTree = "<group>"; };
 		4CCDB1851846503900B0C66C /* BaseCodaPlugin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BaseCodaPlugin.h; sourceTree = "<group>"; };
 		4CCDB1861846503900B0C66C /* BaseCodaPlugin.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BaseCodaPlugin.m; sourceTree = "<group>"; };
@@ -101,7 +107,6 @@
 		4CFCBB8418217EDC0030FC08 /* FMResultSet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FMResultSet.m; sourceTree = "<group>"; };
 		4CFCBB8B182180620030FC08 /* libsqlite3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.dylib; path = usr/lib/libsqlite3.dylib; sourceTree = SDKROOT; };
 		4CFCBB8F18218F2B0030FC08 /* db.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = db.sqlite; sourceTree = "<group>"; };
-		4CFCBB911821B12D0030FC08 /* siteSettingsWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = siteSettingsWindow.xib; sourceTree = "<group>"; };
 		4CFCBB961821B5230030FC08 /* folder_filled-50.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "folder_filled-50.png"; sourceTree = "<group>"; };
 		4CFCBB981821B6CA0030FC08 /* left-50.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "left-50.png"; sourceTree = "<group>"; };
 		4CFCBB9A1821B6D80030FC08 /* right-50.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "right-50.png"; sourceTree = "<group>"; };
@@ -157,11 +162,11 @@
 				4CFCBB951821B51C0030FC08 /* images */,
 				4CCA70CA19228C78001617FC /* less */,
 				4CFCBB8F18218F2B0030FC08 /* db.sqlite */,
+				4CA289EB19FE8E5C008D523C /* node_modules */,
 				4C1DFC1A182063330078B179 /* growl */,
 				4C60E398182009D3003752C5 /* node */,
 				8D5B49B7048680CD000E48DA /* Info.plist */,
 				089C167DFE841241C02AAC07 /* InfoPlist.strings */,
-				4CFCBB911821B12D0030FC08 /* siteSettingsWindow.xib */,
 				4CFCBB77182169690030FC08 /* preferencesWindow.xib */,
 				4C321FCF1827F98700FE7058 /* FileView.xib */,
 				4CE8C352191298C30023524E /* FileFooter.xib */,
@@ -172,6 +177,7 @@
 		08FB77AFFE84173DC02AAC07 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				4CA9B3A41A01421A00934524 /* siteSettingsWindow */,
 				4C5CB3C918244CD700A4DD66 /* views */,
 				4C605F3E1677C20600C8F7D9 /* CodaPlugInsController.h */,
 				F163D8F30C67D694000A99F5 /* LESSPlugin.h */,
@@ -272,6 +278,16 @@
 				4CE8C35719129FC10023524E /* PreferenceView.m */,
 			);
 			name = views;
+			sourceTree = "<group>";
+		};
+		4CA9B3A41A01421A00934524 /* siteSettingsWindow */ = {
+			isa = PBXGroup;
+			children = (
+				4CA9B3A51A01425E00934524 /* siteSettingsWindowController.h */,
+				4CA9B3A61A01425E00934524 /* siteSettingsWindowController.m */,
+				4CA9B3A71A01425E00934524 /* siteSettingsWindowController.xib */,
+			);
+			name = siteSettingsWindow;
 			sourceTree = "<group>";
 		};
 		4CCF170B19BF6463002E0650 /* Legacy */ = {
@@ -379,10 +395,11 @@
 				8D5B49B0048680CD000E48DA /* InfoPlist.strings in Resources */,
 				4CFCBB9B1821B6D80030FC08 /* right-50.png in Resources */,
 				4CE8C3551912993B0023524E /* folder_plus_icon&48.png in Resources */,
+				4CA9B3A91A01425E00934524 /* siteSettingsWindowController.xib in Resources */,
 				4C0C4FD2181F118600E35333 /* README.txt in Resources */,
+				4CA289EC19FE8E5C008D523C /* node_modules in Resources */,
 				4CFCBB991821B6CA0030FC08 /* left-50.png in Resources */,
 				4C60E399182009D3003752C5 /* node in Resources */,
-				4CFCBB921821B12D0030FC08 /* siteSettingsWindow.xib in Resources */,
 				4CFCBB78182169690030FC08 /* preferencesWindow.xib in Resources */,
 				4CFCBB971821B5230030FC08 /* folder_filled-50.png in Resources */,
 			);
@@ -413,6 +430,7 @@
 				4C5CB3CC18244CFF00A4DD66 /* keyPrefButton.m in Sources */,
 				4CFCBB8618217EDC0030FC08 /* FMDatabaseAdditions.m in Sources */,
 				4C6D96D619FD6D95004CAE9E /* LessDb.m in Sources */,
+				4CA9B3A81A01425E00934524 /* siteSettingsWindowController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
