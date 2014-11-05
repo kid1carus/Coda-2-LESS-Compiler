@@ -2,6 +2,7 @@ Coda-2-LESS-Compiler
 ====================
 
 A LESS compiler for Coda 2/2.5
+
 [Check out Less at lesscss.org](http://lesscss.org/)
 
 If you haven't, [check out Coda as well!](http://panic.com/coda/)
