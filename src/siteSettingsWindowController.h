@@ -9,6 +9,7 @@
 #import <Cocoa/Cocoa.h>
 #import "dropView.h"
 #import "FileView.h"
+#import "flippedView.h"
 
 @class LessDb;
 
@@ -17,6 +18,7 @@
     LessDb * Ldb;
     NSMutableArray * fileViews;
     NSView * fileDocumentView;
+    NSView * fileDocumentSubview;
 }
 @property (strong) IBOutlet NSButton *addFileButton;
 @property (strong) IBOutlet NSScrollView *fileScrollView;

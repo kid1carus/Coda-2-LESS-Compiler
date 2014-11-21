@@ -19,6 +19,8 @@
 
 @property (assign) NSInteger fileIndex;
 @property (strong) IBOutlet NSView *advancedSettingsView;
+@property BOOL isAdvancedToggled;
+@property (strong) IBOutlet NSBox *horizontalLine;
 
 /* compilation options */
 @property (strong) IBOutlet keyPrefButton *shouldMinify;
@@ -35,11 +37,6 @@
 @property (strong) IBOutlet keyPrefButton *strictUnits;
 
 @property (strong) IBOutlet NSPopUpButton *lineNumbers;
-
-- (IBAction)toggleAdvanced:(id)sender;
-
-- (IBAction)changeCssPath:(id)sender;
-- (IBAction)deleteFile:(id)sender;
 
 -(void) setupOptionsWithSelector:(SEL)aSelector andTarget:(id)target;
 -(void) setCheckboxesForOptions:(NSDictionary *)options;

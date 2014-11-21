@@ -42,13 +42,10 @@
                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                         <font key="font" metaFont="system"/>
                     </buttonCell>
-                    <connections>
-                        <action selector="changeCssPath:" target="xi1-zP-psv" id="As7-N3-YIF"/>
-                    </connections>
                 </button>
                 <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="wMc-wW-yTH" customClass="keyPrefButton">
                     <rect key="frame" x="460" y="259" width="79" height="18"/>
-                    <buttonCell key="cell" type="check" title="minify" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="OQy-vt-mCc">
+                    <buttonCell key="cell" type="check" title="minify" bezelStyle="regularSquare" imagePosition="left" inset="2" id="OQy-vt-mCc">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                         <font key="font" metaFont="system"/>
                     </buttonCell>
@@ -66,9 +63,6 @@
                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                         <font key="font" metaFont="system"/>
                     </buttonCell>
-                    <connections>
-                        <action selector="deleteFile:" target="xi1-zP-psv" id="S5a-61-ZZQ"/>
-                    </connections>
                 </button>
                 <button toolTip="Advanced settings" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="GvW-ck-VCR">
                     <rect key="frame" x="532" y="217" width="37" height="32"/>
@@ -76,11 +70,8 @@
                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                         <font key="font" metaFont="system"/>
                     </buttonCell>
-                    <connections>
-                        <action selector="toggleAdvanced:" target="xi1-zP-psv" id="9Jv-4Q-zKE"/>
-                    </connections>
                 </button>
-                <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="YU8-Zs-Jn5" userLabel="Advanced Settings">
+                <customView autoresizesSubviews="NO" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="YU8-Zs-Jn5" userLabel="Advanced Settings">
                     <rect key="frame" x="0.0" y="-100" width="583" height="315"/>
                     <subviews>
                         <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="zmX-AH-G6D">
@@ -228,6 +219,12 @@
                     <rect key="frame" x="11" y="241" width="21" height="16"/>
                     <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="NSGoRightTemplate" id="XXZ-y5-drG"/>
                 </imageView>
+                <box autoresizesSubviews="NO" verticalHuggingPriority="750" fixedFrame="YES" title="Box" boxType="separator" titlePosition="noTitle" translatesAutoresizingMaskIntoConstraints="NO" id="Br5-r8-gA6">
+                    <rect key="frame" x="16" y="282" width="552" height="5"/>
+                    <color key="borderColor" white="0.0" alpha="0.41999999999999998" colorSpace="calibratedWhite"/>
+                    <color key="fillColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                    <font key="titleFont" metaFont="system"/>
+                </box>
             </subviews>
             <connections>
                 <outlet property="advancedButton" destination="GvW-ck-VCR" id="zVG-MY-IQ3"/>
@@ -237,6 +234,7 @@
                 <outlet property="deleteButton" destination="zJx-yb-FD0" id="Ulw-6g-HlG"/>
                 <outlet property="disableJavascript" destination="Mv5-GI-IQT" id="52E-3V-WrX"/>
                 <outlet property="fileName" destination="Jxs-h4-ezP" id="FJ6-Au-W7w"/>
+                <outlet property="horizontalLine" destination="Br5-r8-gA6" id="IMF-Td-a98"/>
                 <outlet property="insecureImports" destination="zfh-V3-7uC" id="UZp-vQ-ztp"/>
                 <outlet property="lessPath" destination="yaj-73-L6o" id="4MO-ii-40Y"/>
                 <outlet property="lineNumbers" destination="EPC-x3-dJI" id="Afn-4R-joe"/>
@@ -250,7 +248,7 @@
                 <outlet property="strictMath" destination="sxt-Mz-o3e" id="DTX-XC-6Zt"/>
                 <outlet property="strictUnits" destination="Q7J-1f-SCL" id="jAO-0F-RWS"/>
             </connections>
-            <point key="canvasLocation" x="255.5" y="128.5"/>
+            <point key="canvasLocation" x="248.5" y="114.5"/>
         </customView>
     </objects>
     <resources>

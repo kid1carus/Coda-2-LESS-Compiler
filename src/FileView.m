@@ -89,13 +89,4 @@
     return options;
 }
 
-- (IBAction)toggleAdvanced:(id)sender {
-}
-
-- (IBAction)changeCssPath:(id)sender {
-    
-}
-
-- (IBAction)deleteFile:(id)sender {
-}
 @end

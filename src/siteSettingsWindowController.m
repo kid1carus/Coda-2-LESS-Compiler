@@ -35,8 +35,8 @@ static int ddLogLevel;
     DDLogVerbose(@"LESS:: windowDidLoad fired.");
     // Implement this method to handle any initialization after your window controller's window has been loaded from its nib file.
     [self.fileDropView setDelegate:self];
-    [self.window setDelegate:self];
-    fileDocumentView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 500, 500)];
+    [self.window setDelegate:Ldb.delegate];
+    fileDocumentView = [[flippedView alloc] initWithFrame:NSMakeRect(0, 0, 500, 500)];
     
     [self.fileScrollView setDocumentView:fileDocumentView];
     [Ldb updateParentFilesListWithCompletion:^{
@@ -114,6 +114,19 @@ static int ddLogLevel;
     }];
 }
 
+-(void) advancedButtonPressed:(NSButton *)sender
+{
+    FileView * f = (FileView *)[sender superview];
+    if(![f isKindOfClass:[FileView class]])
+    {
+        return;
+    }
+    
+    f.isAdvancedToggled = !f.isAdvancedToggled;
+    [self scrollToPosition:NSMakePoint(0, f.frame.origin.y)];
+    [self relayoutFileViews];
+}
+
 -(void) userUpdatedLessFilePreference:(NSButton *)sender
 {
     FileView * f = (FileView *)[sender superview];
@@ -131,7 +144,7 @@ static int ddLogLevel;
     NSURL * url = [NSURL fileURLWithPath:[fileInfo objectForKey:@"path"]];
     [Ldb updateLessFilePreferences:[f getOptionValues] forPath:url];
     [Ldb updateParentFilesListWithCompletion:^{
-        [self performSelectorOnMainThread:@selector(rebuildFileList) withObject:nil waitUntilDone:false];
+        [self performSelectorOnMainThread:@selector(updateFileViewOptions) withObject:nil waitUntilDone:false];
     }];
 }
 
@@ -142,14 +155,12 @@ static int ddLogLevel;
     [fileDocumentView setSubviews:[NSArray array]];
     
     fileViews = [NSMutableArray array];
-    NSRect fRect;
-    
-    [fileDocumentView setFrame:NSMakeRect(0, 0, 583, MAX( (111 * (Ldb.currentParentFilesCount + 1)), self.fileScrollView.frame.size.height - 10))];
     
     // if there are no files to display, then display a footer.
     
     if(Ldb.currentParentFilesCount == 0)
     {
+        [fileDocumentView setFrame:NSMakeRect(0, 0, 583, self.fileScrollView.frame.size.height - 10)];
         NSView * footerView;
         NSArray *nibObjects = [Ldb.delegate loadNibNamed:@"FileFooter"];
         
@@ -162,7 +173,7 @@ static int ddLogLevel;
             }
         }
         
-        fRect = footerView.frame;
+        NSRect fRect = footerView.frame;
         fRect.origin.y = 0;
         footerView.frame = fRect;
         
@@ -194,34 +205,118 @@ static int ddLogLevel;
         }
         
         
-        fRect = f.frame;
-        
+        //setup actions and target for all the checkboxes
         [f setupOptionsWithSelector:@selector(userUpdatedLessFilePreference:) andTarget:self];
-        NSData * options = [currentFile objectForKey:@"options"];
         
+        // set the less and css paths
+        NSURL * url = [NSURL fileURLWithPath:[currentFile objectForKey:@"path"] isDirectory:NO];
+        [f.fileName setStringValue:[url lastPathComponent]];
+        [f.lessPath setStringValue:[currentFile objectForKey:@"path"]];
+        [f.cssPath setStringValue:[currentFile objectForKey:@"css_path"]];
+        
+        
+        //setup the rest of the non-preference button actions
+        [f.deleteButton setAction:@selector(deleteParentFile:)];
+        [f.deleteButton setTarget:self];
+        [f.changeCssPathButton setAction:@selector(changeCssFile:)];
+        [f.changeCssPathButton setTarget:self];
+        [f.advancedButton setAction:@selector(advancedButtonPressed:)];
+        [f.advancedButton setTarget:self];
+        
+        f.fileIndex = i;
+        
+        [fileViews addObject:f];
+        [fileDocumentView addSubview:f];
+    }
+    [self updateFileViewOptions];
+    [self relayoutFileViews];
+}
+
+-(void) updateFileViewOptions
+{
+    DDLogVerbose(@"LESS:: updateFileViewOptions");
+    for(FileView * f in fileViews)
+    {
+        NSDictionary * currentFile = [Ldb.currentParentFiles objectAtIndex:f.fileIndex];
+        
+        //now populate the checkboxes with the user's current preferences
+        NSData * options = [currentFile objectForKey:@"options"];
+
         if(options != nil && options != (id)[NSNull null])
         {
             NSDictionary * options = [NSJSONSerialization JSONObjectWithData:[currentFile objectForKey:@"options"] options:0 error:nil];
             [f setCheckboxesForOptions:options];
         }
         
-        NSURL * url = [NSURL fileURLWithPath:[currentFile objectForKey:@"path"] isDirectory:NO];
-        [f.fileName setStringValue:[url lastPathComponent]];
-        [f.lessPath setStringValue:[currentFile objectForKey:@"path"]];
-        [f.cssPath setStringValue:[currentFile objectForKey:@"css_path"]];
-        
-        [f.deleteButton setAction:@selector(deleteParentFile:)];
-        [f.deleteButton setTarget:self];
-        [f.changeCssPathButton setAction:@selector(changeCssFile:)];
-        [f.changeCssPathButton setTarget:self];
-        
-        f.fileIndex = i;
-        
-        float frameY = Ldb.currentParentFilesCount > 3 ? i * fRect.size.height : (fileDocumentView.frame.size.height - ((Ldb.currentParentFilesCount - i) * fRect.size.height));
-        [f setFrame:NSMakeRect(0, frameY, fRect.size.width, fRect.size.height)];
-        [fileViews addObject:f];
-        [fileDocumentView addSubview:f];
     }
+}
+
+-(void) relayoutFileViews
+{
+    float frameHeight = [self getHeightOfFileViews];
+
+    [fileDocumentView setFrame:NSMakeRect(0, 0, 583, MAX(frameHeight, self.fileScrollView.frame.size.height - 10))];
+    
+    for(FileView * f in fileViews)
+    {
+        if(f.fileIndex == 0)
+        {
+            f.horizontalLine.hidden = true;
+        }
+        else
+        {
+            f.horizontalLine.hidden = false;
+        }
+        float viewHeight = 70;
+        float viewWidth = f.frame.size.width;
+        if(f.isAdvancedToggled)
+        {
+            viewHeight = 315;
+            f.advancedSettingsView.hidden = false;
+        }
+        else
+        {
+            f.advancedSettingsView.hidden = true;
+        }
+        
+        float viewY = frameHeight - viewHeight;
+        [f setFrame:NSMakeRect(0, viewY, viewWidth, viewHeight)];
+        frameHeight -= viewHeight;
+    }
+    
+
+	
+}
+
+
+-(float) getHeightOfFileViews
+{
+    float frameHeight = 0;
+    for(FileView * f in fileViews)
+    {
+        if(f.isAdvancedToggled)
+        {
+            frameHeight += 315;
+        }
+        else
+        {
+            frameHeight += 70;
+        }
+    }
+    return frameHeight;
+}
+
+
+- (void)scrollToPosition:(NSPoint)p {
+    [NSAnimationContext beginGrouping];
+    [[NSAnimationContext currentContext] setDuration:0.37];
+    NSClipView* clipView = [self.fileScrollView contentView];
+    NSPoint newOrigin = [clipView bounds].origin;
+    newOrigin.x = p.x;
+    newOrigin.y = p.y;
+    [[clipView animator] setBoundsOrigin:newOrigin];
+    [self.fileScrollView reflectScrolledClipView: [self.fileScrollView contentView]];
+    [NSAnimationContext endGrouping];
 }
 
 #pragma mark - DraggingDestinationDelegate
