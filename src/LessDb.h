@@ -24,6 +24,7 @@
     /* indexing tasks and pipes */
     NSTask * indexTask;
     NSPipe * indexPipe;
+    NSMutableArray * dependencyQueue;
 }
 @property (strong) BaseCodaPlugin <LessDbDelegate> * delegate;
 @property (strong) FMDatabaseQueue * dbQueue;
@@ -38,7 +39,7 @@
 
 -(void) setupDb;
 -(void) replaceDatabase;
--(void) getDbPreferences;
+-(void) reloadDbPreferences;
 -(BOOL) copyDbFile;
 -(void) updateParentFilesListWithCompletion:(void(^)(void))handler;
 
@@ -47,6 +48,6 @@
 -(void) unregisterFile:(NSURL *)url;
 -(void) setCssPath:(NSURL *)cssUrl forPath:(NSURL *)url;
 -(void) updateLessFilePreferences:(NSDictionary *)options forPath:(NSURL *) url;
--(void) performDependencyCheckOnFile:(NSString *)path;
+-(void) addDependencyCheckOnFile:(NSString *)path;
 
 @end

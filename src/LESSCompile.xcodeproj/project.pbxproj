@@ -30,7 +30,9 @@
 		4CE8C353191298C30023524E /* FileFooter.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4CE8C352191298C30023524E /* FileFooter.xib */; };
 		4CE8C3551912993B0023524E /* folder_plus_icon&48.png in Resources */ = {isa = PBXBuildFile; fileRef = 4CE8C3541912993B0023524E /* folder_plus_icon&48.png */; };
 		4CE8C35819129FC10023524E /* PreferenceView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CE8C35719129FC10023524E /* PreferenceView.m */; };
-		4CFCBB78182169690030FC08 /* preferencesWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4CFCBB77182169690030FC08 /* preferencesWindow.xib */; };
+		4CF0C0E11A03FEB80017047E /* flippedView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CF0C0E01A03FEB80017047E /* flippedView.m */; };
+		4CF8EF111A13F2D300162814 /* preferenceWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CF8EF0F1A13F2D300162814 /* preferenceWindowController.m */; };
+		4CF8EF121A13F2D300162814 /* preferenceWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4CF8EF101A13F2D300162814 /* preferenceWindowController.xib */; };
 		4CFCBB8518217EDC0030FC08 /* FMDatabase.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CFCBB7B18217EDC0030FC08 /* FMDatabase.m */; };
 		4CFCBB8618217EDC0030FC08 /* FMDatabaseAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CFCBB7D18217EDC0030FC08 /* FMDatabaseAdditions.m */; };
 		4CFCBB8718217EDC0030FC08 /* FMDatabasePool.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CFCBB7F18217EDC0030FC08 /* FMDatabasePool.m */; };
@@ -93,7 +95,11 @@
 		4CE8C3541912993B0023524E /* folder_plus_icon&48.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "folder_plus_icon&48.png"; sourceTree = "<group>"; };
 		4CE8C35619129FC10023524E /* PreferenceView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PreferenceView.h; sourceTree = "<group>"; };
 		4CE8C35719129FC10023524E /* PreferenceView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PreferenceView.m; sourceTree = "<group>"; };
-		4CFCBB77182169690030FC08 /* preferencesWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = preferencesWindow.xib; sourceTree = "<group>"; };
+		4CF0C0DF1A03FEB80017047E /* flippedView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = flippedView.h; sourceTree = "<group>"; };
+		4CF0C0E01A03FEB80017047E /* flippedView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = flippedView.m; sourceTree = "<group>"; };
+		4CF8EF0E1A13F2D300162814 /* preferenceWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = preferenceWindowController.h; sourceTree = "<group>"; };
+		4CF8EF0F1A13F2D300162814 /* preferenceWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = preferenceWindowController.m; sourceTree = "<group>"; };
+		4CF8EF101A13F2D300162814 /* preferenceWindowController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = preferenceWindowController.xib; sourceTree = "<group>"; };
 		4CFCBB7A18217EDC0030FC08 /* FMDatabase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMDatabase.h; sourceTree = "<group>"; };
 		4CFCBB7B18217EDC0030FC08 /* FMDatabase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FMDatabase.m; sourceTree = "<group>"; };
 		4CFCBB7C18217EDC0030FC08 /* FMDatabaseAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMDatabaseAdditions.h; sourceTree = "<group>"; };
@@ -167,7 +173,6 @@
 				4C60E398182009D3003752C5 /* node */,
 				8D5B49B7048680CD000E48DA /* Info.plist */,
 				089C167DFE841241C02AAC07 /* InfoPlist.strings */,
-				4CFCBB77182169690030FC08 /* preferencesWindow.xib */,
 				4C321FCF1827F98700FE7058 /* FileView.xib */,
 				4CE8C352191298C30023524E /* FileFooter.xib */,
 			);
@@ -177,6 +182,7 @@
 		08FB77AFFE84173DC02AAC07 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				4CF8EF131A13F2DA00162814 /* preferenceWindow */,
 				4CA9B3A41A01421A00934524 /* siteSettingsWindow */,
 				4C5CB3C918244CD700A4DD66 /* views */,
 				4C605F3E1677C20600C8F7D9 /* CodaPlugInsController.h */,
@@ -276,6 +282,8 @@
 				4C8B098C1905BEF4002D30DE /* dropView.m */,
 				4CE8C35619129FC10023524E /* PreferenceView.h */,
 				4CE8C35719129FC10023524E /* PreferenceView.m */,
+				4CF0C0DF1A03FEB80017047E /* flippedView.h */,
+				4CF0C0E01A03FEB80017047E /* flippedView.m */,
 			);
 			name = views;
 			sourceTree = "<group>";
@@ -305,6 +313,16 @@
 				4CCF170B19BF6463002E0650 /* Legacy */,
 			);
 			name = Growl;
+			sourceTree = "<group>";
+		};
+		4CF8EF131A13F2DA00162814 /* preferenceWindow */ = {
+			isa = PBXGroup;
+			children = (
+				4CF8EF0E1A13F2D300162814 /* preferenceWindowController.h */,
+				4CF8EF0F1A13F2D300162814 /* preferenceWindowController.m */,
+				4CF8EF101A13F2D300162814 /* preferenceWindowController.xib */,
+			);
+			name = preferenceWindow;
 			sourceTree = "<group>";
 		};
 		4CFCBB7918217EDC0030FC08 /* fmdb */ = {
@@ -393,6 +411,7 @@
 				4C1DFC1B182063330078B179 /* growl in Resources */,
 				4CFCBB9018218F2B0030FC08 /* db.sqlite in Resources */,
 				8D5B49B0048680CD000E48DA /* InfoPlist.strings in Resources */,
+				4CF8EF121A13F2D300162814 /* preferenceWindowController.xib in Resources */,
 				4CFCBB9B1821B6D80030FC08 /* right-50.png in Resources */,
 				4CE8C3551912993B0023524E /* folder_plus_icon&48.png in Resources */,
 				4CA9B3A91A01425E00934524 /* siteSettingsWindowController.xib in Resources */,
@@ -400,7 +419,6 @@
 				4CA289EC19FE8E5C008D523C /* node_modules in Resources */,
 				4CFCBB991821B6CA0030FC08 /* left-50.png in Resources */,
 				4C60E399182009D3003752C5 /* node in Resources */,
-				4CFCBB78182169690030FC08 /* preferencesWindow.xib in Resources */,
 				4CFCBB971821B5230030FC08 /* folder_filled-50.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -415,6 +433,7 @@
 				4CFCBB9E1821B82A0030FC08 /* FileView.m in Sources */,
 				4C8B098D1905BEF4002D30DE /* dropView.m in Sources */,
 				4C935B29199AC37B00AD1D5A /* DDAbstractDatabaseLogger.m in Sources */,
+				4CF0C0E11A03FEB80017047E /* flippedView.m in Sources */,
 				4C935B2A199AC37D00AD1D5A /* DDASLLogger.m in Sources */,
 				4C935B2B199AC37F00AD1D5A /* DDFileLogger.m in Sources */,
 				4C935B2C199AC38100AD1D5A /* DDLog.m in Sources */,
@@ -427,6 +446,7 @@
 				4CFCBB8818217EDC0030FC08 /* FMDatabaseQueue.m in Sources */,
 				4CFCBB8718217EDC0030FC08 /* FMDatabasePool.m in Sources */,
 				4CCDB1871846503900B0C66C /* BaseCodaPlugin.m in Sources */,
+				4CF8EF111A13F2D300162814 /* preferenceWindowController.m in Sources */,
 				4C5CB3CC18244CFF00A4DD66 /* keyPrefButton.m in Sources */,
 				4CFCBB8618217EDC0030FC08 /* FMDatabaseAdditions.m in Sources */,
 				4C6D96D619FD6D95004CAE9E /* LessDb.m in Sources */,
