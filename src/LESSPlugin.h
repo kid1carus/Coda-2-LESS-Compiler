@@ -6,6 +6,7 @@
 #import "dropView.h"
 #import "keyPrefButton.h"
 #import "siteSettingsWindowController.h"
+#import "preferenceWindowController.h"
 
 @interface LESSPlugin : BaseCodaPlugin <CodaPlugIn, NSUserNotificationCenterDelegate, NSWindowDelegate, DraggingDestinationDelegate, LessDbDelegate>
 {
@@ -19,8 +20,7 @@
     NSString * errorText;
     
     siteSettingsWindowController * siteSettingsController;
-    NSMutableArray * fileViews;
-    NSView * fileDocumentView;
+    preferenceWindowController * preferenceController;
     LessDb * Ldb;
     
 	BOOL isCompiling;
@@ -29,17 +29,11 @@
 
 #pragma mark - preferences Window
 
-@property (strong) IBOutlet NSView *preferenceWindow;
-@property (strong) IBOutlet NSTextField *versionField;
-@property (strong) IBOutlet NSTextField *LESSVersionField;
+//@property (strong) IBOutlet NSView *preferenceWindow;
+//@property (strong) IBOutlet NSTextField *versionField;
+//@property (strong) IBOutlet NSTextField *LESSVersionField;
 
-- (IBAction)userChangedPreference:(NSButton *)sender;
-
-#pragma mark - Site Settings Window
-@property (strong) IBOutlet NSButton *fileButton;
-@property (strong) IBOutlet dropView *fileSettingsWindow;
-@property (strong) IBOutlet NSScrollView *fileScrollView;
-
-- (IBAction)filePressed:(NSButton *)sender;
+//- (IBAction)userChangedPreference:(NSButton *)sender;
+//- (IBAction)viewGithub:(id)sender;
 
 @end

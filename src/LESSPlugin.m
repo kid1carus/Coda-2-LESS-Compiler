@@ -5,8 +5,6 @@
 #import "FileView.h"
 
 static int ddLogLevel = LOG_LEVEL_ERROR;
-static NSString * COMPVERSION = @"0.5.0";
-static NSString * LESSVERSION = @"1.7.0";
 @interface LESSPlugin ()
 
 - (id)initWithController:(CodaPlugInsController*)inController;
@@ -91,150 +89,25 @@ static NSString * LESSVERSION = @"1.7.0";
 
 -(void) openSitesMenu
 {
-    if(self.fileSettingsWindow != nil)
+    if(siteSettingsController != nil)
     {
         return;
     }
+    
     [self updateCurrentSiteUUID];
     siteSettingsController = [[siteSettingsWindowController alloc] init];
     [siteSettingsController showWindow:self];
-    
-	//make sure currentSiteUUID is up to date.
-   	
-    
-//    [NSBundle loadNibNamed:@"siteSettingsWindow" owner: self];
-//    [[self.fileSettingsWindow window] setDelegate:self];
-
-//    [self.fileSettingsWindow setDelegate:self];
-//    fileDocumentView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 500, 500)];
-//    
-//    [self.fileScrollView setDocumentView:fileDocumentView];
-//    [Ldb updateParentFilesListWithCompletion:^{
-//        [self performSelectorOnMainThread:@selector(rebuildFileList) withObject:nil waitUntilDone:false];
-//    }];
 }
 
 -(void) openPreferencesMenu
 {
-    if(self.preferenceWindow != nil)
+    if(preferenceController != nil)
     {
         return;
     }
-    BOOL result = [NSBundle loadNibNamed:@"preferencesWindow" owner: self ];
-    DDLogError(@"LESS:: loaded preferencesWindow? %d", result);
-    if(self.preferenceWindow == nil)
-    {
-        DDLogError(@"LESS:: preferenceWindow is still nil?");
-    }
     
-    [[self.preferenceWindow window] setDelegate:self];
-    [self.LESSVersionField setStringValue:LESSVERSION];
-    [self.versionField setStringValue:COMPVERSION];
-    
-    if(Ldb.prefs == nil)
-    {
-        DDLogVerbose(@"LESS:: prefs is nil");
-        return;
-    }
-    
-    DDLogVerbose(@"LESS:: setting up preference window");
-    for(NSButton * b in [self.preferenceWindow subviews])
-    {
-        if([b isKindOfClass:[NSButton class]] && [b valueForKey:@"prefKey"] != nil)
-        {
-            NSString * prefKey = [b valueForKey:@"prefKey"];
-            NSNumber * val = [Ldb.prefs objectForKey:prefKey];
-            DDLogVerbose(@"LESS:: Preference: %@ : %@", prefKey, val);
-            if(val != nil)
-            {
-                [b setState:[val integerValue]];
-            }
-        }
-    }
-}
-
--(void) rebuildFileList
-{
-    DDLogVerbose(@"LESS:: rebuildFileList");
-
-    [fileDocumentView setSubviews:[NSArray array]];
-
-    fileViews = [NSMutableArray array];
-    NSRect fRect;
-    
-    [fileDocumentView setFrame:NSMakeRect(0, 0, 583, MAX( (111 * (Ldb.currentParentFilesCount + 1)), self.fileScrollView.frame.size.height - 10))];
-
-    // if there are no files to display, then display a footer.
-    
-    if(Ldb.currentParentFilesCount == 0)
-    {
-        NSView * footerView;
-        NSArray *nibObjects = [self loadNibNamed:@"FileFooter"];
-        
-        for(NSView * o in nibObjects)
-        {
-            if([o isKindOfClass:[NSView class]])
-            {
-                footerView = o;
-                break;
-            }
-        }
-        
-        fRect = footerView.frame;
-        fRect.origin.y = 0;
-        footerView.frame = fRect;
-        
-        [fileDocumentView addSubview:footerView];
-        return;
-    }
-    
-    //otherwise, display the list of files.
-    
-    for(int i = Ldb.currentParentFilesCount - 1; i >= 0; i--)
-    {
-        NSDictionary * currentFile = [Ldb.currentParentFiles objectAtIndex:i];
-        
-        NSArray *nibObjects = [self loadNibNamed:@"FileView"];
-        
-        FileView * f;
-        for(FileView * o in nibObjects)
-        {
-            if([o isKindOfClass:[FileView class]])
-            {
-                f = o;
-                break;
-            }
-        }
-        
-        if(f == nil)
-        {
-            DDLogError(@"LESS:: Error loading nib FileView");
-        }
-        
-       
-        fRect = f.frame;
-        
-        [f setupOptionsWithSelector:@selector(userUpdatedLessFilePreference:) andTarget:self];
-        NSDictionary * options = [NSJSONSerialization JSONObjectWithData:[currentFile objectForKey:@"options"] options:0 error:nil];
-        [f setCheckboxesForOptions:options];
-        
-        NSURL * url = [NSURL fileURLWithPath:[currentFile objectForKey:@"path"] isDirectory:NO];
-        [f.fileName setStringValue:[url lastPathComponent]];
-        [f.lessPath setStringValue:[currentFile objectForKey:@"path"]];
-        [f.cssPath setStringValue:[currentFile objectForKey:@"css_path"]];
-        
-        [f.deleteButton setAction:@selector(deleteParentFile:)];
-        [f.deleteButton setTarget:self];
-        [f.changeCssPathButton setAction:@selector(changeCssFile:)];
-        [f.changeCssPathButton setTarget:self];
-        
-		f.fileIndex = i;
-        
-        float frameY = Ldb.currentParentFilesCount > 3 ? i * fRect.size.height : (fileDocumentView.frame.size.height - ((Ldb.currentParentFilesCount - i) * fRect.size.height));
-        [f setFrame:NSMakeRect(0, frameY, fRect.size.width, fRect.size.height)];
-        [fileViews addObject:f];
-    	[fileDocumentView addSubview:f];
-    }
+    preferenceController = [[preferenceWindowController alloc] init];
+    [preferenceController showWindow:self];
 }
 
 #pragma mark - NSWindowDelegate methods
@@ -242,16 +115,14 @@ static NSString * LESSVERSION = @"1.7.0";
 
 -(void)windowWillClose:(NSNotification *)notification
 {
-    if([[notification object] isEqualTo:[self.fileSettingsWindow window]])
+    if([[notification object] isEqualTo:siteSettingsController.window])
     {
-        self.fileSettingsWindow = nil;
-        self.fileScrollView = nil;
-        fileDocumentView = nil;
+        siteSettingsController = nil;
     }
     
-    if([[notification object] isEqualTo:[self.preferenceWindow window]])
+    if([[notification object] isEqualTo:preferenceController.window ])
     {
-        self.preferenceWindow = nil;
+        preferenceController = nil;
     }
 }
 
@@ -296,18 +167,24 @@ static NSString * LESSVERSION = @"1.7.0";
             DDLogVerbose(@"LESS:: css Path: %@", cssPath);
             
             //start the dependency check back on the main thread
-            [Ldb performSelectorOnMainThread:@selector(performDependencyCheckOnFile:) withObject:parentPath waitUntilDone:false];
+            [Ldb performSelectorOnMainThread:@selector(addDependencyCheckOnFile:) withObject:parentPath waitUntilDone:false];
             
             
             //Set compilation options
             NSMutableArray * options  = [NSMutableArray array];
-            NSDictionary * parentFileOptions = [NSJSONSerialization JSONObjectWithData:[parentFile dataForColumn:@"options"] options:0 error:nil];
-            
-            for(NSString * optionName in parentFileOptions.allKeys)
+            NSData * optionsData = [parentFile dataForColumn:@"options"];
+            if(optionsData != nil && ![optionsData isEqual:[NSNull null]])
             {
-                if([[parentFileOptions objectForKey:optionName] intValue] == 1)
+                NSDictionary * parentFileOptions = [NSJSONSerialization JSONObjectWithData:optionsData options:0 error:nil];
+                if(parentFileOptions != nil && parentFileOptions != (id)[NSNull null])
                 {
-                    [options addObject:optionName];
+                    for(NSString * optionName in parentFileOptions.allKeys)
+                    {
+                        if([[parentFileOptions objectForKey:optionName] intValue] == 1)
+                        {
+                            [options addObject:optionName];
+                        }
+                    }
                 }
             }
             
@@ -517,34 +394,6 @@ static NSString * LESSVERSION = @"1.7.0";
         }
         
         [self sendUserNotificationWithTitle:@"LESS:: Compiled Successfully!" andMessage:@"file compiled successfully!"];
-    }
-}
-
-#pragma mark - preferences
-
-- (IBAction)userChangedPreference:(NSButton *)sender
-{
-    if([sender valueForKey:@"prefKey"] == nil)
-    {
-        return;
-    }
-    NSString * pref = [sender valueForKey:@"prefKey"];
-    NSNumber * newState = [NSNumber numberWithInteger:[sender state]];
-    DDLogVerbose(@"LESS:: setting preference %@ : %@", pref, newState);
-    [Ldb updatePreferenceNamed:pref withValue:newState];
-    
-    if([pref isEqualToString:@"verboseLog"])
-    {
-        if([sender state] == NSOffState)
-        {
-            ddLogLevel = LOG_LEVEL_ERROR;
-            DDLogError(@"LESS:: Verbose logging disabled.");
-        }
-        else if([sender state] == NSOnState)
-        {
-            ddLogLevel = LOG_LEVEL_VERBOSE;
-            DDLogVerbose(@"LESS:: Verbose logging enabled.");
-        }
     }
 }
 @end
