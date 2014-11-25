@@ -7,9 +7,7 @@
 //
 
 #import "dropView.h"
-#import "DDLog.h"
-#import "DDASLLogger.h"
-static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+
 @implementation dropView
 
 - (id)initWithCoder:(NSCoder *)coder

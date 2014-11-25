@@ -35,10 +35,12 @@ static LessDb * sharedDb;
     return sharedDb;
 }
 
+#pragma mark - database setup
+
 -(void) setupDb
 {
     //Create Db file if it doesn't exist
-    NSError * error;
+    
     NSURL * dbFile;
     if (![_delegate doesPersistantFileExist:@"db.sqlite"]) {
         DDLogVerbose(@"LESS:: db file does not exist. Attempting to create.");
@@ -76,7 +78,6 @@ static LessDb * sharedDb;
 -(void) replaceDatabase:(NSNumber *)currentDbVersion
 {
     DDLogError(@"LESS:: Current database incompatible with latest compiler release. Attempting to migrate.");
-    NSError * error;
     NSURL * dbFile;
     
     if(currentDbVersion.floatValue < 0.4)	// if we're updating from a very old version, just nuke the database.
@@ -138,52 +139,7 @@ static LessDb * sharedDb;
     [self reloadDbPreferences];
 }
 
--(void) reloadDbPreferences
-{
-    [_dbQueue inDatabase:^(FMDatabase *db) {
-        FMResultSet * prefSet = [db executeQuery:@"SELECT * FROM preferences"];
-        if([prefSet next])
-        {
-            _prefs = [[NSJSONSerialization JSONObjectWithData:[[prefSet stringForColumn:@"json"] dataUsingEncoding:NSUTF8StringEncoding] options:kNilOptions error:nil] mutableCopy];
-            DDLogVerbose(@"LESS:: prefs: %@", _prefs);
-        }
-        else
-        {
-            DDLogVerbose(@"LESS:: no preferences found!");
-            _prefs = [NSMutableDictionary dictionaryWithObjectsAndKeys: nil];
-        }
-        
-        if([_prefs objectForKey:@"verboseLog"] != nil && [[_prefs objectForKey:@"verboseLog"] intValue] == 1)
-        {
-            ddLogLevel = LOG_LEVEL_VERBOSE;
-        }
-        [prefSet close];
-    }];
-    
-    [self updateParentFilesListWithCompletion:nil];
-}
-
-
--(NSDictionary *) getDbPreferences
-{
-    __block NSDictionary * preferences;
-    [_dbQueue inDatabase:^(FMDatabase *db) {
-        FMResultSet * prefSet = [db executeQuery:@"SELECT * FROM preferences"];
-        if([prefSet next])
-        {
-            preferences = [[NSJSONSerialization JSONObjectWithData:[[prefSet stringForColumn:@"json"] dataUsingEncoding:NSUTF8StringEncoding] options:kNilOptions error:nil] mutableCopy];
-            DDLogVerbose(@"LESS:: prefs: %@", _prefs);
-        }
-        else
-        {
-            DDLogVerbose(@"LESS:: no preferences found!");
-            preferences = [NSMutableDictionary dictionaryWithObjectsAndKeys: nil];
-        }
-        [prefSet close];
-    }];
-    
-    return preferences;
-}
+// Save a copy of db.sqlite into wherever NSHomeDirectory() points us
 
 -(BOOL) copyDbFile
 {
@@ -205,73 +161,24 @@ static LessDb * sharedDb;
         return false;
     }
     DDLogVerbose(@"LESS:: Successfully created db.sqlite file");
+    
+    
     return true;
 }
 
--(void) updateParentFilesListWithCompletion:(void(^)(void))handler;
-{
-    if([_delegate getCurrentSiteUUID] == nil)
-    {
-        return;
-    }
-    
-    [_dbQueue inDatabase:^(FMDatabase *db) {
-        DDLogVerbose(@"LESS:: updateParentFilesWithCompletion");
-        FMResultSet * d = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM less_files WHERE parent_id == -1 AND site_uuid == '%@'", [_delegate getCurrentSiteUUID]] ];
-        if(_currentParentFiles == nil)
-        {
-            _currentParentFiles = [NSMutableArray array];
-        }
-        else
-        {
-            [_currentParentFiles removeAllObjects];
-        }
-        while([d next])
-        {
-            [_currentParentFiles addObject:[d resultDictionary]];
-        }
-        
-        FMResultSet *s = [db executeQuery:[NSString stringWithFormat:@"SELECT COUNT(*) FROM less_files WHERE parent_id == -1 AND site_uuid == '%@'", [_delegate getCurrentSiteUUID]] ];
-        if ([s next])
-        {
-            _currentParentFilesCount = [s intForColumnIndex:0];
-        }
-        
-        if(handler != nil)
-        {
-            handler();
-        }
-        [s close];
-        [d close];
-    }];
-}
-
--(void) updatePreferenceNamed:(NSString *)pref withValue:(id)val
-{
-    [_prefs setObject:val forKey:pref];
-    [self setPreferences:_prefs];
-}
-
--(void) setPreferences:(NSDictionary *)preferences
-{
-    [_dbQueue inDatabase:^(FMDatabase *db) {
-        
-        NSData * jData = [NSJSONSerialization dataWithJSONObject:preferences options:kNilOptions error:nil];
-        [db executeUpdate:@"UPDATE preferences SET json = :json WHERE id == 1" withParameterDictionary:@{@"json" : jData}];
-    }];
-}
-
+// This is intended to be used only when updating the database file. It pulls specific values that are common to previous versions of the database,
+// So we can restore these values when db.sqlite is replaced.
 -(NSArray *) getParentFiles;
 {
     NSMutableArray * parentPaths = [NSMutableArray array];
     [_dbQueue inDatabase:^(FMDatabase *db) {
         FMResultSet * files = [db executeQuery:@"SELECT * FROM less_files WHERE parent_id = :parent_id" withParameterDictionary:@{@"parent_id" : @(-1)}];
-		while([files next])
+        while([files next])
         {
             NSMutableDictionary * fields = [@{@"path": [files stringForColumn:@"path"],
-                                    @"site_uuid": [files stringForColumn:@"site_uuid"],
-                                    @"css_path": [files stringForColumn:@"css_path"],
-                                     @"parent_id": @([files intForColumn:@"parent_id"])} mutableCopy];
+                                              @"site_uuid": [files stringForColumn:@"site_uuid"],
+                                              @"css_path": [files stringForColumn:@"css_path"],
+                                              @"parent_id": @([files intForColumn:@"parent_id"])} mutableCopy];
             if([files stringForColumn:@"options"] != nil)
             {
                 fields[@"options"] = [files stringForColumn:@"options"];
@@ -282,6 +189,61 @@ static LessDb * sharedDb;
     }];
     return parentPaths;
 }
+
+#pragma mark - general preferences
+
+
+// retrieve the preferences from the database, and create an NSDictionary from them
+-(NSDictionary *) getDbPreferences
+{
+    __block NSDictionary * preferences;
+    [_dbQueue inDatabase:^(FMDatabase *db) {
+        FMResultSet * prefSet = [db executeQuery:@"SELECT * FROM preferences"];
+        if([prefSet next])
+        {
+            preferences = [[NSJSONSerialization JSONObjectWithData:[[prefSet stringForColumn:@"json"] dataUsingEncoding:NSUTF8StringEncoding] options:kNilOptions error:nil] mutableCopy];
+            DDLogVerbose(@"LESS:: prefs: %@", _prefs);
+        }
+        else
+        {
+            DDLogVerbose(@"LESS:: no preferences found!");
+            preferences = [NSMutableDictionary dictionaryWithObjectsAndKeys: nil];
+        }
+        [prefSet close];
+    }];
+    
+    return preferences;
+}
+
+
+-(void) reloadDbPreferences
+{
+    _prefs = [[self getDbPreferences] mutableCopy];
+    [self updateParentFilesListWithCompletion:nil];
+}
+
+
+// Update the given preference, and push the change to the database
+-(void) updatePreferenceNamed:(NSString *)pref withValue:(id)val
+{
+    [_prefs setObject:val forKey:pref];
+    [self setPreferences:_prefs];
+}
+
+// Take the given preferences and save them as a json object in the database
+-(void) setPreferences:(NSDictionary *)preferences
+{
+    [_dbQueue inDatabase:^(FMDatabase *db) {
+        
+        NSData * jData = [NSJSONSerialization dataWithJSONObject:preferences options:kNilOptions error:nil];
+        [db executeUpdate:@"UPDATE preferences SET json = :json WHERE id == 1" withParameterDictionary:@{@"json" : jData}];
+    }];
+}
+
+#pragma mark - file registration
+
+// For a given url, determine if it is a file we should register (is it even a .less file? Is it a dependency of an existing registered file?).
+// If so, save it to the database, and check if it has any dependencies that need to be tracked as well.
 
 -(void) registerFile:(NSURL *)url
 {
@@ -302,6 +264,7 @@ static LessDb * sharedDb;
         return;
     }
     NSString *cssFile = [fileName stringByReplacingOccurrencesOfString:[url lastPathComponent] withString:[[url lastPathComponent] stringByReplacingOccurrencesOfString:@"less" withString:@"css"]];
+    
     [_dbQueue inDatabase:^(FMDatabase *db) {
         DDLogVerbose(@"LESS:: registerFile");
         
@@ -352,6 +315,8 @@ static LessDb * sharedDb;
     }];
 }
 
+
+// Delete any references to the given url and its dependencies.
 -(void) unregisterFile:(NSURL *)url
 {
     NSString * fileName = [_delegate getResolvedPathForPath:[url path]];
@@ -372,56 +337,13 @@ static LessDb * sharedDb;
     }];
 }
 
--(void) setCssPath:(NSURL *)cssUrl forPath:(NSURL *)url
-{
-    NSString * fileName = [_delegate getResolvedPathForPath:[url path]];
-    NSString * cssFileName = [_delegate getResolvedPathForPath:[cssUrl path]];
-    [_dbQueue inDatabase:^(FMDatabase *db) {
-        FMResultSet * parentFile = [db executeQuery:@"SELECT * FROM less_files WHERE path == :path" withParameterDictionary:@{@"path":fileName}];
-        if(![parentFile next])
-        {
-            DDLogError(@"LESS:: setCssPath: file %@ not found in db", fileName);
-            return;
-        }
-        if([db executeUpdate:@"UPDATE less_files SET css_path == :css_path WHERE id == :id" withParameterDictionary:@{@"css_path":cssFileName, @"id": [NSNumber numberWithInt:[parentFile intForColumn:@"id"]]}])
-        {
-            DDLogVerbose(@"LESS:: setCssPath: successfully set css path for file %@", fileName);
-        }
-        else
-        {
-            DDLogError(@"LESS:: setCssPath: error, %@",[db lastError]);
-        }
-        [parentFile close];
-    }];
-}
-
--(void) updateLessFilePreferences:(NSDictionary *)options forPath:(NSURL *) url
-{
-    
-    NSData * preferenceData = [NSJSONSerialization dataWithJSONObject:options options:kNilOptions error:nil];
-    DDLogVerbose(@"LESS:: updating preferences to: %@", [[NSString alloc] initWithData:preferenceData encoding:NSUTF8StringEncoding]);
-    
-    NSString * fileName = [_delegate getResolvedPathForPath:[url path]];
-    [_dbQueue inDatabase:^(FMDatabase *db) {
-        if([db executeUpdate:@"UPDATE less_files SET options == :val WHERE path == :path" withParameterDictionary:@{@"val": preferenceData, @"path" : fileName}])
-        {
-            DDLogVerbose(@"LESS:: updateLessFilePreferences: successfully updated preference for %@", fileName);
-            DDLogVerbose(@"LESS:: updateLessFilePreferences: updated preferences to: %@", [[NSString alloc] initWithData:preferenceData encoding:NSUTF8StringEncoding]);
-        }
-        else
-        {
-            DDLogError(@"LESS:: updateLessFilePreferences: error: %@", [db lastError]);
-        }
-    }];
-    
-}
 
 #pragma  mark - depenencyCheck queue
 /* To avoid calling multiple dependency checks at once, let's make a simple queue to process them in order. */
 
 -(void) addDependencyCheckOnFile:(NSString *) path
 {
-
+    
     if(dependencyQueue == nil)
     {
         dependencyQueue = [NSMutableArray array];
@@ -451,6 +373,8 @@ static LessDb * sharedDb;
     }
 }
 
+// Setup an NSTask to run the less compiler, parse the output to get the list of all dependency files,
+// and register them as dependencies.
 
 -(void) performDependencyCheckOnFile:(NSString *)path
 {
@@ -519,6 +443,94 @@ static LessDb * sharedDb;
         [indexTask launch];
         
     }];
+}
+
+# pragma mark - other things
+
+// Make sure our local copy of _currentParentFiles is up to date.
+
+-(void) updateParentFilesListWithCompletion:(void(^)(void))handler;
+{
+    if([_delegate getCurrentSiteUUID] == nil)
+    {
+        return;
+    }
+    
+    [_dbQueue inDatabase:^(FMDatabase *db) {
+        DDLogVerbose(@"LESS:: updateParentFilesWithCompletion");
+        FMResultSet * d = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM less_files WHERE parent_id == -1 AND site_uuid == '%@'", [_delegate getCurrentSiteUUID]] ];
+        if(_currentParentFiles == nil)
+        {
+            _currentParentFiles = [NSMutableArray array];
+        }
+        else
+        {
+            [_currentParentFiles removeAllObjects];
+        }
+        while([d next])
+        {
+            [_currentParentFiles addObject:[d resultDictionary]];
+        }
+        
+        FMResultSet *s = [db executeQuery:[NSString stringWithFormat:@"SELECT COUNT(*) FROM less_files WHERE parent_id == -1 AND site_uuid == '%@'", [_delegate getCurrentSiteUUID]] ];
+        if ([s next])
+        {
+            _currentParentFilesCount = [s intForColumnIndex:0];
+        }
+        
+        if(handler != nil)
+        {
+            handler();
+        }
+        [s close];
+        [d close];
+    }];
+}
+
+// If the user chooses to update the css path of a less file to somewhere else.
+-(void) setCssPath:(NSURL *)cssUrl forPath:(NSURL *)url
+{
+    NSString * fileName = [_delegate getResolvedPathForPath:[url path]];
+    NSString * cssFileName = [_delegate getResolvedPathForPath:[cssUrl path]];
+    [_dbQueue inDatabase:^(FMDatabase *db) {
+        FMResultSet * parentFile = [db executeQuery:@"SELECT * FROM less_files WHERE path == :path" withParameterDictionary:@{@"path":fileName}];
+        if(![parentFile next])
+        {
+            DDLogError(@"LESS:: setCssPath: file %@ not found in db", fileName);
+            return;
+        }
+        if([db executeUpdate:@"UPDATE less_files SET css_path == :css_path WHERE id == :id" withParameterDictionary:@{@"css_path":cssFileName, @"id": [NSNumber numberWithInt:[parentFile intForColumn:@"id"]]}])
+        {
+            DDLogVerbose(@"LESS:: setCssPath: successfully set css path for file %@", fileName);
+        }
+        else
+        {
+            DDLogError(@"LESS:: setCssPath: error, %@",[db lastError]);
+        }
+        [parentFile close];
+    }];
+}
+
+// Update preferences specific to each less file.
+-(void) updateLessFilePreferences:(NSDictionary *)options forPath:(NSURL *) url
+{
+    
+    NSData * preferenceData = [NSJSONSerialization dataWithJSONObject:options options:kNilOptions error:nil];
+    DDLogVerbose(@"LESS:: updating preferences to: %@", [[NSString alloc] initWithData:preferenceData encoding:NSUTF8StringEncoding]);
+    
+    NSString * fileName = [_delegate getResolvedPathForPath:[url path]];
+    [_dbQueue inDatabase:^(FMDatabase *db) {
+        if([db executeUpdate:@"UPDATE less_files SET options == :val WHERE path == :path" withParameterDictionary:@{@"val": preferenceData, @"path" : fileName}])
+        {
+            DDLogVerbose(@"LESS:: updateLessFilePreferences: successfully updated preference for %@", fileName);
+            DDLogVerbose(@"LESS:: updateLessFilePreferences: updated preferences to: %@", [[NSString alloc] initWithData:preferenceData encoding:NSUTF8StringEncoding]);
+        }
+        else
+        {
+            DDLogError(@"LESS:: updateLessFilePreferences: error: %@", [db lastError]);
+        }
+    }];
+    
 }
 
 @end

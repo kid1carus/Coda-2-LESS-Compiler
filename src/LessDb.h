@@ -35,14 +35,9 @@
 
 +(LessDb *)sharedLessDb;
 -(LessDb *) initWithDelegate:(BaseCodaPlugin <LessDbDelegate> *)d;
-
-
 -(void) setupDb;
--(void) replaceDatabase;
--(void) reloadDbPreferences;
--(BOOL) copyDbFile;
--(void) updateParentFilesListWithCompletion:(void(^)(void))handler;
 
+-(void) updateParentFilesListWithCompletion:(void(^)(void))handler;
 -(void) updatePreferenceNamed:(NSString *)pref withValue:(id)val;
 -(void) registerFile:(NSURL *)url;
 -(void) unregisterFile:(NSURL *)url;

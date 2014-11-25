@@ -173,8 +173,6 @@
 				4C60E398182009D3003752C5 /* node */,
 				8D5B49B7048680CD000E48DA /* Info.plist */,
 				089C167DFE841241C02AAC07 /* InfoPlist.strings */,
-				4C321FCF1827F98700FE7058 /* FileView.xib */,
-				4CE8C352191298C30023524E /* FileFooter.xib */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -274,6 +272,8 @@
 		4C5CB3C918244CD700A4DD66 /* views */ = {
 			isa = PBXGroup;
 			children = (
+				4C321FCF1827F98700FE7058 /* FileView.xib */,
+				4CE8C352191298C30023524E /* FileFooter.xib */,
 				4CFCBB9C1821B82A0030FC08 /* FileView.h */,
 				4CFCBB9D1821B82A0030FC08 /* FileView.m */,
 				4C5CB3CA18244CFF00A4DD66 /* keyPrefButton.h */,
