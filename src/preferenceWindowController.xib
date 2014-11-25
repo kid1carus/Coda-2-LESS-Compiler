@@ -125,7 +125,7 @@
                         </textFieldCell>
                     </textField>
                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="Jqm-fC-gEH" userLabel="Text Field - LESS Version field">
-                        <rect key="frame" x="342" y="190" width="100" height="17"/>
+                        <rect key="frame" x="351" y="190" width="100" height="17"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" id="dur-d7-gGU">
                             <font key="font" metaFont="system"/>
@@ -134,7 +134,7 @@
                         </textFieldCell>
                     </textField>
                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" id="Qjg-53-Uad" userLabel="Text Field - version field">
-                        <rect key="frame" x="342" y="210" width="100" height="17"/>
+                        <rect key="frame" x="351" y="210" width="100" height="17"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" id="DYM-IC-VwE">
                             <font key="font" metaFont="system"/>
