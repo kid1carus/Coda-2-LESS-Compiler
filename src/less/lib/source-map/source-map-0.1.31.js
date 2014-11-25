@@ -1931,6 +1931,3 @@ this.sourceMap = {
   SourceMapGenerator: require('source-map/source-map-generator').SourceMapGenerator,
   SourceNode: require('source-map/source-node').SourceNode
 };
-
-
-

@@ -91,6 +91,7 @@ static int ddLogLevel = LOG_LEVEL_ERROR;
 {
     if(siteSettingsController != nil)
     {
+        [siteSettingsController showWindow:self];
         return;
     }
     
@@ -103,6 +104,7 @@ static int ddLogLevel = LOG_LEVEL_ERROR;
 {
     if(preferenceController != nil)
     {
+        [preferenceController showWindow:self];
         return;
     }
     
