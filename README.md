@@ -37,7 +37,6 @@ If you're still using Coda 2.0.x, the plugin cannot mark the compiled files for 
 
 This compiler does not have its own log, but it DOES barf a lot of stuff into system.log. Lines from this plugin start with 'LESS::'.
 
-Many of the command-line options for the Node.js compiler are not available-- if you have the need for any of these, let me know and I'll gladly add an option for it.
 
 Improvements
 ------------
@@ -54,6 +53,14 @@ My immediate goals are:
 
 Change Log
 ==========
+
+1.1.0
+-----
+- Updated Less to 2.2.0
+- Updated Node to latest release
+- Refactored NSTask code to separate class (which will hopefully make it less tempermental)
+- Cleaned up some of the compile code
+- Modified Lessc to make --depends more consistently output to stdout before appearing to end (see issue #13)
 
 0.5
 ---
