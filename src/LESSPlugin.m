@@ -4,7 +4,7 @@
 #import "DDASLLogger.h"
 #import "FileView.h"
 
-static int ddLogLevel = LOG_LEVEL_ERROR;
+static int ddLogLevel = LOG_LEVEL_VERBOSE;
 @interface LESSPlugin ()
 
 - (id)initWithController:(CodaPlugInsController*)inController;
@@ -35,6 +35,7 @@ static int ddLogLevel = LOG_LEVEL_ERROR;
         [self registerActions];
         Ldb = [[LessDb alloc] initWithDelegate:self];
         [Ldb setupDb];
+        [Ldb setupLog];
     }
 	return self;
 }
@@ -80,7 +81,8 @@ static int ddLogLevel = LOG_LEVEL_ERROR;
         NSURL *url = [NSURL fileURLWithPath:path isDirectory:NO];
         if([[url pathExtension] isEqualToString:@"less"])
         {
-            [self performSelectorOnMainThread:@selector(handleLessFile:) withObject:textView waitUntilDone:true];
+            [self performSelector:@selector(handleLessFile:) withObject:[self getResolvedPathForPath:path] afterDelay:0.01];
+//            [self performSelectorOnMainThread:@selector(handleLessFile:) withObject:textView waitUntilDone:true];
         }
     }
 }
@@ -131,7 +133,7 @@ static int ddLogLevel = LOG_LEVEL_ERROR;
 
 #pragma mark - LESS methods
 
--(void) handleLessFile:(CodaTextView *)textView
+-(void) handleLessFile:(NSString *)path
 {
     if(isCompiling || Ldb.isDepenencying || (task!= nil && [task isRunning]))
     {
@@ -139,84 +141,63 @@ static int ddLogLevel = LOG_LEVEL_ERROR;
         return;
     }
     
-    NSString *path = [self getResolvedPathForPath:[textView path]];
     DDLogVerbose(@"LESS:: ++++++++++++++++++++++++++++++++++++++++++++++++++++++");
     DDLogVerbose(@"LESS:: Handling file: %@", path);
     
-    [Ldb.dbQueue inDatabase:^(FMDatabase *db) {
-        FMResultSet * s = [db executeQuery:@"SELECT * FROM less_files WHERE path = :path" withParameterDictionary:@{@"path": path}];
-        if([s next])
+    NSDictionary * parent = [Ldb getParentForFilepath:path];
+    if(parent == nil)
+    {
+        return;
+    }
+    NSString * parentPath = [parent objectForKey:@"path"];
+    NSString * cssPath = [parent objectForKey:@"css_path"];
+    
+    
+    DDLogVerbose(@"LESS:: parent Path: %@", parentPath);
+    DDLogVerbose(@"LESS:: css Path: %@", cssPath);
+    
+    //Set compilation options
+    NSMutableArray * options  = [NSMutableArray array];
+    NSData * optionsData = [parent objectForKey:@"options"];
+    
+    if(optionsData != nil && ![optionsData isEqual:[NSNull null]])
+    {
+        NSDictionary * parentFileOptions = [NSJSONSerialization JSONObjectWithData:optionsData options:0 error:nil];
+        if(parentFileOptions != nil && parentFileOptions != (id)[NSNull null])
         {
-            FMResultSet * parentFile = s;
-            int parent_id = [parentFile intForColumn:@"parent_id"];
-            DDLogVerbose(@"LESS:: initial parent_id: %d", parent_id);
-            //Find the parent Less file (parent_id = -1)
-            //This could probably be done with one query, but I'm kind of bad with SQL recursion :welp:
-            while(parent_id > -1)
+            for(NSString * optionName in parentFileOptions.allKeys)
             {
-                [parentFile close];
-                parentFile = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM less_files WHERE id = %d", parent_id]];
-                if([parentFile next])
+                if([[parentFileOptions objectForKey:optionName] intValue] == 1)
                 {
-                    parent_id = [parentFile intForColumn:@"parent_id"];
+                    [options addObject:optionName];
                 }
             }
-            
-			NSString * parentPath = [parentFile stringForColumn:@"path"];
-            NSString *cssPath = [parentFile stringForColumn:@"css_path"];
-
-            DDLogVerbose(@"LESS:: parent Path: %@", parentPath);
-            DDLogVerbose(@"LESS:: css Path: %@", cssPath);
-            
-            //start the dependency check back on the main thread
-            [Ldb performSelectorOnMainThread:@selector(addDependencyCheckOnFile:) withObject:parentPath waitUntilDone:false];
-            
-            
-            //Set compilation options
-            NSMutableArray * options  = [NSMutableArray array];
-            NSData * optionsData = [parentFile dataForColumn:@"options"];
-            if(optionsData != nil && ![optionsData isEqual:[NSNull null]])
-            {
-                NSDictionary * parentFileOptions = [NSJSONSerialization JSONObjectWithData:optionsData options:0 error:nil];
-                if(parentFileOptions != nil && parentFileOptions != (id)[NSNull null])
-                {
-                    for(NSString * optionName in parentFileOptions.allKeys)
-                    {
-                        if([[parentFileOptions objectForKey:optionName] intValue] == 1)
-                        {
-                            [options addObject:optionName];
-                        }
-                    }
-                }
-            }
-            
-            [parentFile close];
-            [self compileFile:parentPath toFile:cssPath withOptions:options];
         }
-        else
-        {
-            DDLogError(@"LESS:: No DB entry found for file: %@", path);
-        }
-        [s close];
-    }];
+    }
+    
+    DDLogVerbose(@"LESS:: compiling");
+    int resultCode = [self compileFile:parentPath toFile:cssPath withOptions:options];
+    if(resultCode == 0)
+    {
+        DDLogVerbose(@"LESS:: starting dependency check");
+        [Ldb addDependencyCheckOnFile:parentPath];
+        DDLogVerbose(@"LESS:: dependency check ended.");
+    }
 }
 
--(void) compileFile:(NSString *)lessFile toFile:(NSString *)cssFile withOptions:(NSArray *)options
+-(int) compileFile:(NSString *)lessFile toFile:(NSString *)cssFile withOptions:(NSArray *)options
 {
     if(isCompiling || Ldb.isDepenencying || (task!= nil && [task isRunning]))
     {
         DDLogVerbose(@"LESS:: Compilation task is already running.");
-        return;
+        return -1;
     }
     isCompiling = true;
     compileCount++;
     DDLogVerbose(@"LESS:: Compiling file: %@ to file: %@", lessFile, cssFile);
     DDLogVerbose(@"LESS:: Compile count: %d", compileCount);
-    task = [[NSTask alloc] init];
-    outputPipe = [[NSPipe alloc] init];
-    errorPipe = [[NSPipe alloc]  init];
-    outputText = [[NSString alloc] init];
-    errorText = [[NSString alloc] init];
+
+    NSString * launchPath = [NSString stringWithFormat:@"%@/node", [self.pluginBundle resourcePath]];
     NSString * lessc = [NSString stringWithFormat:@"%@/less/bin/lessc", [self.pluginBundle resourcePath]];
     NSMutableArray * arguments = [NSMutableArray array];
     [arguments addObject:lessc];
@@ -232,109 +213,28 @@ static int ddLogLevel = LOG_LEVEL_ERROR;
     [arguments addObject:lessFile];
     [arguments addObject:cssFile];
     DDLogVerbose(@"LESS:: Node arguments: %@", arguments);
-    task.launchPath = [NSString stringWithFormat:@"%@/node", [self.pluginBundle resourcePath]];
-    task.arguments = arguments;
-    task.standardOutput = outputPipe;
     
-    [[outputPipe fileHandleForReading] readToEndOfFileInBackgroundAndNotify];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getOutput:) name:NSFileHandleReadToEndOfFileCompletionNotification object:[outputPipe fileHandleForReading]];
     
-    task.standardError = errorPipe;
-    [[errorPipe fileHandleForReading] readToEndOfFileInBackgroundAndNotify];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(getError:) name:NSFileHandleReadToEndOfFileCompletionNotification object:[errorPipe fileHandleForReading]];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(taskDidTerminate:) name:NSTaskDidTerminateNotification object:task];
-    
+    task = [[TaskMan alloc] initWithLaunchPath:launchPath AndArguments:arguments];
     [task launch];
-}
-
-
--(void) taskDidTerminate:(NSNotification *) notification
-{
-    DDLogVerbose(@"LESS:: Received taskDidTerminate.");
-    
-    if(task.isRunning)
-    {
-        DDLogVerbose(@"LESS:: Psyche, task is still running.");
-        return;
-    }
-    DDLogVerbose(@"LESS:: Task terminated with status: %d", task.terminationStatus);
+    outputText = [task getOutput];
+    errorText = [task getError];
+    DDLogVerbose(@"LESS:: Task terminated with status: %d", [task resultCode]);
     DDLogVerbose(@"LESS:: =====================================================");
-}
-
--(void) getOutput:(NSNotification *) notification
-{
-
-    NSData *output = [[notification userInfo ] objectForKey:@"NSFileHandleNotificationDataItem"];
-    NSString *outStr = [[NSString alloc] initWithData:output encoding:NSUTF8StringEncoding];
-//	DDLogVerbose(@"LESS:: getOutput: %@",outStr);
     
-    dispatch_async(dispatch_get_main_queue(), ^{
-        outputText = [outputText stringByAppendingString: outStr];
-    });
-    
-    if([task isRunning])
+    if([task resultCode] == 0)
     {
-        [[outputPipe fileHandleForReading] readToEndOfFileInBackgroundAndNotify];
+        [self displaySuccess];
     }
     else
     {
-        DDLogVerbose(@"LESS:: Task terminated with status: %d", task.terminationStatus);
-        DDLogVerbose(@"LESS:: =====================================================");
-        isCompiling = false;
-        if(task.terminationStatus == 0)
-        {
-        	[self displaySuccess];
-        }
+        [self displayError:errorText];
     }
-}
-
-
--(void) getError:(NSNotification *) notification
-{
-    
-    NSData *output = [[notification userInfo ] objectForKey:@"NSFileHandleNotificationDataItem"];
-    NSString *outStr = [[NSString alloc] initWithData:output encoding:NSUTF8StringEncoding];
-    if([outStr isEqualToString:@""])
-    {
-        return;
-    }
-    DDLogError(@"LESS:: Encountered some error on compilation task: %@", outStr);
-
-    dispatch_async(dispatch_get_main_queue(), ^{
-        NSDictionary * error = [self getErrorMessage:outStr];
-        if(error != nil)
-        {
-            if([[Ldb.prefs objectForKey:@"displayOnError"] integerValue] == 1)
-            {
-                NSString * sound = nil;
-                if([[Ldb.prefs objectForKey:@"playOnError"] integerValue] == 1)
-                {
-                    sound = @"Basso";
-                }
-                
-                [self sendUserNotificationWithTitle:@"LESS:: Parse Error" andMessage:[error objectForKey:@"errorMessage"]];
-            }
-            
-            if([[Ldb.prefs objectForKey:@"openFileOnError"] integerValue] == 1)
-            {
-                NSError * err;
-                CodaTextView * errorTextView = [self.controller openFileAtPath:[error objectForKey:@"filePath"] error:&err];
-                if(err)
-                {
-                	DDLogVerbose(@"LESS:: error opening file: %@", err);
-                    return;
-                }
-                
-                [errorTextView goToLine:[[error objectForKey:@"lineNumber"] integerValue] column:[[error objectForKey:@"columnNumber"] integerValue] ];
-            }
-        }
-    });
-    
-    if([task isRunning])
-    {
-    	[[errorPipe fileHandleForReading] readToEndOfFileInBackgroundAndNotify];
-    }
+    int ret = [task resultCode];
+    isCompiling = false;
+    task = nil;
+    return ret;
 }
 
 /* parse the error message and pull the useful bits from it. */
@@ -397,5 +297,37 @@ static int ddLogLevel = LOG_LEVEL_ERROR;
         
         [self sendUserNotificationWithTitle:@"LESS:: Compiled Successfully!" andMessage:@"file compiled successfully!"];
     }
+}
+
+-(void) displayError:(NSString *)errorText
+{
+    NSDictionary * error = [self getErrorMessage:errorText];
+    if(error != nil)
+    {
+        if([[Ldb.prefs objectForKey:@"displayOnError"] integerValue] == 1)
+        {
+            NSString * sound = nil;
+            if([[Ldb.prefs objectForKey:@"playOnError"] integerValue] == 1)
+            {
+                sound = @"Basso";
+            }
+            
+            [self sendUserNotificationWithTitle:@"LESS:: Parse Error" andMessage:[error objectForKey:@"errorMessage"]];
+        }
+        
+        if([[Ldb.prefs objectForKey:@"openFileOnError"] integerValue] == 1)
+        {
+            NSError * err;
+            CodaTextView * errorTextView = [self.controller openFileAtPath:[error objectForKey:@"filePath"] error:&err];
+            if(err)
+            {
+                DDLogVerbose(@"LESS:: error opening file: %@", err);
+                return;
+            }
+            
+            [errorTextView goToLine:[[error objectForKey:@"lineNumber"] integerValue] column:[[error objectForKey:@"columnNumber"] integerValue] ];
+        }
+    }
+
 }
 @end

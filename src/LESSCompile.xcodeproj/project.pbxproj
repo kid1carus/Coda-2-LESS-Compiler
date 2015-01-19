@@ -13,6 +13,8 @@
 		4C5CB3CC18244CFF00A4DD66 /* keyPrefButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C5CB3CB18244CFF00A4DD66 /* keyPrefButton.m */; };
 		4C5CB3CE182456C400A4DD66 /* trash2-50.png in Resources */ = {isa = PBXBuildFile; fileRef = 4C5CB3CD182456C400A4DD66 /* trash2-50.png */; };
 		4C60E399182009D3003752C5 /* node in Resources */ = {isa = PBXBuildFile; fileRef = 4C60E398182009D3003752C5 /* node */; };
+		4C61B8E41A697C2100456E41 /* log.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 4C61B8E31A697C2100456E41 /* log.sqlite */; };
+		4C61B8E71A69C35500456E41 /* TaskMan.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C61B8E61A69C35500456E41 /* TaskMan.m */; };
 		4C6D96D619FD6D95004CAE9E /* LessDb.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C6D96D519FD6D95004CAE9E /* LessDb.m */; };
 		4C8B098D1905BEF4002D30DE /* dropView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C8B098C1905BEF4002D30DE /* dropView.m */; };
 		4C935B29199AC37B00AD1D5A /* DDAbstractDatabaseLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C0C4FBC181F118600E35333 /* DDAbstractDatabaseLogger.m */; };
@@ -77,6 +79,9 @@
 		4C5CB3CD182456C400A4DD66 /* trash2-50.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "trash2-50.png"; sourceTree = "<group>"; };
 		4C605F3E1677C20600C8F7D9 /* CodaPlugInsController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CodaPlugInsController.h; sourceTree = "<group>"; };
 		4C60E398182009D3003752C5 /* node */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = node; sourceTree = "<group>"; };
+		4C61B8E31A697C2100456E41 /* log.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = log.sqlite; sourceTree = "<group>"; };
+		4C61B8E51A69C35500456E41 /* TaskMan.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TaskMan.h; sourceTree = "<group>"; };
+		4C61B8E61A69C35500456E41 /* TaskMan.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TaskMan.m; sourceTree = "<group>"; };
 		4C6D96D419FD6D95004CAE9E /* LessDb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LessDb.h; sourceTree = "<group>"; };
 		4C6D96D519FD6D95004CAE9E /* LessDb.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LessDb.m; sourceTree = "<group>"; };
 		4C8B098B1905BEF4002D30DE /* dropView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dropView.h; sourceTree = "<group>"; };
@@ -168,6 +173,7 @@
 				4CFCBB951821B51C0030FC08 /* images */,
 				4CCA70CA19228C78001617FC /* less */,
 				4CFCBB8F18218F2B0030FC08 /* db.sqlite */,
+				4C61B8E31A697C2100456E41 /* log.sqlite */,
 				4CA289EB19FE8E5C008D523C /* node_modules */,
 				4C1DFC1A182063330078B179 /* growl */,
 				4C60E398182009D3003752C5 /* node */,
@@ -190,6 +196,8 @@
 				4CCDB1861846503900B0C66C /* BaseCodaPlugin.m */,
 				4C6D96D419FD6D95004CAE9E /* LessDb.h */,
 				4C6D96D519FD6D95004CAE9E /* LessDb.m */,
+				4C61B8E51A69C35500456E41 /* TaskMan.h */,
+				4C61B8E61A69C35500456E41 /* TaskMan.m */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -404,6 +412,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4C61B8E41A697C2100456E41 /* log.sqlite in Resources */,
 				4CE8C353191298C30023524E /* FileFooter.xib in Resources */,
 				4CCA70CB19228C78001617FC /* less in Resources */,
 				4C321FD01827F98700FE7058 /* FileView.xib in Resources */,
@@ -435,6 +444,7 @@
 				4C935B29199AC37B00AD1D5A /* DDAbstractDatabaseLogger.m in Sources */,
 				4CF0C0E11A03FEB80017047E /* flippedView.m in Sources */,
 				4C935B2A199AC37D00AD1D5A /* DDASLLogger.m in Sources */,
+				4C61B8E71A69C35500456E41 /* TaskMan.m in Sources */,
 				4C935B2B199AC37F00AD1D5A /* DDFileLogger.m in Sources */,
 				4C935B2C199AC38100AD1D5A /* DDLog.m in Sources */,
 				4C935B2D199AC38300AD1D5A /* DDTTYLogger.m in Sources */,
@@ -473,8 +483,8 @@
 			buildSettings = {
 				CLANG_ENABLE_OBJC_ARC = YES;
 				COPY_PHASE_STRIP = NO;
-				DEPLOYMENT_LOCATION = NO;
-				DSTROOT = "$(HOME)/Library/Application Support/Coda/PlugIns";
+				DEPLOYMENT_LOCATION = YES;
+				DSTROOT = "$(HOME)/Library/Application Support/Coda 2/Plug-ins";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -486,10 +496,10 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = LESSCompile_Prefix.pch;
 				INFOPLIST_FILE = Info.plist;
-				INSTALL_PATH = "";
-				MACOSX_DEPLOYMENT_TARGET = 10.6.8;
+				INSTALL_PATH = /;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = LESSCompile;
-				SDKROOT = macosx;
+				SDKROOT = macosx10.9;
 				SKIP_INSTALL = NO;
 				WRAPPER_EXTENSION = codaplugin;
 			};
@@ -501,7 +511,7 @@
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				DEPLOYMENT_LOCATION = NO;
-				DSTROOT = "$(HOME)/Library/Application Support/Coda/PlugIns";
+				DSTROOT = "$(HOME)/Library/Application Support/Coda 2/Plug-ins";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -512,9 +522,9 @@
 				GCC_PREFIX_HEADER = LESSCompile_Prefix.pch;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "";
-				MACOSX_DEPLOYMENT_TARGET = 10.6.8;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = LESSCompile;
-				SDKROOT = macosx;
+				SDKROOT = macosx10.9;
 				SKIP_INSTALL = NO;
 				WRAPPER_EXTENSION = codaplugin;
 			};

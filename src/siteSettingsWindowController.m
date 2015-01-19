@@ -337,6 +337,8 @@ static int ddLogLevel;
                 continue;
             }
             NSURL * aUrl = [NSURL URLWithString:aPath];
+            DDLogVerbose(@"LESS:: dragged urL: %@", aUrl);
+//            [Ldb performSelectorOnMainThread:@selector(registerFile:) withObject:aUrl waitUntilDone:true];
             [Ldb registerFile:aUrl];
         }
     }

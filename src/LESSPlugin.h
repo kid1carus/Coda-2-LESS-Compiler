@@ -8,14 +8,18 @@
 #import "siteSettingsWindowController.h"
 #import "preferenceWindowController.h"
 
+#import "TaskMan.h"
+
 @interface LESSPlugin : BaseCodaPlugin <CodaPlugIn, NSUserNotificationCenterDelegate, NSWindowDelegate, DraggingDestinationDelegate, LessDbDelegate>
 {
     
     /* compile tasks and pipes */
-    NSTask * task;
-    NSPipe * outputPipe;
-    NSPipe * errorPipe;
-    
+    TaskMan * task;
+//    
+//    NSTask * task;
+//    NSPipe * outputPipe;
+//    NSPipe * errorPipe;
+//    
     NSString * outputText;
     NSString * errorText;
     

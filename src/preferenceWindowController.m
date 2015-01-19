@@ -14,8 +14,8 @@
 #import "keyPrefButton.h"
 
 static int ddLogLevel;
-static NSString * COMPVERSION = @"1.0.0";
-static NSString * LESSVERSION = @"2.1.0";
+static NSString * COMPVERSION = @"1.1.0";
+static NSString * LESSVERSION = @"2.2.0";
 @interface preferenceWindowController ()
 
 @end
