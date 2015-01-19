@@ -21,35 +21,28 @@ This plugin provides LESS compilation straight in Coda--no more having to rememb
 
 How do you use it?
 ------------------
-
 Once you install the plugin, you can add .less files to be watched by going to Plug-Ins > LESS Compiler > Site Settings.
 You can drag and drop the desired .less file, or hit the folder icon and select it. LESS Compiler will add it, and watch it *AND* any @imported files for changes.
 
 ![File Settings](/stuff/Less file settings.png)
+
+Clicking the cog will show the Advanced settings for the given file:
+
+![Advanced Settings](/stuff/Less file settings advanced.png)
 
 The preferences menu provides various options for how LESS Compiler notifies you.
 ![Preferences](/stuff/Less preferences.png)
 
 Limitations
 -----------
-
 If you're still using Coda 2.0.x, the plugin cannot mark the compiled files for publishing. Fortunately, Coda 2.5 takes care of this!
 
 This compiler does not have its own log, but it DOES barf a lot of stuff into system.log. Lines from this plugin start with 'LESS::'.
 
-
 Improvements
 ------------
-
 If you have any ideas for how this plugin can work better, or any feature requests, please let me know by [opening an issue in the issue tracker](https://github.com/mjvotaw/Coda-2-LESS-Compiler/issues/new).
 
-
-Plans for the Plugin
---------------------
-
-My immediate goals are:
-- Add a fuller set of 'advanced' compilation options on a per-file basis.
-- Setup the database to better handle changes to structure, so that future releases don't completely nuke the user's settings and compile lists.
 
 Change Log
 ==========
@@ -61,6 +54,13 @@ Change Log
 - Refactored NSTask code to separate class (which will hopefully make it less tempermental)
 - Cleaned up some of the compile code
 - Modified Lessc to make --depends more consistently output to stdout before appearing to end (see issue #13)
+
+1.0.0
+-----
+- Added many more compiler options
+- Setup database to no longer nuke older versions
+- Cleaned up code a bunch
+- Updated Less to 2.1.0
 
 0.5
 ---
