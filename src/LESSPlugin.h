@@ -10,16 +10,10 @@
 
 #import "TaskMan.h"
 
-@interface LESSPlugin : BaseCodaPlugin <CodaPlugIn, NSUserNotificationCenterDelegate, NSWindowDelegate, DraggingDestinationDelegate, LessDbDelegate>
+@interface LESSPlugin : BaseCodaPlugin <CodaPlugIn, NSUserNotificationCenterDelegate, NSWindowDelegate, LessDbDelegate>
 {
     
-    /* compile tasks and pipes */
     TaskMan * task;
-//    
-//    NSTask * task;
-//    NSPipe * outputPipe;
-//    NSPipe * errorPipe;
-//    
     NSString * outputText;
     NSString * errorText;
     

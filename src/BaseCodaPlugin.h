@@ -30,6 +30,7 @@
 -(void) sendUserNotificationWithTitle:(NSString *)title andMessage:(NSString *)message;
 -(void) sendUserNotificationWithTitle:(NSString *)title sound:(NSString *)sound andMessage:(NSString * ) message;
 #pragma mark - OS X Compatability methods
+-(id) getNibNamed:(NSString *)nibName forClass:(Class)nibClass;
 -(NSArray *) loadNibNamed:(NSString *)nibName;
 #pragma mark - other helpers
 -(BOOL) isSiteOpen;

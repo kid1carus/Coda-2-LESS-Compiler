@@ -74,9 +74,14 @@ static int ddLogLevel = LOG_LEVEL_ERROR;
     NSURL * chosenFile = nil;
     // Create the File Open Dialog class.
     NSOpenPanel* openDlg = [NSOpenPanel openPanel];
-    if([_controller respondsToSelector:@selector(focusedTextView)] && [_controller focusedTextView] != nil)
+    
+    if([_controller respondsToSelector:@selector(siteLocalPath)])   //Coda 2.5
     {
-    	[openDlg setDirectoryURL: [NSURL fileURLWithPath:[[_controller focusedTextView] siteLocalPath] ]];
+    	[openDlg setDirectoryURL: [NSURL fileURLWithPath:[_controller siteLocalPath] ]];
+    }
+    else if([_controller respondsToSelector:@selector(focusedTextView:)] && [_controller focusedTextView:nil] != nil)    //Coda 2
+    {
+        [openDlg setDirectoryURL: [NSURL fileURLWithPath:[[_controller focusedTextView:nil] siteLocalPath] ]];
     }
     // Enable the selection of files in the dialog.
     [openDlg setCanChooseFiles:YES];
@@ -109,9 +114,14 @@ static int ddLogLevel = LOG_LEVEL_ERROR;
     NSURL * chosenFile = nil;
     // Create the File Open Dialog class.
     NSSavePanel* saveDlg = [NSSavePanel savePanel];
-    if([_controller respondsToSelector:@selector(focusedTextView)] && [_controller focusedTextView] != nil)
+    
+    if([_controller respondsToSelector:@selector(siteLocalPath)])   //Coda 2.5
     {
-    	[saveDlg setDirectoryURL: [NSURL fileURLWithPath:[[_controller focusedTextView] siteLocalPath] ]];
+        [saveDlg setDirectoryURL: [NSURL fileURLWithPath:[_controller siteLocalPath] ]];
+    }
+    else if([_controller respondsToSelector:@selector(focusedTextView:)] && [_controller focusedTextView:nil] != nil) //Coda 2
+    {
+        [saveDlg setDirectoryURL: [NSURL fileURLWithPath:[[_controller focusedTextView:nil] siteLocalPath] ]];
     }
     
     [saveDlg setCanCreateDirectories:TRUE];
@@ -238,6 +248,19 @@ static int ddLogLevel = LOG_LEVEL_ERROR;
 }
 
 #pragma mark - OS X compatability methods
+
+-(id) getNibNamed:(NSString *)nibName forClass:(Class)nibClass
+{
+    NSArray * nibObjects = [self loadNibNamed:nibName];
+    for(id o in nibObjects)
+    {
+        if([o isKindOfClass:nibClass])
+        {
+            return o;
+        }
+    }
+    return nil;
+}
 
 -(NSArray *) loadNibNamed:(NSString *)nibName
 {

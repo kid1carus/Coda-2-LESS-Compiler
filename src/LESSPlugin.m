@@ -220,10 +220,11 @@ static int ddLogLevel = LOG_LEVEL_VERBOSE;
     [task launch];
     outputText = [task getOutput];
     errorText = [task getError];
-    DDLogVerbose(@"LESS:: Task terminated with status: %d", [task resultCode]);
+    int resultCode = [task resultCode];
+    DDLogVerbose(@"LESS:: Task terminated with status: %d", resultCode);
     DDLogVerbose(@"LESS:: =====================================================");
     
-    if([task resultCode] == 0)
+    if(resultCode == 0)
     {
         [self displaySuccess];
     }
@@ -231,10 +232,10 @@ static int ddLogLevel = LOG_LEVEL_VERBOSE;
     {
         [self displayError:errorText];
     }
-    int ret = [task resultCode];
+
     isCompiling = false;
     task = nil;
-    return ret;
+    return resultCode;
 }
 
 /* parse the error message and pull the useful bits from it. */

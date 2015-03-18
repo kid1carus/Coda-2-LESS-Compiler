@@ -161,17 +161,7 @@ static int ddLogLevel;
     if(Ldb.currentParentFilesCount == 0)
     {
         [fileDocumentView setFrame:NSMakeRect(0, 0, 583, self.fileScrollView.frame.size.height - 10)];
-        NSView * footerView;
-        NSArray *nibObjects = [Ldb.delegate loadNibNamed:@"FileFooter"];
-        
-        for(NSView * o in nibObjects)
-        {
-            if([o isKindOfClass:[NSView class]])
-            {
-                footerView = o;
-                break;
-            }
-        }
+        NSView * footerView = [Ldb.delegate getNibNamed:@"FileFooter" forClass:[NSView class]];
         
         NSRect fRect = footerView.frame;
         fRect.origin.y = 0;
@@ -186,18 +176,7 @@ static int ddLogLevel;
     for(int i = Ldb.currentParentFilesCount - 1; i >= 0; i--)
     {
         NSDictionary * currentFile = [Ldb.currentParentFiles objectAtIndex:i];
-        
-        NSArray *nibObjects = [Ldb.delegate loadNibNamed:@"FileView"];
-        
-        FileView * f;
-        for(FileView * o in nibObjects)
-        {
-            if([o isKindOfClass:[FileView class]])
-            {
-                f = o;
-                break;
-            }
-        }
+        FileView * f = [Ldb.delegate getNibNamed:@"FileView" forClass:[FileView class]];
         
         if(f == nil)
         {
