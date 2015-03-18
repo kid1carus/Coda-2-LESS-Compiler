@@ -10,7 +10,6 @@
 #import "DDLog.h"
 #import "DDASLLogger.h"
 
-#define DDLogVerbose(frmt, ...) [sharedDb logToDatabase:frmt, ##__VA_ARGS__];
 #define DBERROR(frmt, ...) [sharedDb errorToDatabase:frmt, ##__VA_ARGS__];
 static int ddLogLevel;
 static float COMPATIBLEDB = 0.6;
@@ -411,6 +410,8 @@ static LessDb * sharedDb;
     DDLogVerbose(@"LESS:: Performing dependency check on %@", path);
     _isDepenencying = true;
     
+    dependsPath = [_delegate getResolvedPathForPath:[[_delegate urlForPeristantFilePath:@"DEPENDS"] path]];
+    
     [_dbQueue inDatabase:^(FMDatabase *db) {
         
         FMResultSet * parent = [db executeQuery:@"SELECT * FROM less_files WHERE path = :path" withParameterDictionary:@{@"path":path}];
@@ -428,13 +429,10 @@ static LessDb * sharedDb;
         //run less to get dependencies list
         NSString * lessc = [NSString stringWithFormat:@"%@/less/bin/lessc", [_delegate.pluginBundle resourcePath]];
         NSString * launchPath = [NSString stringWithFormat:@"%@/node", [_delegate.pluginBundle resourcePath]];
-        tm = [[TaskMan alloc] initWithLaunchPath:launchPath AndArguments:@[lessc, @"--depends", path, @"DEPENDS"]];
+        tm = [[TaskMan alloc] initWithLaunchPath:launchPath AndArguments:@[lessc, @"--depends", path, dependsPath]];
         [tm launch];
         NSString * output = [tm getOutput];
         NSArray * dependencies = [self parseDependencies:output];
-        
-        //nuke all of the dependency records for this parent file
-        [db executeUpdate:@"DELTE FROM less_files WHERE parent_id = :parent_id" withParameterDictionary:@{@"parent_id":@(indexCurrentParentId)}];
         
         //Add or update the dependencies
         for(NSString * fileName in dependencies)
@@ -449,6 +447,12 @@ static LessDb * sharedDb;
                 DBERROR(@"LESS:: dependency update failed: %@", fileName);
             }
         }
+        
+        //nuke anything that's not a current dependency
+        
+        NSString * dependenciesList = [NSString stringWithFormat:@"'%@'",[dependencies componentsJoinedByString:@"', '"]];
+        [db executeUpdate:[NSString stringWithFormat:@"DELETE FROM less_files WHERE parent_id = :parent_id AND path NOT IN (%@)", dependenciesList] withParameterDictionary:@{@"parent_id" : @(indexCurrentParentId)}];
+        
     }];
     _isDepenencying = false;
     [self performSelectorOnMainThread:@selector(runDependencyQueue) withObject:nil waitUntilDone:false];
@@ -458,7 +462,8 @@ static LessDb * sharedDb;
 -(NSArray *) parseDependencies:(NSString *)outStr
 {
     NSMutableArray * depencyList = [NSMutableArray array];
-    outStr = [outStr stringByReplacingOccurrencesOfString:@"DEPENDS: " withString:@""];
+                  
+    outStr = [outStr stringByReplacingOccurrencesOfString:dependsPath withString:@""];
     NSError * error;
     NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"(/.*?\\.less)" options:nil error:&error];
     if(error != nil)

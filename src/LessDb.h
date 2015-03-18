@@ -30,6 +30,7 @@
     NSPipe * errorPipe;
     NSMutableArray * dependencyQueue;
     NSString * indexOutput;
+    NSString * dependsPath;
 }
 @property (strong) BaseCodaPlugin <LessDbDelegate> * delegate;
 @property (strong) FMDatabaseQueue * dbQueue;
