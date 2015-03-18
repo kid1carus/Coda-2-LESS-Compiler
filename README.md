@@ -47,6 +47,11 @@ If you have any ideas for how this plugin can work better, or any feature reques
 Change Log
 ==========
 
+1.1.1
+-----
+- Fixed issue #15 (--depends creates extraneous file, now creating it in a less conspicuous place)
+- Finally changed dependency sql to not recreate each dependency row on every compilation
+
 1.1.0
 -----
 - Updated Less to 2.2.0
