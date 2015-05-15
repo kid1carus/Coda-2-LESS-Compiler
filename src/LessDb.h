@@ -48,6 +48,7 @@
 -(void) updatePreferenceNamed:(NSString *)pref withValue:(id)val;
 -(void) registerFile:(NSURL *)url;
 -(void) unregisterFile:(NSURL *)url;
+-(void) unregisterFileWithId:(int)fileId;
 -(NSDictionary *) getParentForFilepath:(NSString *)filepath;
 -(void) setCssPath:(NSURL *)cssUrl forPath:(NSURL *)url;
 -(void) updateLessFilePreferences:(NSDictionary *)options forPath:(NSURL *) url;

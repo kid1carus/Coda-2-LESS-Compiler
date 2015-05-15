@@ -359,6 +359,16 @@ static LessDb * sharedDb;
     }];
 }
 
+-(void) unregisterFileWithId:(int)fileId
+{
+    [_dbQueue inDatabase:^(FMDatabase *db) {
+        DDLogVerbose(@"LESS:: unregisterFile: unregistered file with id %d", fileId);
+
+        [db executeUpdate:@"DELETE FROM less_files WHERE parent_id = :parent_id" withParameterDictionary:@{@"parent_id" : @(fileId)}];
+        
+        [db executeUpdate:@"DELETE FROM less_files WHERE id = :id" withParameterDictionary:@{@"id" : @(fileId)}];
+    }];
+}
 
 #pragma  mark - depenencyCheck queue
 /* To avoid calling multiple dependency checks at once, let's make a simple queue to process them in order. */
