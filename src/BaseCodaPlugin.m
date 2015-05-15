@@ -74,15 +74,13 @@ static int ddLogLevel = LOG_LEVEL_ERROR;
     NSURL * chosenFile = nil;
     // Create the File Open Dialog class.
     NSOpenPanel* openDlg = [NSOpenPanel openPanel];
+    NSString * openTo = [self getSiteLocalPath];
+    if(openTo == nil || [openTo isEqualToString:@""])
+    {
+        openTo = NSHomeDirectory();
+    }
+    [openDlg setDirectoryURL: [NSURL fileURLWithPath:openTo]];
     
-    if([_controller respondsToSelector:@selector(siteLocalPath)])   //Coda 2.5
-    {
-    	[openDlg setDirectoryURL: [NSURL fileURLWithPath:[_controller siteLocalPath] ]];
-    }
-    else if([_controller respondsToSelector:@selector(focusedTextView:)] && [_controller focusedTextView:nil] != nil)    //Coda 2
-    {
-        [openDlg setDirectoryURL: [NSURL fileURLWithPath:[[_controller focusedTextView:nil] siteLocalPath] ]];
-    }
     // Enable the selection of files in the dialog.
     [openDlg setCanChooseFiles:YES];
     
@@ -114,16 +112,12 @@ static int ddLogLevel = LOG_LEVEL_ERROR;
     NSURL * chosenFile = nil;
     // Create the File Open Dialog class.
     NSSavePanel* saveDlg = [NSSavePanel savePanel];
-    
-    if([_controller respondsToSelector:@selector(siteLocalPath)])   //Coda 2.5
+    NSString * openTo = [self getSiteLocalPath];
+    if(openTo == nil || [openTo isEqualToString:@""])
     {
-        [saveDlg setDirectoryURL: [NSURL fileURLWithPath:[_controller siteLocalPath] ]];
+        openTo = NSHomeDirectory();
     }
-    else if([_controller respondsToSelector:@selector(focusedTextView:)] && [_controller focusedTextView:nil] != nil) //Coda 2
-    {
-        [saveDlg setDirectoryURL: [NSURL fileURLWithPath:[[_controller focusedTextView:nil] siteLocalPath] ]];
-    }
-    
+    [saveDlg setDirectoryURL: [NSURL fileURLWithPath:openTo]];
     [saveDlg setCanCreateDirectories:TRUE];
     
     if ( [saveDlg runModal] == NSOKButton )
@@ -322,6 +316,20 @@ static int ddLogLevel = LOG_LEVEL_ERROR;
     }
     
     return currentSiteUUID;
+}
+
+-(NSString *) getSiteLocalPath
+{
+    if([_controller respondsToSelector:@selector(siteLocalPath)])   //Coda 2.5
+    {
+       return [_controller siteLocalPath];
+    }
+    else if([_controller respondsToSelector:@selector(focusedTextView:)] && [_controller focusedTextView:nil] != nil) //Coda 2
+    {
+        [[_controller focusedTextView:nil] siteLocalPath];
+    }
+
+    return nil;
 }
 
 @end
