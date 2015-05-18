@@ -47,6 +47,12 @@ If you have any ideas for how this plugin can work better, or any feature reques
 Change Log
 ==========
 
+1.1.2
+-----
+- Fixed crash when a Site doesn't have a local root set
+- Fixed odd situation caused by `[url URLByResolvingSymlinksInPath]` not being case sentsitive
+
+
 1.1.1
 -----
 - Fixed issue #15 (--depends creates extraneous file, now creating it in a less conspicuous place)
