@@ -81,7 +81,7 @@ static int ddLogLevel;
     {
         NSDictionary * fileInfo = [Ldb.currentParentFiles objectAtIndex:f.fileIndex];
         NSURL * url = [NSURL fileURLWithPath:[fileInfo objectForKey:@"path"]];
-        [Ldb unregisterFileWithId:[fileInfo objectForKey:@"id"]];
+        [Ldb unregisterFileWithId:[[fileInfo objectForKey:@"id"] intValue]];
         [Ldb updateParentFilesListWithCompletion:^{
             [self performSelectorOnMainThread:@selector(rebuildFileList) withObject:nil waitUntilDone:false];
         }];
