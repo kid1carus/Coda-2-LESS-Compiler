@@ -212,33 +212,33 @@ static LessDb * sharedDb;
 
 #pragma mark - general preferences
 
-
 // retrieve the preferences from the database, and create an NSDictionary from them
--(NSDictionary *) getDbPreferences
+-(LessPreferences *) getDbPreferences
 {
-    __block NSDictionary * preferences;
-    [_dbQueue inDatabase:^(FMDatabase *db) {
-        FMResultSet * prefSet = [db executeQuery:@"SELECT * FROM preferences"];
-        if([prefSet next])
-        {
-            preferences = [[NSJSONSerialization JSONObjectWithData:[[prefSet stringForColumn:@"json"] dataUsingEncoding:NSUTF8StringEncoding] options:kNilOptions error:nil] mutableCopy];
-            DDLogError(@"LESS:: prefs: %@", _prefs);
-        }
-        else
-        {
-            DDLogError(@"LESS:: no preferences found!");
-            preferences = [NSMutableDictionary dictionaryWithObjectsAndKeys: nil];
-        }
-        [prefSet close];
-    }];
     
-    return preferences;
+    NSArray * f = [self fetResultsForEntityNamed:@"Preferences"];
+    if(f.count == 0)
+    {
+        LessPreferences * p = [self newObjectForEntityForName:@"Preferences"];
+        p.json = @"{\
+        \"displayOnError\":1,\
+        \"displayOnSuccess\":1,\
+        \"openFileOnError\":0,\
+        \"playOnSuccess\":0,\
+        \"playOnError\":1\
+        }";
+        [[self managedObjectContext] save:nil];
+        return p;
+    }
+    return f[0];
 }
 
 
 -(void) reloadDbPreferences
 {
-    _prefs = [[self getDbPreferences] mutableCopy];
+    _internalPreferences = [self getDbPreferences];
+    _prefs = [[NSJSONSerialization JSONObjectWithData:[_internalPreferences.json dataUsingEncoding:NSUTF8StringEncoding] options:kNilOptions error:nil] mutableCopy];
+    
     [self updateParentFilesListWithCompletion:nil];
 }
 
@@ -253,11 +253,11 @@ static LessDb * sharedDb;
 // Take the given preferences and save them as a json object in the database
 -(void) setPreferences:(NSDictionary *)preferences
 {
-    [_dbQueue inDatabase:^(FMDatabase *db) {
-        
-        NSData * jData = [NSJSONSerialization dataWithJSONObject:preferences options:kNilOptions error:nil];
-        [db executeUpdate:@"UPDATE preferences SET json = :json WHERE id == 1" withParameterDictionary:@{@"json" : jData}];
-    }];
+    
+    NSData * preferenceData = [NSJSONSerialization dataWithJSONObject:preferences options:kNilOptions error:nil];
+    NSString * preferenceString = [[NSString alloc] initWithData:preferenceData encoding:NSUTF8StringEncoding];
+    [_internalPreferences setJson:preferenceString];
+    [[self managedObjectContext] save:nil];
 }
 
 #pragma mark - file registration
@@ -643,5 +643,103 @@ static LessDb * sharedDb;
         [db executeUpdate:@"INSERT INTO log (time, text, type) VALUES (:time, :text, :type)" withParameterDictionary:args];
     }];
 }
+
+
+
+#pragma mark - coredata
+
+- (NSManagedObjectContext *)managedObjectContext
+{
+    if (_managedObjectContext != nil) {
+        return _managedObjectContext;
+    }
+    
+    NSPersistentStoreCoordinator *coordinator = [self persistentStoreCoordinator];
+    if (coordinator != nil) {
+        _managedObjectContext = [[NSManagedObjectContext alloc] init];
+        [_managedObjectContext setPersistentStoreCoordinator:coordinator];
+    }
+    return _managedObjectContext;
+}
+
+- (NSManagedObjectModel *)managedObjectModel
+{
+    if (_managedObjectModel != nil) {
+        return _managedObjectModel;
+    }
+    NSURL *modelURL = [[_delegate bundle] URLForResource:@"Model" withExtension:@"momd"];
+    _managedObjectModel = [[NSManagedObjectModel alloc] initWithContentsOfURL:modelURL];
+    return _managedObjectModel;
+}
+
+- (NSPersistentStoreCoordinator *)persistentStoreCoordinator
+{
+    if (_persistentStoreCoordinator != nil) {
+        return _persistentStoreCoordinator;
+    }
+    
+    NSURL *storeURL = [_delegate urlForPeristantFilePath:@"db_core_data.sqlite"];
+    NSError *error = nil;
+    _persistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:[self managedObjectModel]];
+    if (![_persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:storeURL options:@{NSMigratePersistentStoresAutomaticallyOption:@YES, NSInferMappingModelAutomaticallyOption:@YES} error:&error]) {
+        /*
+         Replace this implementation with code to handle the error appropriately.
+         
+         abort() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
+         
+         Typical reasons for an error here include:
+         * The persistent store is not accessible;
+         * The schema for the persistent store is incompatible with current managed object model.
+         Check the error message to determine what the actual problem was.
+         
+         
+         If the persistent store is not accessible, there is typically something wrong with the file path. Often, a file URL is pointing into the application's resources directory instead of a writeable directory.
+         
+         If you encounter schema incompatibility errors during development, you can reduce their frequency by:
+         * Simply deleting the existing store:
+         [[NSFileManager defaultManager] removeItemAtURL:storeURL error:nil]
+         
+         * Performing automatic lightweight migration by passing the following dictionary as the options parameter:
+         @{NSMigratePersistentStoresAutomaticallyOption:@YES, NSInferMappingModelAutomaticallyOption:@YES}
+         
+         Lightweight migration will only work for a limited set of schema changes; consult "Core Data Model Versioning and Data Migration Programming Guide" for details.
+         
+         */
+        NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
+        abort();
+    }
+    
+    return _persistentStoreCoordinator;
+}
+
+
+#pragma mark - core data helpers
+
+-(NSArray *) fetchResultsForEntityNamed:(NSString *)entityName WithPredicate:(NSPredicate *)predicate AndSortDescriptors:(NSArray *)sortDescriptors
+{
+    NSFetchRequest * fetch = [[NSFetchRequest alloc] init];
+    [fetch setEntity: [_managedObjectModel entitiesByName ][entityName] ];
+    [fetch setPredicate: predicate];
+    [fetch setSortDescriptors: sortDescriptors];
+    
+    NSArray * results = [[self managedObjectContext] executeFetchRequest:fetch error:nil];
+    return results;
+}
+
+-(NSArray *)fetchResultsForEntityNamed:(NSString *)entityName WithPredicate:(NSPredicate *)predicate
+{
+    return [self fetchResultsForEntityNamed:entityName WithPredicate:predicate AndSortDescriptors:nil];
+}
+
+-(NSArray *)fetResultsForEntityNamed:(NSString *)entityName
+{
+    return [self fetchResultsForEntityNamed:entityName WithPredicate:nil AndSortDescriptors:nil];
+}
+
+-(id)newObjectForEntityForName:(NSString *)entityName
+{
+    return [NSEntityDescription insertNewObjectForEntityForName:entityName inManagedObjectContext:[self managedObjectContext]];
+}
+
 
 @end

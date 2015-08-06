@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 42;
+	objectVersion = 44;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -25,6 +25,10 @@
 		4CA289EC19FE8E5C008D523C /* node_modules in Resources */ = {isa = PBXBuildFile; fileRef = 4CA289EB19FE8E5C008D523C /* node_modules */; };
 		4CA9B3A81A01425E00934524 /* siteSettingsWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CA9B3A61A01425E00934524 /* siteSettingsWindowController.m */; };
 		4CA9B3A91A01425E00934524 /* siteSettingsWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4CA9B3A71A01425E00934524 /* siteSettingsWindowController.xib */; };
+		4CA9BAD81B739EB3000EE1C5 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CA9BAD71B739EB3000EE1C5 /* CoreData.framework */; };
+		4CA9BADC1B739FA3000EE1C5 /* Model.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 4CA9BADA1B739FA3000EE1C5 /* Model.xcdatamodeld */; };
+		4CA9BAE21B73A010000EE1C5 /* LessFile.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CA9BAE11B73A010000EE1C5 /* LessFile.m */; };
+		4CA9BAE51B73A02D000EE1C5 /* LessPreferences.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CA9BAE41B73A02D000EE1C5 /* LessPreferences.m */; };
 		4CCA70CB19228C78001617FC /* less in Resources */ = {isa = PBXBuildFile; fileRef = 4CCA70CA19228C78001617FC /* less */; };
 		4CCDB1871846503900B0C66C /* BaseCodaPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CCDB1861846503900B0C66C /* BaseCodaPlugin.m */; };
 		4CCF170D19BF6463002E0650 /* Growl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CCF170A19BF6463002E0650 /* Growl.framework */; };
@@ -91,6 +95,12 @@
 		4CA9B3A51A01425E00934524 /* siteSettingsWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = siteSettingsWindowController.h; sourceTree = "<group>"; };
 		4CA9B3A61A01425E00934524 /* siteSettingsWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = siteSettingsWindowController.m; sourceTree = "<group>"; };
 		4CA9B3A71A01425E00934524 /* siteSettingsWindowController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = siteSettingsWindowController.xib; sourceTree = "<group>"; };
+		4CA9BAD71B739EB3000EE1C5 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/System/Library/Frameworks/CoreData.framework; sourceTree = DEVELOPER_DIR; };
+		4CA9BADB1B739FA3000EE1C5 /* Model.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Model.xcdatamodel; sourceTree = "<group>"; };
+		4CA9BAE01B73A010000EE1C5 /* LessFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LessFile.h; sourceTree = "<group>"; };
+		4CA9BAE11B73A010000EE1C5 /* LessFile.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LessFile.m; sourceTree = "<group>"; };
+		4CA9BAE31B73A02D000EE1C5 /* LessPreferences.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LessPreferences.h; sourceTree = "<group>"; };
+		4CA9BAE41B73A02D000EE1C5 /* LessPreferences.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LessPreferences.m; sourceTree = "<group>"; };
 		4CCA70CA19228C78001617FC /* less */ = {isa = PBXFileReference; lastKnownFileType = folder; path = less; sourceTree = "<group>"; };
 		4CCDB1851846503900B0C66C /* BaseCodaPlugin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BaseCodaPlugin.h; sourceTree = "<group>"; };
 		4CCDB1861846503900B0C66C /* BaseCodaPlugin.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BaseCodaPlugin.m; sourceTree = "<group>"; };
@@ -135,6 +145,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4CA9BAD81B739EB3000EE1C5 /* CoreData.framework in Frameworks */,
 				4CFCBB8C182180620030FC08 /* libsqlite3.dylib in Frameworks */,
 				8D5B49B4048680CD000E48DA /* Cocoa.framework in Frameworks */,
 				4CCF170E19BF6463002E0650 /* Growl.framework in Frameworks */,
@@ -148,6 +159,7 @@
 		089C166AFE841209C02AAC07 /* Capitalize */ = {
 			isa = PBXGroup;
 			children = (
+				4CA9BAD71B739EB3000EE1C5 /* CoreData.framework */,
 				4C27CAAD19BF458700FA70A1 /* external */,
 				08FB77AFFE84173DC02AAC07 /* Classes */,
 				32C88E010371C26100C91783 /* Other Sources */,
@@ -186,6 +198,7 @@
 		08FB77AFFE84173DC02AAC07 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				4CA9BAD91B739F95000EE1C5 /* Core Data */,
 				4CF8EF131A13F2DA00162814 /* preferenceWindow */,
 				4CA9B3A41A01421A00934524 /* siteSettingsWindow */,
 				4C5CB3C918244CD700A4DD66 /* views */,
@@ -304,6 +317,18 @@
 				4CA9B3A71A01425E00934524 /* siteSettingsWindowController.xib */,
 			);
 			name = siteSettingsWindow;
+			sourceTree = "<group>";
+		};
+		4CA9BAD91B739F95000EE1C5 /* Core Data */ = {
+			isa = PBXGroup;
+			children = (
+				4CA9BAE31B73A02D000EE1C5 /* LessPreferences.h */,
+				4CA9BAE41B73A02D000EE1C5 /* LessPreferences.m */,
+				4CA9BAE01B73A010000EE1C5 /* LessFile.h */,
+				4CA9BAE11B73A010000EE1C5 /* LessFile.m */,
+				4CA9BADA1B739FA3000EE1C5 /* Model.xcdatamodeld */,
+			);
+			name = "Core Data";
 			sourceTree = "<group>";
 		};
 		4CCF170B19BF6463002E0650 /* Legacy */ = {
@@ -440,6 +465,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4CFCBB9E1821B82A0030FC08 /* FileView.m in Sources */,
+				4CA9BADC1B739FA3000EE1C5 /* Model.xcdatamodeld in Sources */,
 				4C8B098D1905BEF4002D30DE /* dropView.m in Sources */,
 				4C935B29199AC37B00AD1D5A /* DDAbstractDatabaseLogger.m in Sources */,
 				4CF0C0E11A03FEB80017047E /* flippedView.m in Sources */,
@@ -456,7 +482,9 @@
 				4CFCBB8818217EDC0030FC08 /* FMDatabaseQueue.m in Sources */,
 				4CFCBB8718217EDC0030FC08 /* FMDatabasePool.m in Sources */,
 				4CCDB1871846503900B0C66C /* BaseCodaPlugin.m in Sources */,
+				4CA9BAE21B73A010000EE1C5 /* LessFile.m in Sources */,
 				4CF8EF111A13F2D300162814 /* preferenceWindowController.m in Sources */,
+				4CA9BAE51B73A02D000EE1C5 /* LessPreferences.m in Sources */,
 				4C5CB3CC18244CFF00A4DD66 /* keyPrefButton.m in Sources */,
 				4CFCBB8618217EDC0030FC08 /* FMDatabaseAdditions.m in Sources */,
 				4C6D96D619FD6D95004CAE9E /* LessDb.m in Sources */,
@@ -576,6 +604,19 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		4CA9BADA1B739FA3000EE1C5 /* Model.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				4CA9BADB1B739FA3000EE1C5 /* Model.xcdatamodel */,
+			);
+			currentVersion = 4CA9BADB1B739FA3000EE1C5 /* Model.xcdatamodel */;
+			path = Model.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = 089C1669FE841209C02AAC07 /* Project object */;
 }

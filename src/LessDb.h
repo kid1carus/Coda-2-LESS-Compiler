@@ -14,6 +14,8 @@
 #import "FMDatabaseQueue.h"
 #import "BaseCodaPlugin.h"
 #import "TaskMan.h"
+#import "LessFile.h"
+#import "LessPreferences.h"
 
 @protocol LessDbDelegate <NSObject>
 
@@ -35,10 +37,19 @@
 @property (strong) BaseCodaPlugin <LessDbDelegate> * delegate;
 @property (strong) FMDatabaseQueue * dbQueue;
 @property (strong) FMDatabaseQueue * dbLog;
+
+
+@property (strong) LessPreferences * internalPreferences;
 @property (strong) NSMutableDictionary * prefs;
 @property (strong) NSMutableArray * currentParentFiles;
 @property (readwrite) int currentParentFilesCount;
 @property (readwrite) BOOL isDepenencying;
+
+@property (strong, nonatomic) NSManagedObjectContext *managedObjectContext;
+@property (strong, nonatomic) NSManagedObjectModel *managedObjectModel;
+@property (strong, nonatomic) NSPersistentStoreCoordinator *persistentStoreCoordinator;
+
+
 
 +(LessDb *)sharedLessDb;
 -(LessDb *) initWithDelegate:(BaseCodaPlugin <LessDbDelegate> *)d;
