@@ -7,11 +7,7 @@
 //
 
 #import "LessDb.h"
-#import "DDLog.h"
-#import "DDASLLogger.h"
 
-#define DBERROR(frmt, ...) [sharedDb errorToDatabase:frmt, ##__VA_ARGS__];
-static int ddLogLevel;
 static float COMPATIBLEDB = 0.6;
 static float VERY_OLD_DB = 0.4;
 static LessDb * sharedDb;
@@ -24,6 +20,8 @@ static LessDb * sharedDb;
     {
         self.delegate = d;
         sharedDb = self;
+        [self reloadDbPreferences];
+        [self runCoreDataMigration];
     }
     return self;
 }
@@ -39,152 +37,53 @@ static LessDb * sharedDb;
 
 #pragma mark - database setup
 
--(void) setupDb
+-(void) runCoreDataMigration
 {
-    //Create Db file if it doesn't exist
-    
-    NSURL * dbFile;
-    if (![_delegate doesPersistantFileExist:@"db.sqlite"]) {
-        DDLogError(@"LESS:: db file does not exist. Attempting to create.");
-        if(![self copyFileNamed:@"db" ofType:@"sqlite"])
-        {
-            return;
-        }
+    if(![_delegate doesPersistantFileExist:@"db.sqlite"])
+    {
+        return;
     }
-    dbFile = [_delegate urlForPeristantFilePath:@"db.sqlite"];
-    DDLogError(@"LESS:: dbFile: %@", dbFile);
     
+    // get dbQueue
+    NSURL * dbFile = [_delegate urlForPeristantFilePath:@"db.sqlite"];
     _dbQueue = [FMDatabaseQueue databaseQueueWithPath:[dbFile path]];
+    
+    
+    // get parent files
+    NSArray * parentFiles = [self getParentFiles];
+    
+    for(NSDictionary * parentFile in parentFiles)
+    {
+        LessFile * newFile = [self newObjectForEntityForName:@"LessFile"];
+        newFile.path = [parentFile objectForKey:@"path"];
+        newFile.css_path = [parentFile objectForKey:@"css_path"];
+        newFile.site_uuid = [parentFile objectForKey:@"site_uuid"];
+        newFile.options = [parentFile objectForKey:@"options"];
+        [[self managedObjectContext] save:nil];
+        [self addDependencyCheckOnFile:newFile.path];
+    }
+    
+    // get preferences
+    
     [_dbQueue inDatabase:^(FMDatabase *db) {
-        FMResultSet * versionSet  = [db executeQuery:@"SELECT version from preferences"];
-        if([versionSet next])
+        FMResultSet * prefs = [db executeQuery:@"SELECT * from preferences"];
+        if([prefs next])
         {
-            float dbVersion = [versionSet doubleForColumn:@"version"];
-            [versionSet close];
-            //The current database version is lower than the latest, so we'll need to kill it :x
-            if(dbVersion < COMPATIBLEDB)
-            {
-                [self performSelectorOnMainThread:@selector(replaceDatabase:) withObject:@(dbVersion) waitUntilDone:false];
-            }
-            else
-            {
-                [self performSelectorOnMainThread:@selector(reloadDbPreferences) withObject:nil waitUntilDone:false];
-            }
+            NSData * jsonData = [prefs dataForColumn:@"json"];
+            LessPreferences * newPreferences = [self getDbPreferences];
+            newPreferences.json = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+            [[self managedObjectContext] save:nil];
         }
-        [versionSet close];
+        [prefs close];
     }];
     
-    [self updateParentFilesListWithCompletion:nil];
-}
-
-
--(void) setupLog
-{
-    NSURL * logFile;
-    if (![_delegate doesPersistantFileExist:@"log.sqlite"]) {
-        DDLogError(@"LESS:: log file does not exist. Attempting to create.");
-        if(![self copyFileNamed:@"log" ofType:@"sqlite"])
-        {
-            return;
-        }
-    }
-    logFile = [_delegate urlForPeristantFilePath:@"log.sqlite"];
-    DDLogError(@"LESS:: dbFile: %@", logFile);
-    
-    _dbLog = [FMDatabaseQueue databaseQueueWithPath:[logFile path]];
-}
-
--(void) replaceDatabase:(NSNumber *)currentDbVersion
-{
-    DDLogError(@"LESS:: Current database incompatible with latest compiler release. Attempting to migrate.");
-    NSURL * dbFile;
-    
-    if(currentDbVersion.floatValue < VERY_OLD_DB)	// if we're updating from a very old version, just nuke the database.
-    {
-        DDLogError(@"LESS:: very old version, sorry we're just nuking everything.");
-        if(![self copyFileNamed:@"db" ofType:@"sqlite"])
-        {
-            return;
-        }
-        
-        dbFile = [_delegate urlForPeristantFilePath:@"db.sqlite"];
-        DDLogError(@"LESS:: dbFile: %@", dbFile);
-        
-        [_dbQueue close];
-        _dbQueue = [FMDatabaseQueue databaseQueueWithPath:[dbFile path]];
-        [self reloadDbPreferences];
-        return;
-    }
-    
-    //Otherwise, we're on a new enough copy that we can try to maintain most of the content
-    
-    //try to maintain as much of what the person setup as we can
-    NSArray * parentFiles = [self getParentFiles];
-    NSDictionary * preferences = [self getDbPreferences];
-    
-    if(![self copyFileNamed:@"db" ofType:@"sqlite"])
-    {
-        return;
-    }
-    
-    dbFile = [_delegate urlForPeristantFilePath:@"db.sqlite"];
-    DDLogError(@"LESS:: dbFile: %@", dbFile);
-    
     [_dbQueue close];
-    _dbQueue = [FMDatabaseQueue databaseQueueWithPath:[dbFile path]];
+    _dbQueue = nil;
     
-    //re-register previously registered files
-    
-    for(NSDictionary * file in parentFiles)
-    {
-        DDLogError(@"LESS:: re-registering file '%@'", [file objectForKey:@"path"]);
-        
-        [_dbQueue inDatabase:^(FMDatabase *db) {
-            
-        	if(![db executeUpdate:@"INSERT OR REPLACE INTO less_files (css_path, path, parent_id, site_uuid) VALUES (:css_path, :path, :parent_id, :site_uuid)"
-          withParameterDictionary:file ])
-            {
-                DDLogError(@"LESS:: SQL ERROR: %@", [db lastError]);
-                return;
-            }
-            DDLogError(@"LESS:: Inserted registered file");
-            
-        }];
-        [self addDependencyCheckOnFile:[file objectForKey:@"path"]];
-    }
-    
-    //set preferences back
-    [self setPreferences:preferences];
-    [self reloadDbPreferences];
+    // and delete the db file, because we don't need it anymore.
+    [_delegate removeFileFromPersistantStorage:[dbFile path]];
 }
 
-// Save a copy of db.sqlite into wherever NSHomeDirectory() points us
-
--(BOOL) copyFileNamed:(NSString *)name ofType:(NSString *)type
-{
-    NSError * error;
-    if(![_delegate doesPersistantStorageDirectoryExist])
-    {
-        error = [_delegate createPersistantStorageDirectory];
-        if(error)
-        {
-            DDLogError(@"LESS:: Error creating Persistant Storage Directory: %@", error);
-            return false;
-        }
-    }
-    NSString * path = [_delegate.pluginBundle pathForResource:name ofType:type];
-    DDLogError(@"LESS:: path for resource: %@",path);
-    error = [_delegate copyFileToPersistantStorage:path];
-    if(error)
-    {
-        DDLogError(@"LESS:: Error creating file %@.%@: %@",name,type, error);
-        return false;
-    }
-    DDLogError(@"LESS:: Successfully created file %@.%@", name, type);
-    
-    
-    return true;
-}
 
 // This is intended to be used only when updating the database file. It pulls specific values that are common to previous versions of the database,
 // So we can restore these values when db.sqlite is replaced.
@@ -216,7 +115,7 @@ static LessDb * sharedDb;
 -(LessPreferences *) getDbPreferences
 {
     
-    NSArray * f = [self fetResultsForEntityNamed:@"Preferences"];
+    NSArray * f = [self fetchResultsForEntityNamed:@"Preferences"];
     if(f.count == 0)
     {
         LessPreferences * p = [self newObjectForEntityForName:@"Preferences"];
@@ -239,13 +138,17 @@ static LessDb * sharedDb;
     _internalPreferences = [self getDbPreferences];
     _prefs = [[NSJSONSerialization JSONObjectWithData:[_internalPreferences.json dataUsingEncoding:NSUTF8StringEncoding] options:kNilOptions error:nil] mutableCopy];
     
-    [self updateParentFilesListWithCompletion:nil];
+    [self updateParentFilesList];
 }
 
 
 // Update the given preference, and push the change to the database
 -(void) updatePreferenceNamed:(NSString *)pref withValue:(id)val
 {
+    if(_prefs == nil)
+    {
+        _prefs = [NSMutableDictionary dictionary];
+    }
     [_prefs setObject:val forKey:pref];
     [self setPreferences:_prefs];
 }
@@ -267,7 +170,7 @@ static LessDb * sharedDb;
 
 -(void) registerFile:(NSURL *)url
 {
-    DDLogVerbose(@"LESS:: registering file: %@", url);
+    [_delegate logMessage:[NSString stringWithFormat:@"LESS:: registering file: %@", url]];
     if(url == nil)
     {
         return;
@@ -287,87 +190,58 @@ static LessDb * sharedDb;
     NSString *cssFile = [fileName stringByReplacingOccurrencesOfString:[url lastPathComponent] withString:[[url lastPathComponent] stringByReplacingOccurrencesOfString:@"less" withString:@"css"]];
     
     
-    [_dbQueue inDatabase:^(FMDatabase *db) {
-        DBERROR(@"LESS:: registerFile");
-        
-        // check if the file has already been registered
-        FMResultSet * file = [db executeQuery:@"SELECT * FROM less_files WHERE path = :path" withParameterDictionary:@{@"path": fileName}];
-        if([file next])
-        {
-            // is it a dependency of a parent file?
-            if([file intForColumn:@"parent_id"] > -1)
-            {
-                NSString * filePath = [[file stringForColumn:@"path"] lastPathComponent];
-                FMResultSet * parent = [db executeQuery:@"SELECT * FROM less_files WHERE id = :id" withParameterDictionary:@{@"id" : [NSNumber numberWithInt:[file intForColumn:@"parent_id"]] }];
-                
-                //make sure that the parent file actually exists. If it does, then throw an alert.
-                if([parent next])
-                {
-                    NSString * parentPath = [[parent stringForColumn:@"path"] lastPathComponent];
-                    
-                    DBERROR(@"LESS:: Trying to register dependency of file '%@'.", [parent stringForColumn:@"path"]);
-                    
-                    NSAlert *alert = [[NSAlert alloc] init];
-                    [alert addButtonWithTitle:@"OK"];
-                    [alert setMessageText:@"File already registered"];
-                    [alert setInformativeText:[NSString stringWithFormat:@"The file '%@' is already a dependency of '%@'", filePath, parentPath]];
-                    [alert setAlertStyle:NSWarningAlertStyle];
-                    
-                    [alert beginSheetModalForWindow:[[_delegate.controller focusedTextView] window] modalDelegate:self didEndSelector:nil contextInfo:nil];
-                    [parent close];
-                    [file close];
-                    return;
-                }
-                [parent close];
-            }
-            //otherwise, we could maybe throw another alert here. But instead, let's just re-register the file.
-        }
-        [file close];
-        
-        NSDictionary * args = @{@"css_path" : cssFile, @"path" : fileName, @"parent_id" : @(-1), @"site_uuid" : [_delegate getCurrentSiteUUID]};
-        
-        if(![db executeUpdate:@"INSERT OR REPLACE INTO less_files (css_path, path, parent_id, site_uuid) VALUES (:css_path, :path, :parent_id, :site_uuid)"
-      withParameterDictionary:args ])
-        {
-            DBERROR(@"LESS:: SQL ERROR: %@", [db lastError]);
-            return;
-        }
-        DDLogVerbose(@"LESS:: Inserted registered file");
-        [self performSelectorOnMainThread:@selector(addDependencyCheckOnFile:) withObject:fileName waitUntilDone:FALSE];
-    }];
+    
+    NSArray * existingFiles = [self fetchResultsForEntityNamed:@"LessFile" WithPredicate:[NSPredicate predicateWithFormat:@"path == %@", fileName]];
+    LessFile * newFile;
+    if(existingFiles.count == 0)
+    {
+        newFile = [self newObjectForEntityForName:@"LessFile"];
+    }
+    else
+    {
+        newFile = existingFiles[0];
+    }
+    
+    newFile.css_path = cssFile;
+    newFile.path = fileName;
+    newFile.site_uuid = [_delegate getCurrentSiteUUID];
+    
+    NSError * error;
+    [_managedObjectContext save:&error];
+    [self addDependencyCheckOnFile:fileName];
 }
 
 
 // Delete any references to the given url and its dependencies.
--(void) unregisterFile:(NSURL *)url
+-(void) unregisterFile:(LessFile *)parentFile
 {
-    NSString * fileName = [_delegate getResolvedPathForPath:[url path]];
-    [_dbQueue inDatabase:^(FMDatabase *db) {
-        FMResultSet * parentFile = [db executeQuery:@"SELECT * FROM less_files WHERE path == :path" withParameterDictionary:@{@"path":fileName}];
-        if(![parentFile next])
+    if(parentFile)
+    {
+        NSArray * childFiles = [self fetchResultsForEntityNamed:@"LessFile" WithPredicate:[NSPredicate predicateWithFormat:@"parent == %@", parentFile]];
+        
+        for(LessFile * child in childFiles)
         {
-            DBERROR(@"LESS:: unregisterFile: file %@ not found in db", fileName);
-            return;
+            [self.managedObjectContext deleteObject:child];
         }
-        
-        int parentFileId = [parentFile intForColumn:@"id"];
-        [db executeUpdate:@"DELETE FROM less_files WHERE parent_id == :parent_id" withParameterDictionary:@{@"parent_id" : [NSNumber numberWithInt:parentFileId]}];
-        
-        [db executeUpdate:@"DELETE FROM less_files WHERE id == :id" withParameterDictionary:@{@"id" : [NSNumber numberWithInt:parentFileId]}];
-        DDLogVerbose(@"LESS:: unregisterFile: unregistered file %@", fileName);
-        [parentFile close];
-    }];
+        [self.managedObjectContext deleteObject:parentFile];
+    }
+    [self.managedObjectContext save:nil];
 }
 
--(void) unregisterFileWithId:(int)fileId
+-(void) unregisterFileWithId:(NSManagedObjectID*)fileId
 {
-    [_dbQueue inDatabase:^(FMDatabase *db) {
-        DDLogVerbose(@"LESS:: unregisterFile: unregistered file with id %d", fileId);
-
-        [db executeUpdate:@"DELETE FROM less_files WHERE parent_id = :parent_id" withParameterDictionary:@{@"parent_id" : @(fileId)}];
-        
-        [db executeUpdate:@"DELETE FROM less_files WHERE id = :id" withParameterDictionary:@{@"id" : @(fileId)}];
-    }];
+    
+    LessFile * parentFile = (LessFile *)[[self managedObjectContext] objectWithID:fileId];
+    if(parentFile)
+    {
+        NSArray * childrenFiles = [self fetchResultsForEntityNamed:@"LessFile" WithPredicate:[NSPredicate predicateWithFormat:@"parent == %@", parentFile]];
+        for(LessFile* child in childrenFiles)
+        {
+            [[self managedObjectContext] deleteObject:child];
+        }
+        [[self managedObjectContext] deleteObject:parentFile];
+    }
+    [self.managedObjectContext save:nil];
 }
 
 #pragma  mark - depenencyCheck queue
@@ -375,7 +249,7 @@ static LessDb * sharedDb;
 
 -(void) addDependencyCheckOnFile:(NSString *) path
 {
-    DDLogVerbose(@"LESS:: Adding path to dependencyQueue: %@", path);
+    [_delegate logMessage:[NSString stringWithFormat:@"LESS:: Adding path to dependencyQueue: %@", path]];
     if(dependencyQueue == nil)
     {
         dependencyQueue = [NSMutableArray array];
@@ -393,12 +267,12 @@ static LessDb * sharedDb;
 
 -(void) runDependencyQueue
 {
-    DDLogVerbose(@"LESS:: runDependencyQueue");
+    [_delegate logMessage:[NSString stringWithFormat:@"LESS:: runDependencyQueue"]];
     @synchronized(dependencyQueue)
     {
         if(dependencyQueue.count == 0)
         {
-            DDLogVerbose(@"LESS:: queue is empty!");
+            [_delegate logMessage:[NSString stringWithFormat:@"LESS:: queue is empty!"]];
             return;
         }
         NSString * path = [dependencyQueue firstObject];
@@ -414,56 +288,60 @@ static LessDb * sharedDb;
 {
     if(_isDepenencying)
     {
-        DDLogVerbose(@"LESS:: Already checking Dependencies!");
+        [_delegate logMessage:[NSString stringWithFormat:@"LESS:: Already checking Dependencies!"]];
         return;
     }
-    DDLogVerbose(@"LESS:: Performing dependency check on %@", path);
+    [_delegate logMessage:[NSString stringWithFormat:@"LESS:: Performing dependency check on %@", path]];
     _isDepenencying = true;
     
     dependsPath = [_delegate getResolvedPathForPath:[[_delegate urlForPeristantFilePath:@"DEPENDS"] path]];
     
-    [_dbQueue inDatabase:^(FMDatabase *db) {
-        
-        FMResultSet * parent = [db executeQuery:@"SELECT * FROM less_files WHERE path = :path" withParameterDictionary:@{@"path":path}];
-        if(![parent next])
-        {
-            DBERROR(@"LESS:: Parent file not found in db!");
-            [parent close];
-            return;
-        }
-        
-        int indexCurrentParentId = [parent intForColumn:@"id"];
-        NSString * indexCurrentSiteUUID = [parent stringForColumn:@"site_uuid"];
-        [parent close];
-
-        //run less to get dependencies list
-        NSString * lessc = [NSString stringWithFormat:@"%@/less/bin/lessc", [_delegate.pluginBundle resourcePath]];
-        NSString * launchPath = [NSString stringWithFormat:@"%@/node", [_delegate.pluginBundle resourcePath]];
-        tm = [[TaskMan alloc] initWithLaunchPath:launchPath AndArguments:@[lessc, @"--depends", path, dependsPath]];
-        [tm launch];
-        NSString * output = [tm getOutput];
-        NSArray * dependencies = [self parseDependencies:output];
-        
-        //Add or update the dependencies
+    NSArray * parentFiles = [self fetchResultsForEntityNamed:@"LessFile" WithPredicate:[NSPredicate predicateWithFormat:@"path == %@", path]];
+    if(parentFiles.count == 0)
+    {
+        return;
+    }
+    
+    
+    //run less to get dependencies list
+    NSString * lessc = [NSString stringWithFormat:@"%@/less/bin/lessc", [_delegate.pluginBundle resourcePath]];
+    NSString * launchPath = [NSString stringWithFormat:@"%@/node", [_delegate.pluginBundle resourcePath]];
+    tm = [[TaskMan alloc] initWithLaunchPath:launchPath AndArguments:@[lessc, @"--depends", path, dependsPath]];
+    [tm launch];
+    NSString * output = [tm getOutput];
+    NSArray * dependencies = [self parseDependencies:output];
+    
+    for(LessFile * parentFile in parentFiles)
+    {
+        // add/update dependencies
         for(NSString * fileName in dependencies)
         {
-            NSDictionary * args = @{@"css_path" : @"", @"path" : fileName, @"parent_id" : @(indexCurrentParentId), @"site_uuid" : indexCurrentSiteUUID};
-            if([db executeUpdate:@"INSERT OR REPLACE INTO less_files (css_path, path, parent_id, site_uuid) VALUES (:css_path, :path, :parent_id, :site_uuid)" withParameterDictionary:args])
+            NSString * resolvedName = [_delegate getResolvedPathForPath:fileName];
+            
+            LessFile * dependentFile = [self fetchSingleResultForEntityNamed:@"LessFile" WithPredicate:[NSPredicate predicateWithFormat:@"path == %@ AND parent == %@", resolvedName, parentFile]];
+            if(dependentFile == nil)
             {
-                DDLogVerbose(@"LESS:: dependency update succeeded: %@", fileName);
+                dependentFile = (LessFile *)[self newObjectForEntityForName:@"LessFile"];
             }
-            else
-            {
-                DBERROR(@"LESS:: dependency update failed: %@", fileName);
-            }
+            
+            dependentFile.path = fileName;
+            dependentFile.parent = parentFile;
+            dependentFile.site_uuid = parentFile.site_uuid;
+            
+            [self.managedObjectContext save:nil];
         }
         
-        //nuke anything that's not a current dependency
+        // find any dependencies that exist in the db but NOT in our current depencies list. These need to be removed
+        NSArray * oldDependencies = [self fetchResultsForEntityNamed:@"LessFile" WithPredicate:[NSPredicate predicateWithFormat:@"parent == %@ AND NOT (path IN %@)", parentFile, dependencies]];
         
-        NSString * dependenciesList = [NSString stringWithFormat:@"'%@'",[dependencies componentsJoinedByString:@"', '"]];
-        [db executeUpdate:[NSString stringWithFormat:@"DELETE FROM less_files WHERE parent_id = :parent_id AND path NOT IN (%@)", dependenciesList] withParameterDictionary:@{@"parent_id" : @(indexCurrentParentId)}];
+        for(LessFile * oldFile in oldDependencies)
+        {
+            [self.managedObjectContext deleteObject:oldFile];
+        }
         
-    }];
+        [self.managedObjectContext save:nil];
+    }
+    
     _isDepenencying = false;
     [self performSelectorOnMainThread:@selector(runDependencyQueue) withObject:nil waitUntilDone:false];
 }
@@ -478,7 +356,7 @@ static LessDb * sharedDb;
     NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"(/.*?\\.less)" options:nil error:&error];
     if(error != nil)
     {
-        DBERROR(@"LESS:: error with regex: %@", error);
+        [_delegate logMessage:[NSString stringWithFormat:@"LESS:: error with regex: %@", error]];
     }
     NSArray * dependencies = [regex matchesInString:outStr options:nil range:NSMakeRange(0, [outStr length])];
     if([dependencies count] > 0)
@@ -497,76 +375,32 @@ static LessDb * sharedDb;
 // Make sure our local copy of _currentParentFiles is up to date.
 
 
--(NSDictionary *)getParentForFilepath:(NSString *)filepath
+-(LessFile *)getParentForFilepath:(NSString *)filepath
 {
-    __block NSDictionary * parent = nil;
+    NSString * resolvedName = [_delegate getResolvedPathForPath:filepath];
     
-    [_dbQueue inDatabase:^(FMDatabase *db) {
-        FMResultSet * s = [db executeQuery:@"SELECT * FROM less_files WHERE path = :path" withParameterDictionary:@{@"path": filepath}];
-        if([s next])
-        {
-            FMResultSet * parentFile = s;
-            int parent_id = [parentFile intForColumn:@"parent_id"];
-            DDLogVerbose(@"LESS:: initial parent_id: %d", parent_id);
-            //Find the parent Less file (parent_id = -1)
-            //This could probably be done with one query, but I'm kind of bad with SQL recursion :welp:
-            while(parent_id > -1)
-            {
-                [parentFile close];
-                parentFile = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM less_files WHERE id = %d", parent_id]];
-                if([parentFile next])
-                {
-                    parent_id = [parentFile intForColumn:@"parent_id"];
-                }
-            }
-            parent = [parentFile resultDictionary];
-        }
-        else
-        {
-            DDLogError(@"LESS:: No DB entry found for file: %@", filepath);
-        }
-        [s close];
-    }];
+    LessFile * file = [self fetchSingleResultForEntityNamed:@"LessFile" WithPredicate:[NSPredicate predicateWithFormat:@"path == %@", resolvedName]];
     
-    return parent;
+    if(file && file.parent)
+    {
+        return file.parent;
+    }
+    
+    return file;
+    
 }
 
--(void) updateParentFilesListWithCompletion:(void(^)(void))handler;
+-(void) updateParentFilesList
 {
     if([_delegate getCurrentSiteUUID] == nil)
     {
         return;
     }
     
-    [_dbQueue inDatabase:^(FMDatabase *db) {
-        DDLogVerbose(@"LESS:: updateParentFilesWithCompletion");
-        FMResultSet * d = [db executeQuery:[NSString stringWithFormat:@"SELECT * FROM less_files WHERE parent_id == -1 AND site_uuid == '%@'", [_delegate getCurrentSiteUUID]] ];
-        if(_currentParentFiles == nil)
-        {
-            _currentParentFiles = [NSMutableArray array];
-        }
-        else
-        {
-            [_currentParentFiles removeAllObjects];
-        }
-        while([d next])
-        {
-            [_currentParentFiles addObject:[d resultDictionary]];
-        }
-        
-        FMResultSet *s = [db executeQuery:[NSString stringWithFormat:@"SELECT COUNT(*) FROM less_files WHERE parent_id == -1 AND site_uuid == '%@'", [_delegate getCurrentSiteUUID]] ];
-        if ([s next])
-        {
-            _currentParentFilesCount = [s intForColumnIndex:0];
-        }
-        
-        if(handler != nil)
-        {
-            handler();
-        }
-        [s close];
-        [d close];
-    }];
+    NSArray * parentFiles = [self fetchResultsForEntityNamed:@"LessFile" WithPredicate:[NSPredicate predicateWithFormat:@"site_uuid == %@ AND parent == NULL", [_delegate getCurrentSiteUUID]]];
+    
+    _currentParentFiles = [parentFiles mutableCopy];
+    _currentParentFilesCount = parentFiles.count;
 }
 
 // If the user chooses to update the css path of a less file to somewhere else.
@@ -574,23 +408,15 @@ static LessDb * sharedDb;
 {
     NSString * fileName = [_delegate getResolvedPathForPath:[url path]];
     NSString * cssFileName = [_delegate getResolvedPathForPath:[cssUrl path]];
-    [_dbQueue inDatabase:^(FMDatabase *db) {
-        FMResultSet * parentFile = [db executeQuery:@"SELECT * FROM less_files WHERE path == :path" withParameterDictionary:@{@"path":fileName}];
-        if(![parentFile next])
-        {
-            DBERROR(@"LESS:: setCssPath: file %@ not found in db", fileName);
-            return;
-        }
-        if([db executeUpdate:@"UPDATE less_files SET css_path == :css_path WHERE id == :id" withParameterDictionary:@{@"css_path":cssFileName, @"id": [NSNumber numberWithInt:[parentFile intForColumn:@"id"]]}])
-        {
-            DDLogVerbose(@"LESS:: setCssPath: successfully set css path for file %@", fileName);
-        }
-        else
-        {
-            DBERROR(@"LESS:: setCssPath: error, %@",[db lastError]);
-        }
-        [parentFile close];
-    }];
+    
+    
+    LessFile * file = [self fetchSingleResultForEntityNamed:@"LessFile" WithPredicate:[NSPredicate predicateWithFormat:@"site_uuid == %@ AND path == %@", [_delegate getCurrentSiteUUID], fileName]];
+    
+    if(file)
+    {
+        file.css_path = cssFileName;
+    }
+    [self.managedObjectContext save:nil];
 }
 
 // Update preferences specific to each less file.
@@ -598,21 +424,18 @@ static LessDb * sharedDb;
 {
     
     NSData * preferenceData = [NSJSONSerialization dataWithJSONObject:options options:kNilOptions error:nil];
-    DDLogVerbose(@"LESS:: updating preferences to: %@", [[NSString alloc] initWithData:preferenceData encoding:NSUTF8StringEncoding]);
+    NSString * preferenceString = [[NSString alloc] initWithData:preferenceData encoding:NSUTF8StringEncoding];
+    [_delegate logMessage:[NSString stringWithFormat:@"LESS:: updating preferences to: %@", preferenceString]];
     
     NSString * fileName = [_delegate getResolvedPathForPath:[url path]];
-    [_dbQueue inDatabase:^(FMDatabase *db) {
-        if([db executeUpdate:@"UPDATE less_files SET options == :val WHERE path == :path" withParameterDictionary:@{@"val": preferenceData, @"path" : fileName}])
-        {
-            DDLogVerbose(@"LESS:: updateLessFilePreferences: successfully updated preference for %@", fileName);
-            DDLogVerbose(@"LESS:: updateLessFilePreferences: updated preferences to: %@", [[NSString alloc] initWithData:preferenceData encoding:NSUTF8StringEncoding]);
-        }
-        else
-        {
-            DBERROR(@"LESS:: updateLessFilePreferences: error: %@", [db lastError]);
-        }
-    }];
+    LessFile * file = [self fetchSingleResultForEntityNamed:@"LessFile" WithPredicate:[NSPredicate predicateWithFormat:@"site_uuid == %@ AND path == %@", [_delegate getCurrentSiteUUID], fileName ]];
     
+    if(file)
+    {
+        file.options = preferenceString;
+    }
+    
+    [self.managedObjectContext save:nil];
 }
 
 -(void) logToDatabase: (NSString *)format, ...
@@ -635,13 +458,13 @@ static LessDb * sharedDb;
 
 -(void) sendLineToLog:(NSString *)line :(NSString *)type
 {
-    NSString * date = [NSDateFormatter localizedStringFromDate:[NSDate date]
-                                                     dateStyle:NSDateFormatterShortStyle
-                                                     timeStyle:NSDateFormatterLongStyle];
-    NSDictionary * args = @{@"time": date, @"text": line, @"type":type };
-    [_dbLog inDatabase:^(FMDatabase *db) {
-        [db executeUpdate:@"INSERT INTO log (time, text, type) VALUES (:time, :text, :type)" withParameterDictionary:args];
-    }];
+//    NSString * date = [NSDateFormatter localizedStringFromDate:[NSDate date]
+//                                                     dateStyle:NSDateFormatterShortStyle
+//                                                     timeStyle:NSDateFormatterLongStyle];
+//    NSDictionary * args = @{@"time": date, @"text": line, @"type":type };
+//    [_dbLog inDatabase:^(FMDatabase *db) {
+//        [db executeUpdate:@"INSERT INTO log (time, text, type) VALUES (:time, :text, :type)" withParameterDictionary:args];
+//    }];
 }
 
 
@@ -718,7 +541,7 @@ static LessDb * sharedDb;
 -(NSArray *) fetchResultsForEntityNamed:(NSString *)entityName WithPredicate:(NSPredicate *)predicate AndSortDescriptors:(NSArray *)sortDescriptors
 {
     NSFetchRequest * fetch = [[NSFetchRequest alloc] init];
-    [fetch setEntity: [_managedObjectModel entitiesByName ][entityName] ];
+    [fetch setEntity: [[self managedObjectModel] entitiesByName ][entityName] ];
     [fetch setPredicate: predicate];
     [fetch setSortDescriptors: sortDescriptors];
     
@@ -731,9 +554,19 @@ static LessDb * sharedDb;
     return [self fetchResultsForEntityNamed:entityName WithPredicate:predicate AndSortDescriptors:nil];
 }
 
--(NSArray *)fetResultsForEntityNamed:(NSString *)entityName
+-(NSArray *)fetchResultsForEntityNamed:(NSString *)entityName
 {
     return [self fetchResultsForEntityNamed:entityName WithPredicate:nil AndSortDescriptors:nil];
+}
+
+-(id) fetchSingleResultForEntityNamed:(NSString *)entityName WithPredicate:(NSPredicate *)predicate
+{
+    NSArray * results = [self fetchResultsForEntityNamed:entityName WithPredicate:predicate AndSortDescriptors:nil];
+    if(results.count == 0)
+    {
+        return nil;
+    }
+    return results[0];
 }
 
 -(id)newObjectForEntityForName:(NSString *)entityName

@@ -1,10 +1,7 @@
 #import "LESSPlugin.h"
 #import "CodaPlugInsController.h"
-#import "DDLog.h"
-#import "DDASLLogger.h"
 #import "FileView.h"
 
-static int ddLogLevel = LOG_LEVEL_VERBOSE;
 @interface LESSPlugin ()
 
 - (id)initWithController:(CodaPlugInsController*)inController;
@@ -24,7 +21,6 @@ static int ddLogLevel = LOG_LEVEL_VERBOSE;
 //2.0.1 and higher
 - (id)initWithPlugInController:(CodaPlugInsController*)aController plugInBundle:(NSObject <CodaPlugInBundle> *)p
 {
-    [DDLog addLogger:[DDASLLogger sharedInstance]];
     return [self initWithController:aController andPlugInBundle:p];
 }
 
@@ -34,8 +30,12 @@ static int ddLogLevel = LOG_LEVEL_VERBOSE;
 	{
         [self registerActions];
         Ldb = [[LessDb alloc] initWithDelegate:self];
-        [Ldb setupDb];
-        [Ldb setupLog];
+        if([[Ldb.prefs objectForKey:@"verboseLog"] intValue] == 1)
+        {
+            self.verboseLogging = true;
+        }
+        [self logMessage:@"hey does this work?"];
+        [self logError:@"This is an error message"];
     }
 	return self;
 }
@@ -137,28 +137,28 @@ static int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     if(isCompiling || Ldb.isDepenencying || (task!= nil && [task isRunning]))
     {
-        DDLogVerbose(@"LESS:: Compilation already happening!");
+        [self logMessage:[NSString stringWithFormat:@"LESS:: Compilation already happening!" ]];
         return;
     }
     
-    DDLogVerbose(@"LESS:: ++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-    DDLogVerbose(@"LESS:: Handling file: %@", path);
+    [self logMessage:[NSString stringWithFormat:@"LESS:: ++++++++++++++++++++++++++++++++++++++++++++++++++++++" ]];
+    [self logMessage:[NSString stringWithFormat:@"LESS:: Handling file: %@", path ]];
     
-    NSDictionary * parent = [Ldb getParentForFilepath:path];
+    LessFile * parent = [Ldb getParentForFilepath:path];
     if(parent == nil)
     {
         return;
     }
-    NSString * parentPath = [parent objectForKey:@"path"];
-    NSString * cssPath = [parent objectForKey:@"css_path"];
+    NSString * parentPath = parent.path;
+    NSString * cssPath = parent.css_path;
     
     
-    DDLogVerbose(@"LESS:: parent Path: %@", parentPath);
-    DDLogVerbose(@"LESS:: css Path: %@", cssPath);
+    [self logMessage:[NSString stringWithFormat:@"LESS:: parent Path: %@", parentPath ]];
+    [self logMessage:[NSString stringWithFormat:@"LESS:: css Path: %@", cssPath ]];
     
     //Set compilation options
     NSMutableArray * options  = [NSMutableArray array];
-    NSData * optionsData = [parent objectForKey:@"options"];
+    NSData * optionsData = [parent.options dataUsingEncoding:NSUTF8StringEncoding];
     
     if(optionsData != nil && ![optionsData isEqual:[NSNull null]])
     {
@@ -175,13 +175,13 @@ static int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
     }
     
-    DDLogVerbose(@"LESS:: compiling");
+    [self logMessage:[NSString stringWithFormat:@"LESS:: compiling" ]];
     int resultCode = [self compileFile:parentPath toFile:cssPath withOptions:options];
     if(resultCode == 0)
     {
-        DDLogVerbose(@"LESS:: starting dependency check");
+        [self logMessage:[NSString stringWithFormat:@"LESS:: starting dependency check" ]];
         [Ldb addDependencyCheckOnFile:parentPath];
-        DDLogVerbose(@"LESS:: dependency check ended.");
+        [self logMessage:[NSString stringWithFormat:@"LESS:: dependency check ended." ]];
     }
 }
 
@@ -189,13 +189,13 @@ static int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     if(isCompiling || Ldb.isDepenencying || (task!= nil && [task isRunning]))
     {
-        DDLogVerbose(@"LESS:: Compilation task is already running.");
+        [self logMessage:[NSString stringWithFormat:@"LESS:: Compilation task is already running." ]];
         return -1;
     }
     isCompiling = true;
     compileCount++;
-    DDLogVerbose(@"LESS:: Compiling file: %@ to file: %@", lessFile, cssFile);
-    DDLogVerbose(@"LESS:: Compile count: %d", compileCount);
+    [self logMessage:[NSString stringWithFormat:@"LESS:: Compiling file: %@ to file: %@", lessFile, cssFile ]];
+    [self logMessage:[NSString stringWithFormat:@"LESS:: Compile count: %d", compileCount ]];
 
     NSString * launchPath = [NSString stringWithFormat:@"%@/node", [self.pluginBundle resourcePath]];
     NSString * lessc = [NSString stringWithFormat:@"%@/less/bin/lessc", [self.pluginBundle resourcePath]];
@@ -212,7 +212,7 @@ static int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     [arguments addObject:lessFile];
     [arguments addObject:cssFile];
-    DDLogVerbose(@"LESS:: Node arguments: %@", arguments);
+    [self logMessage:[NSString stringWithFormat:@"LESS:: Node arguments: %@", arguments ]];
     
     
     
@@ -221,8 +221,8 @@ static int ddLogLevel = LOG_LEVEL_VERBOSE;
     outputText = [task getOutput];
     errorText = [task getError];
     int resultCode = [task resultCode];
-    DDLogVerbose(@"LESS:: Task terminated with status: %d", resultCode);
-    DDLogVerbose(@"LESS:: =====================================================");
+    [self logMessage:[NSString stringWithFormat:@"LESS:: Task terminated with status: %d", resultCode ]];
+    [self logMessage:[NSString stringWithFormat:@"LESS:: =====================================================" ]];
     
     if(resultCode == 0)
     {
@@ -266,7 +266,7 @@ static int ddLogLevel = LOG_LEVEL_VERBOSE;
                    @"columnNumber":columnNumber};
         
     }
-    DDLogVerbose(@"LESS:: Error: %@", output);
+    [self logMessage:[NSString stringWithFormat:@"LESS:: Error: %@", output ]];
     return output;
 }
 
@@ -322,7 +322,7 @@ static int ddLogLevel = LOG_LEVEL_VERBOSE;
             CodaTextView * errorTextView = [self.controller openFileAtPath:[error objectForKey:@"filePath"] error:&err];
             if(err)
             {
-                DDLogVerbose(@"LESS:: error opening file: %@", err);
+                [self logMessage:[NSString stringWithFormat:@"LESS:: error opening file: %@", err ]];
                 return;
             }
             

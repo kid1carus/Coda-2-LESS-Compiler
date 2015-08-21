@@ -1,8 +1,5 @@
 #import "BaseCodaPlugin.h"
-#import "DDLog.h"
-#import "DDASLLogger.h"
 
-static int ddLogLevel = LOG_LEVEL_ERROR;
 
 @interface BaseCodaPlugin ()
 
@@ -35,6 +32,7 @@ static int ddLogLevel = LOG_LEVEL_ERROR;
     _pluginBundle = p;
     _bundle = [NSBundle bundleWithIdentifier:[p bundleIdentifier]];
     currentSiteUUID = @"*";
+    [self setupLogging];
 	return self;
 }
 
@@ -187,6 +185,28 @@ static int ddLogLevel = LOG_LEVEL_ERROR;
     return error;
 }
 
+-(NSError *)removeFileFromPersistantStorage:(NSString *)path
+{
+    NSError * error = nil;
+    NSFileManager* fileManager = [NSFileManager defaultManager];
+    NSString * filename = [path lastPathComponent];
+    NSURL * url = [self urlForPeristantFilePath: filename];
+    if(![self doesPersistantStorageDirectoryExist])
+    {
+        error = [self createPersistantStorageDirectory];
+        if(error != nil)
+        {
+            return error;
+        }
+    }
+    if([self doesPersistantFileExist:filename])
+    {
+        [fileManager removeItemAtPath:[url path] error:&error];
+    }
+    
+    return error;
+}
+
 
 #pragma mark - url/path helper methods
 
@@ -258,7 +278,6 @@ static int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(NSArray *) loadNibNamed:(NSString *)nibName
 {
-    DDLogVerbose(@"LESS:: loading nib: %@", nibName);
     NSMutableArray * nibObjects = [NSMutableArray array];
     if([_bundle respondsToSelector:@selector(loadNibNamed:owner:topLevelObjects:)])
     {
@@ -274,6 +293,32 @@ static int ddLogLevel = LOG_LEVEL_ERROR;
     return nibObjects;
 }
 
+
+#pragma mark - system logging
+
+-(void) setupLogging
+{
+    
+    logClient = asl_open([[self name] UTF8String] , "com.apple.console", 0);
+    
+    msg = asl_new(ASL_TYPE_MSG);
+    asl_set(msg, ASL_KEY_FACILITY, "com.apple.console");
+    asl_set(msg, ASL_KEY_LEVEL, ASL_STRING_NOTICE);
+    asl_set(msg, ASL_KEY_READ_UID, "-1");
+}
+
+-(void) logMessage:(NSString *)message
+{
+    if(self.verboseLogging)
+    {
+        asl_log(logClient, msg, 7, [message UTF8String]);
+    }
+}
+
+-(void) logError:(NSString *)errorMessage
+{
+    asl_log(logClient, msg, 3, [errorMessage UTF8String]);
+}
 
 #pragma mark - other helpers
 

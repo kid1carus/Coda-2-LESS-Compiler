@@ -47,6 +47,12 @@ If you have any ideas for how this plugin can work better, or any feature reques
 Change Log
 ==========
 
+1.2
+---
+- Eliminated dependency for Lumberjack
+- Added message/error level console logging that actually works this time
+- Migrated database to use Core Data instead of requiring a third-party sqlite database (effectively eliminating the fmdb depencency). This version will migrate old sqlite databases to Core Data, but future releases will not!
+
 1.1.2
 -----
 - Fixed crash when a Site doesn't have a local root set

@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		4C0C4FD2181F118600E35333 /* README.txt in Resources */ = {isa = PBXBuildFile; fileRef = 4C0C4FCA181F118600E35333 /* README.txt */; };
 		4C1DFC1B182063330078B179 /* growl in Resources */ = {isa = PBXBuildFile; fileRef = 4C1DFC1A182063330078B179 /* growl */; };
 		4C321FD01827F98700FE7058 /* FileView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4C321FCF1827F98700FE7058 /* FileView.xib */; };
 		4C5CB3CC18244CFF00A4DD66 /* keyPrefButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C5CB3CB18244CFF00A4DD66 /* keyPrefButton.m */; };
@@ -17,11 +16,6 @@
 		4C61B8E71A69C35500456E41 /* TaskMan.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C61B8E61A69C35500456E41 /* TaskMan.m */; };
 		4C6D96D619FD6D95004CAE9E /* LessDb.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C6D96D519FD6D95004CAE9E /* LessDb.m */; };
 		4C8B098D1905BEF4002D30DE /* dropView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C8B098C1905BEF4002D30DE /* dropView.m */; };
-		4C935B29199AC37B00AD1D5A /* DDAbstractDatabaseLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C0C4FBC181F118600E35333 /* DDAbstractDatabaseLogger.m */; };
-		4C935B2A199AC37D00AD1D5A /* DDASLLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C0C4FBE181F118600E35333 /* DDASLLogger.m */; };
-		4C935B2B199AC37F00AD1D5A /* DDFileLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C0C4FC0181F118600E35333 /* DDFileLogger.m */; };
-		4C935B2C199AC38100AD1D5A /* DDLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C935B27199AC16800AD1D5A /* DDLog.m */; };
-		4C935B2D199AC38300AD1D5A /* DDTTYLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C0C4FC4181F118600E35333 /* DDTTYLogger.m */; };
 		4CA289EC19FE8E5C008D523C /* node_modules in Resources */ = {isa = PBXBuildFile; fileRef = 4CA289EB19FE8E5C008D523C /* node_modules */; };
 		4CA9B3A81A01425E00934524 /* siteSettingsWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CA9B3A61A01425E00934524 /* siteSettingsWindowController.m */; };
 		4CA9B3A91A01425E00934524 /* siteSettingsWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4CA9B3A71A01425E00934524 /* siteSettingsWindowController.xib */; };
@@ -62,20 +56,6 @@
 		089C167FFE841241C02AAC07 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		32DBCF630370AF2F00C91783 /* LESSCompile_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LESSCompile_Prefix.pch; sourceTree = "<group>"; };
-		4C0C4FBB181F118600E35333 /* DDAbstractDatabaseLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDAbstractDatabaseLogger.h; sourceTree = "<group>"; };
-		4C0C4FBC181F118600E35333 /* DDAbstractDatabaseLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDAbstractDatabaseLogger.m; sourceTree = "<group>"; };
-		4C0C4FBD181F118600E35333 /* DDASLLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDASLLogger.h; sourceTree = "<group>"; };
-		4C0C4FBE181F118600E35333 /* DDASLLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDASLLogger.m; sourceTree = "<group>"; };
-		4C0C4FBF181F118600E35333 /* DDFileLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDFileLogger.h; sourceTree = "<group>"; };
-		4C0C4FC0181F118600E35333 /* DDFileLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDFileLogger.m; sourceTree = "<group>"; };
-		4C0C4FC1181F118600E35333 /* DDLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDLog.h; sourceTree = "<group>"; };
-		4C0C4FC3181F118600E35333 /* DDTTYLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDTTYLogger.h; sourceTree = "<group>"; };
-		4C0C4FC4181F118600E35333 /* DDTTYLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDTTYLogger.m; sourceTree = "<group>"; };
-		4C0C4FC6181F118600E35333 /* ContextFilterLogFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContextFilterLogFormatter.h; sourceTree = "<group>"; };
-		4C0C4FC7181F118600E35333 /* ContextFilterLogFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ContextFilterLogFormatter.m; sourceTree = "<group>"; };
-		4C0C4FC8181F118600E35333 /* DispatchQueueLogFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DispatchQueueLogFormatter.h; sourceTree = "<group>"; };
-		4C0C4FC9181F118600E35333 /* DispatchQueueLogFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DispatchQueueLogFormatter.m; sourceTree = "<group>"; };
-		4C0C4FCA181F118600E35333 /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
 		4C1DFC1A182063330078B179 /* growl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = growl; sourceTree = "<group>"; };
 		4C321FCF1827F98700FE7058 /* FileView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FileView.xib; sourceTree = "<group>"; };
 		4C5CB3CA18244CFF00A4DD66 /* keyPrefButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = keyPrefButton.h; sourceTree = "<group>"; };
@@ -90,7 +70,6 @@
 		4C6D96D519FD6D95004CAE9E /* LessDb.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LessDb.m; sourceTree = "<group>"; };
 		4C8B098B1905BEF4002D30DE /* dropView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dropView.h; sourceTree = "<group>"; };
 		4C8B098C1905BEF4002D30DE /* dropView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = dropView.m; sourceTree = "<group>"; };
-		4C935B27199AC16800AD1D5A /* DDLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDLog.m; sourceTree = "<group>"; };
 		4CA289EB19FE8E5C008D523C /* node_modules */ = {isa = PBXFileReference; lastKnownFileType = folder; path = node_modules; sourceTree = "<group>"; };
 		4CA9B3A51A01425E00934524 /* siteSettingsWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = siteSettingsWindowController.h; sourceTree = "<group>"; };
 		4CA9B3A61A01425E00934524 /* siteSettingsWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = siteSettingsWindowController.m; sourceTree = "<group>"; };
@@ -249,42 +228,11 @@
 			name = "Other Sources";
 			sourceTree = "<group>";
 		};
-		4C0C4FBA181F118600E35333 /* Lumberjack */ = {
-			isa = PBXGroup;
-			children = (
-				4C0C4FBB181F118600E35333 /* DDAbstractDatabaseLogger.h */,
-				4C0C4FBC181F118600E35333 /* DDAbstractDatabaseLogger.m */,
-				4C0C4FBD181F118600E35333 /* DDASLLogger.h */,
-				4C0C4FBE181F118600E35333 /* DDASLLogger.m */,
-				4C0C4FBF181F118600E35333 /* DDFileLogger.h */,
-				4C0C4FC0181F118600E35333 /* DDFileLogger.m */,
-				4C0C4FC1181F118600E35333 /* DDLog.h */,
-				4C935B27199AC16800AD1D5A /* DDLog.m */,
-				4C0C4FC3181F118600E35333 /* DDTTYLogger.h */,
-				4C0C4FC4181F118600E35333 /* DDTTYLogger.m */,
-				4C0C4FC5181F118600E35333 /* Extensions */,
-			);
-			path = Lumberjack;
-			sourceTree = "<group>";
-		};
-		4C0C4FC5181F118600E35333 /* Extensions */ = {
-			isa = PBXGroup;
-			children = (
-				4C0C4FC6181F118600E35333 /* ContextFilterLogFormatter.h */,
-				4C0C4FC7181F118600E35333 /* ContextFilterLogFormatter.m */,
-				4C0C4FC8181F118600E35333 /* DispatchQueueLogFormatter.h */,
-				4C0C4FC9181F118600E35333 /* DispatchQueueLogFormatter.m */,
-				4C0C4FCA181F118600E35333 /* README.txt */,
-			);
-			path = Extensions;
-			sourceTree = "<group>";
-		};
 		4C27CAAD19BF458700FA70A1 /* external */ = {
 			isa = PBXGroup;
 			children = (
 				4CCF170F19BF6469002E0650 /* Growl */,
 				4CFCBB8B182180620030FC08 /* libsqlite3.dylib */,
-				4C0C4FBA181F118600E35333 /* Lumberjack */,
 				4CFCBB7918217EDC0030FC08 /* fmdb */,
 			);
 			name = external;
@@ -449,7 +397,6 @@
 				4CFCBB9B1821B6D80030FC08 /* right-50.png in Resources */,
 				4CE8C3551912993B0023524E /* folder_plus_icon&48.png in Resources */,
 				4CA9B3A91A01425E00934524 /* siteSettingsWindowController.xib in Resources */,
-				4C0C4FD2181F118600E35333 /* README.txt in Resources */,
 				4CA289EC19FE8E5C008D523C /* node_modules in Resources */,
 				4CFCBB991821B6CA0030FC08 /* left-50.png in Resources */,
 				4C60E399182009D3003752C5 /* node in Resources */,
@@ -467,13 +414,8 @@
 				4CFCBB9E1821B82A0030FC08 /* FileView.m in Sources */,
 				4CA9BADC1B739FA3000EE1C5 /* Model.xcdatamodeld in Sources */,
 				4C8B098D1905BEF4002D30DE /* dropView.m in Sources */,
-				4C935B29199AC37B00AD1D5A /* DDAbstractDatabaseLogger.m in Sources */,
 				4CF0C0E11A03FEB80017047E /* flippedView.m in Sources */,
-				4C935B2A199AC37D00AD1D5A /* DDASLLogger.m in Sources */,
 				4C61B8E71A69C35500456E41 /* TaskMan.m in Sources */,
-				4C935B2B199AC37F00AD1D5A /* DDFileLogger.m in Sources */,
-				4C935B2C199AC38100AD1D5A /* DDLog.m in Sources */,
-				4C935B2D199AC38300AD1D5A /* DDTTYLogger.m in Sources */,
 				4CFCBB8918217EDC0030FC08 /* fmdb.m in Sources */,
 				F163D8F50C67D694000A99F5 /* LESSPlugin.m in Sources */,
 				4CE8C35819129FC10023524E /* PreferenceView.m in Sources */,

@@ -38,7 +38,6 @@
 @property (strong) FMDatabaseQueue * dbQueue;
 @property (strong) FMDatabaseQueue * dbLog;
 
-
 @property (strong) LessPreferences * internalPreferences;
 @property (strong) NSMutableDictionary * prefs;
 @property (strong) NSMutableArray * currentParentFiles;
@@ -55,12 +54,12 @@
 -(LessDb *) initWithDelegate:(BaseCodaPlugin <LessDbDelegate> *)d;
 -(void) setupDb;
 -(void) setupLog;
--(void) updateParentFilesListWithCompletion:(void(^)(void))handler;
+-(void) updateParentFilesList;
 -(void) updatePreferenceNamed:(NSString *)pref withValue:(id)val;
 -(void) registerFile:(NSURL *)url;
--(void) unregisterFile:(NSURL *)url;
--(void) unregisterFileWithId:(int)fileId;
--(NSDictionary *) getParentForFilepath:(NSString *)filepath;
+-(void) unregisterFile:(LessFile *)parentFile;
+-(void) unregisterFileWithId:(NSManagedObjectID*)fileId;
+-(LessFile *) getParentForFilepath:(NSString *)filepath;
 -(void) setCssPath:(NSURL *)cssUrl forPath:(NSURL *)url;
 -(void) updateLessFilePreferences:(NSDictionary *)options forPath:(NSURL *) url;
 -(void) addDependencyCheckOnFile:(NSString *)path;

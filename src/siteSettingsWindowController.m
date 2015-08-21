@@ -8,11 +8,7 @@
 
 #import "siteSettingsWindowController.h"
 #import "LessDb.h"
-#import "DDLog.h"
-#import "DDASLLogger.h"
 #import "FileView.h"
-
-static int ddLogLevel;
 
 @interface siteSettingsWindowController ()
 
@@ -25,23 +21,22 @@ static int ddLogLevel;
     if(self = [super initWithWindowNibName:@"siteSettingsWindowController"])
     {
         Ldb = [LessDb sharedLessDb];
-        DDLogVerbose(@"LESS:: siteSettingsWindowController init'd");
+        [Ldb.delegate logMessage:[NSString stringWithFormat: @"LESS:: siteSettingsWindowController init'd" ]];
     }
     return self;
 }
 
 - (void)windowDidLoad {
     [super windowDidLoad];
-    DDLogVerbose(@"LESS:: windowDidLoad fired.");
+    [Ldb.delegate logMessage:[NSString stringWithFormat: @"LESS:: windowDidLoad fired." ]];
     // Implement this method to handle any initialization after your window controller's window has been loaded from its nib file.
     [self.fileDropView setDelegate:self];
     [self.window setDelegate:Ldb.delegate];
     fileDocumentView = [[flippedView alloc] initWithFrame:NSMakeRect(0, 0, 500, 500)];
     
     [self.fileScrollView setDocumentView:fileDocumentView];
-    [Ldb updateParentFilesListWithCompletion:^{
-        [self performSelectorOnMainThread:@selector(rebuildFileList) withObject:nil waitUntilDone:false];
-    }];
+    [Ldb updateParentFilesList];
+    [self rebuildFileList];
 }
 
 
@@ -56,9 +51,8 @@ static int ddLogLevel;
     }
     
     [Ldb registerFile:openUrl];
-    [Ldb updateParentFilesListWithCompletion:^{
-        [self performSelectorOnMainThread:@selector(rebuildFileList) withObject:nil waitUntilDone:false];
-    }];
+    [Ldb updateParentFilesList];
+    [self rebuildFileList];
     
 }
 
@@ -79,12 +73,10 @@ static int ddLogLevel;
     NSInteger response = [alert runModal];
     if(response == NSAlertFirstButtonReturn)
     {
-        NSDictionary * fileInfo = [Ldb.currentParentFiles objectAtIndex:f.fileIndex];
-        NSURL * url = [NSURL fileURLWithPath:[fileInfo objectForKey:@"path"]];
-        [Ldb unregisterFileWithId:[[fileInfo objectForKey:@"id"] intValue]];
-        [Ldb updateParentFilesListWithCompletion:^{
-            [self performSelectorOnMainThread:@selector(rebuildFileList) withObject:nil waitUntilDone:false];
-        }];
+        LessFile * fileInfo = [Ldb.currentParentFiles objectAtIndex:f.fileIndex];
+        [Ldb unregisterFile:fileInfo];
+        [Ldb updateParentFilesList];
+        [self rebuildFileList];
     }
     else
     {
@@ -105,13 +97,12 @@ static int ddLogLevel;
     {
         return;
     }
-    NSDictionary * fileInfo = [Ldb.currentParentFiles objectAtIndex:f.fileIndex];
-    NSURL * url = [NSURL fileURLWithPath:[fileInfo objectForKey:@"path"]];
+    LessFile * fileInfo = [Ldb.currentParentFiles objectAtIndex:f.fileIndex];
+    NSURL * url = [NSURL fileURLWithPath:fileInfo.path];
     
     [Ldb setCssPath:saveUrl forPath:url];
-    [Ldb updateParentFilesListWithCompletion:^{
-        [self performSelectorOnMainThread:@selector(rebuildFileList) withObject:nil waitUntilDone:false];
-    }];
+    [Ldb updateParentFilesList];
+    [self rebuildFileList];
 }
 
 -(void) advancedButtonPressed:(NSButton *)sender
@@ -140,17 +131,16 @@ static int ddLogLevel;
         return;
     }
     
-    NSDictionary * fileInfo = [Ldb.currentParentFiles objectAtIndex:f.fileIndex];
-    NSURL * url = [NSURL fileURLWithPath:[fileInfo objectForKey:@"path"]];
+    LessFile * fileInfo = [Ldb.currentParentFiles objectAtIndex:f.fileIndex];
+    NSURL * url = [NSURL fileURLWithPath:fileInfo.path];
     [Ldb updateLessFilePreferences:[f getOptionValues] forPath:url];
-    [Ldb updateParentFilesListWithCompletion:^{
-        [self performSelectorOnMainThread:@selector(updateFileViewOptions) withObject:nil waitUntilDone:false];
-    }];
+    [Ldb updateParentFilesList];
+//    [self rebuildFileList];
 }
 
 -(void) rebuildFileList
 {
-    DDLogVerbose(@"LESS:: rebuildFileList");
+    [Ldb.delegate logMessage:[NSString stringWithFormat: @"LESS:: rebuildFileList" ]];
     
     [fileDocumentView setSubviews:[NSArray array]];
     
@@ -175,12 +165,12 @@ static int ddLogLevel;
     
     for(int i = Ldb.currentParentFilesCount - 1; i >= 0; i--)
     {
-        NSDictionary * currentFile = [Ldb.currentParentFiles objectAtIndex:i];
+        LessFile * currentFile = [Ldb.currentParentFiles objectAtIndex:i];
         FileView * f = [Ldb.delegate getNibNamed:@"FileView" forClass:[FileView class]];
         
         if(f == nil)
         {
-            DDLogError(@"LESS:: Error loading nib FileView");
+            [Ldb.delegate logMessage:[NSString stringWithFormat: @"LESS:: Error loading nib FileView" ]];
         }
         
         
@@ -188,10 +178,10 @@ static int ddLogLevel;
         [f setupOptionsWithSelector:@selector(userUpdatedLessFilePreference:) andTarget:self];
         
         // set the less and css paths
-        NSURL * url = [NSURL fileURLWithPath:[currentFile objectForKey:@"path"] isDirectory:NO];
+        NSURL * url = [NSURL fileURLWithPath:currentFile.path isDirectory:NO];
         [f.fileName setStringValue:[url lastPathComponent]];
-        [f.lessPath setStringValue:[currentFile objectForKey:@"path"]];
-        [f.cssPath setStringValue:[currentFile objectForKey:@"css_path"]];
+        [f.lessPath setStringValue:currentFile.path];
+        [f.cssPath setStringValue:currentFile.css_path];
         
         
         //setup the rest of the non-preference button actions
@@ -213,18 +203,18 @@ static int ddLogLevel;
 
 -(void) updateFileViewOptions
 {
-    DDLogVerbose(@"LESS:: updateFileViewOptions");
+    [Ldb.delegate logMessage:[NSString stringWithFormat: @"LESS:: updateFileViewOptions" ]];
     for(FileView * f in fileViews)
     {
-        NSDictionary * currentFile = [Ldb.currentParentFiles objectAtIndex:f.fileIndex];
+        LessFile * currentFile = [Ldb.currentParentFiles objectAtIndex:f.fileIndex];
         
         //now populate the checkboxes with the user's current preferences
-        NSData * options = [currentFile objectForKey:@"options"];
-
+        NSData * options = [currentFile.options dataUsingEncoding:NSUTF8StringEncoding];
+        NSError * error;
         if(options != nil && options != (id)[NSNull null])
         {
-            NSDictionary * options = [NSJSONSerialization JSONObjectWithData:[currentFile objectForKey:@"options"] options:0 error:nil];
-            [f setCheckboxesForOptions:options];
+            NSDictionary * optionsD = [NSJSONSerialization JSONObjectWithData:options options:0 error:&error];
+            [f setCheckboxesForOptions:optionsD];
         }
         
     }
@@ -316,15 +306,14 @@ static int ddLogLevel;
                 continue;
             }
             NSURL * aUrl = [NSURL URLWithString:aPath];
-            DDLogVerbose(@"LESS:: dragged urL: %@", aUrl);
+            [Ldb.delegate logMessage:[NSString stringWithFormat: @"LESS:: dragged urL: %@", aUrl ]];
 //            [Ldb performSelectorOnMainThread:@selector(registerFile:) withObject:aUrl waitUntilDone:true];
             [Ldb registerFile:aUrl];
         }
     }
     
-    [Ldb updateParentFilesListWithCompletion:^{
-        [self performSelectorOnMainThread:@selector(rebuildFileList) withObject:nil waitUntilDone:false];
-    }];
+    [Ldb updateParentFilesList];
+    [self rebuildFileList];
     
 }
 
