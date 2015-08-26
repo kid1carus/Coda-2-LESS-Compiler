@@ -9,7 +9,7 @@ If you haven't, [check out Coda as well!](http://panic.com/coda/)
 
 Installation
 ------------
-[(RECOMMENDED) Install the latest stable version straight from Panic! (Look for LESSCompile)](http://panic.com/coda/plugins.php#Plugins)
+[(RECOMMENDED) Install the latest stable version straight from Panic!](https://panic.com/coda/plugins.php?id=92)
 
 Or, [Download and manually install the plugin from github](https://github.com/mjvotaw/Coda-2-LESS-Compiler/raw/master/LESSCompile.codaplugin.zip)
 
