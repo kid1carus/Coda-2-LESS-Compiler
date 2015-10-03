@@ -11,8 +11,6 @@
 #import "FileView.h"
 #import "keyPrefButton.h"
 
-static NSString * COMPVERSION = @"1.2";
-static NSString * LESSVERSION = @"2.2.0";
 @interface preferenceWindowController ()
 
 @end
@@ -48,8 +46,8 @@ static NSString * LESSVERSION = @"2.2.0";
         }
     }
     
-    [self.lessVersion setStringValue:LESSVERSION];
-    [self.compilerVersion setStringValue:COMPVERSION];
+    [self.lessVersion setStringValue:[Ldb.delegate.bundle objectForInfoDictionaryKey:@"CFBundleVersion"]];
+    [self.compilerVersion setStringValue:[Ldb.delegate.bundle objectForInfoDictionaryKey:@"CompilerVersion"]];
     
 }
 
