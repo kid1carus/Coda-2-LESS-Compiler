@@ -501,6 +501,11 @@ static LessDb * sharedDb;
         return _persistentStoreCoordinator;
     }
     
+    if(![_delegate doesPersistantStorageDirectoryExist])
+    {
+        [_delegate createPersistantStorageDirectory];
+    }
+    
     NSURL *storeURL = [_delegate urlForPeristantFilePath:@"db_core_data.sqlite"];
     NSError *error = nil;
     _persistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:[self managedObjectModel]];

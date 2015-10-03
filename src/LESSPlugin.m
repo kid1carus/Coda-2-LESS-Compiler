@@ -34,8 +34,6 @@
         {
             self.verboseLogging = true;
         }
-        [self logMessage:@"hey does this work?"];
-        [self logError:@"This is an error message"];
     }
 	return self;
 }
