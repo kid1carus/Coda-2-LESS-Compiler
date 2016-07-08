@@ -46,8 +46,8 @@
         }
     }
     
-    [self.lessVersion setStringValue:[Ldb.delegate.bundle objectForInfoDictionaryKey:@"CFBundleVersion"]];
-    [self.compilerVersion setStringValue:[Ldb.delegate.bundle objectForInfoDictionaryKey:@"CompilerVersion"]];
+    [self.lessVersion setStringValue:[Ldb.delegate.bundle objectForInfoDictionaryKey:@"CompilerVersion"]];
+    [self.compilerVersion setStringValue:[Ldb.delegate.bundle objectForInfoDictionaryKey:@"CFBundleVersion"]];
     
 }
 

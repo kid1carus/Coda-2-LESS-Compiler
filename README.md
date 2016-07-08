@@ -47,6 +47,15 @@ If you have any ideas for how this plugin can work better, or any feature reques
 Change Log
 ==========
 
+
+1.2.2
+---
+- Updated Less compiler to 2.5.1 (fixing issue #24)
+
+1.2.1
+---
+- Fixes issue #21 (LessDb didn't make sure the Persistent Storage Directory existed before trying to save CoreData file)
+
 1.2
 ---
 - Eliminated dependency for Lumberjack
@@ -56,7 +65,7 @@ Change Log
 1.1.2
 -----
 - Fixed crash when a Site doesn't have a local root set
-- Fixed odd situation caused by `[url URLByResolvingSymlinksInPath]` not being case sentsitive
+- Fixed odd situation caused by `[url URLByResolvingSymlinksInPath]` not being case sensitive
 
 
 1.1.1
