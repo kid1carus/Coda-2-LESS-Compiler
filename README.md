@@ -48,6 +48,11 @@ Change Log
 ==========
 
 
+1.2.3
+---
+- Fixed issue #26 (missing Node dependencies)
+- Updated Less compiler to 2.7.1
+
 1.2.2
 ---
 - Updated Less compiler to 2.5.1 (fixing issue #24)
